@@ -246,7 +246,7 @@ option{background:#16181d}
 <button id="newsBtn" class="t" data-ov="news"><svg viewBox="0 0 24 24"><path d="M12 7l7 7-1.4 1.4L12 9.8l-5.6 5.6L5 14z"/></svg>소식<i class="badge" id="ncnt" hidden></i></button>
 <button id="bigDonate" class="t" data-ov="donate"><span class="h"><svg viewBox="0 0 24 24"><path d="M12 21.4 10.6 20C5.4 15.4 2 12.3 2 8.5 2 5.4 4.4 3 7.5 3c1.7 0 3.4.8 4.5 2.1C13.1 3.8 14.8 3 16.5 3 19.6 3 22 5.4 22 8.5c0 3.8-3.4 6.9-8.6 11.5z"/></svg>후원하기</span><small id="bigGoal">서버 운영비에 써요</small></button>
 <div id="ver"></div>
-<div id="nameGate" hidden><div class="box"><h3>게임 속 이름을 적어 주세요</h3><p>친구들에게 보일 이름(실명)이에요. 머리 위 이름표·탭 목록·채팅에 이 이름으로 보여요. 한글이나 영문 2~10글자, 나중에 설정에서 바꿀 수 있어요.</p><input type="text" id="gateName" maxlength="10" autocomplete="off" placeholder="예: 홍길동"><div class="e" id="gateErr"></div><button id="gateOk">확인</button></div></div>
+<div id="nameGate" hidden><div class="box"><h3>본인의 실명을 적어 주세요</h3><p>인게임 이름으로 사용될 본인의 실명을 적어 주세요. 머리 위 이름표·탭 목록·채팅에 이 이름으로 보여요.<br><b style="color:#ff8f78">본인 본명이 아닐 시 불이익이 있습니다.</b></p><input type="text" id="gateName" maxlength="10" autocomplete="off" placeholder="예: 홍길동"><div class="e" id="gateErr"></div><button id="gateOk">확인</button></div></div>
 
 <!-- 소식 -->
 <section class="ov" id="ov-news">
@@ -301,7 +301,7 @@ option{background:#16181d}
   <button class="back" data-close>← 홈</button><h2 class="t">설정</h2><div class="sub">이 컴퓨터에만 저장돼요</div><button class="x" data-close>닫기 ✕</button>
   <div class="body"><div class="form">
     <div class="fr"><label for="mem">메모리</label><select id="mem"><option value="2048">2 GB</option><option value="3072">3 GB</option><option value="4096">4 GB (권장)</option><option value="6144">6 GB</option><option value="8192">8 GB</option></select></div>
-    <div class="fr"><label for="rname">게임 속 이름</label><input type="text" id="rname" maxlength="10" autocomplete="off"><small>실명. 다른 사람에게 머리 위·채팅에 이 이름으로 보여요</small></div>
+    <div class="fr"><label for="rname">게임 속 이름</label><input type="text" id="rname" maxlength="10" autocomplete="off"><small>인게임 이름으로 쓰이는 본인의 실명 (본명이 아닐 시 불이익)</small></div>
     <div class="fr"><label for="auto">켜면 바로 접속</label><select id="auto"><option value="1">예</option><option value="0">아니요</option></select></div>
     <div class="acts"><button class="pri" id="save">저장</button><span id="saved">저장했어요</span><span style="flex:1"></span><button id="quit">런처 끄기</button></div>
   </div></div>
