@@ -1,7 +1,7 @@
 # CGMS Launcher
 
-Launcher for our Minecraft: Java Edition server, Korea War (a nation-war server on a map of the Korean peninsula).
-Players were having a hard time installing Fabric and keeping our companion mod up to date by hand, so I made this.
+Launcher for Korea War, a small Minecraft: Java Edition server I run with my friends (a nation-war game on a map of the Korean peninsula).
+My friends were having a hard time installing Fabric and keeping our companion mod up to date by hand, so I made this.
 
 ![screenshot](docs/screenshot.png)
 
@@ -11,9 +11,9 @@ What it does:
 - downloads the game, Fabric and our server's mods, checks them, and keeps them updated
 - starts the game and joins the server
 - shows server status, notices and the war map
-- has a donation page for server costs (optional, cosmetic titles only)
+- has an optional donation page so friends can chip in for the server bill (cosmetic titles only)
 
-It only works with our server. There are no ads and it doesn't collect any data. There's an optional donation page for server costs (players who donate get a cosmetic title in game, nothing that affects gameplay). Sign-in happens on Microsoft's own page in your default browser, so the launcher never sees your password. See [PRIVACY.md](PRIVACY.md).
+It only works with our server. There are no ads and it doesn't collect any data. There's an optional donation page where friends can chip in a dollar or two for hosting. Anyone who does gets a cosmetic title in game, nothing that affects gameplay. Sign-in happens on Microsoft's own page in your default browser, so the launcher never sees your password. See [PRIVACY.md](PRIVACY.md).
 
 Until our app ID is approved for Minecraft sign-in, the launcher sets everything up and then opens the official Minecraft Launcher with a "Korea War" installation, and you sign in there.
 
