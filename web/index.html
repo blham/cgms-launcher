@@ -267,23 +267,20 @@ option{background:#16181d}
 </section>
 <!-- 후원 -->
 <section class="ov" id="ov-donate">
-  <button class="back" data-close>← 홈</button><h2 class="t">후원</h2><div class="sub">후원은 서버 운영비에 쓰여요 · 보상은 칭호뿐이에요 (게임에 유리한 것 없음)</div><button class="x" data-close>닫기 ✕</button>
+  <button class="back" data-close>← 홈</button><h2 class="t">후원</h2><div class="sub">후원은 서버 운영비에만 써요 · 후원해도 게임에서 달라지는 건 없어요</div><button class="x" data-close>닫기 ✕</button>
   <div class="body"><div class="don">
     <div class="dcol">
       <div class="dbox">
         <h3 class="cap2" style="margin-top:0">후원하는 법</h3>
         <p class="dnote" id="dNote"></p>
         <ol class="steps"><li>토스·카카오페이 버튼을 누르거나 아래 계좌로 보내요.</li>
-        <li><b>보낼 때 메시지(받는 분 표시)에 내 마인크래프트 닉네임을 적어 주세요.</b></li>
-        <li>서버장이 확인하면 게임에 칭호가 생겨요.</li></ol>
+        <li>보낼 때 메시지(받는 분 표시)에 마인크래프트 닉네임을 적어 주면 감사 인사에 이름이 나와요. (안 적어도 돼요)</li></ol>
         <div class="pay"><button class="toss" id="dToss" hidden>토스로 후원 ↗</button><button class="kakao" id="dKakao" hidden>카카오페이로 후원 ↗</button><button class="kofi" id="dGo" hidden>Ko-fi ↗</button></div>
         <div class="bank" id="dBank" hidden><div><div class="exp" style="margin:0">계좌로 보내기</div><b id="dBankTxt"></b></div><button class="fbtn" id="dBankCopy">계좌번호 복사</button></div>
         <div class="exp" id="dGoNote"></div>
       </div>
-      <h3 class="cap2">칭호 단계 (누적 금액)</h3><div id="dTiers"></div>
-      <h3 class="cap2">내 후원</h3><div id="dMe" class="dbox"><div class="empty">게임 안에서 <b>/후원</b> 을 치면 내 누적 후원과 칭호, 다음 단계까지 남은 금액이 보여요.</div></div>
     </div>
-    <div class="dcol"><h3 class="cap2" style="margin-top:0">최근 후원해 주신 분</h3><div id="dRecent"></div><h3 class="cap2">후원자 명예의 전당</h3><div id="dHall"></div></div>
+    <div class="dcol"><h3 class="cap2" style="margin-top:0">고마운 분들</h3><div id="dRecent"></div></div>
   </div></div>
 </section>
 <!-- 모드 -->
@@ -450,10 +447,8 @@ function drawDonate(dn){
   if(bk){$("dBankTxt").textContent=`${bk.name||""} ${bk.number}${bk.holder?" ("+bk.holder+")":""}`.trim();$("dBankCopy").onclick=()=>{try{navigator.clipboard.writeText(bk.number);$("dBankCopy").textContent="복사됨"}catch(e){}}}
   $("dNote").textContent=dn.note||"";
   $("dGoNote").textContent=(toss||kakao||page||bk)?"":"서버장이 아직 후원 방법을 설정하지 않았어요.";
-  $("dTiers").innerHTML=(dn.tiers||[]).map(t=>`<div class="tier"><span class="w">${wonF(t.min)} 이상</span>${titleSpan(t.title,t.color)}</div>`).join("")||`<div class="empty">아직 단계가 없어요</div>`;
   const row=x=>`<div class="dn"><img alt="" src="https://mc-heads.net/avatar/${encodeURIComponent(x.name)}/22" data-fb="hide">${esc(x.name)}<small>${titleSpan(x.title,x.color)}</small></div>`;
-  $("dRecent").innerHTML=(dn.recent||[]).map(row).join("")||`<div class="empty">아직 없어요. 첫 후원자가 되어 주세요!</div>`;
-  $("dHall").innerHTML=(dn.hall||[]).map(row).join("")||`<div class="empty">아직 없어요</div>`;
+  $("dRecent").innerHTML=(dn.recent||[]).map(row).join("")||`<div class="empty">아직 없어요.</div>`;
 }
 // ---------------- 모드
 let mods=null, openMod="";
