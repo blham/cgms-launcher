@@ -13,7 +13,7 @@ What it does:
 - shows server status, notices and the war map
 - has an optional donation page so friends can chip in for the server bill (no rewards, nothing changes in game)
 
-It only works with our server. There are no ads and it doesn't collect any data. There's an optional donation page where friends can chip in a dollar or two for hosting. Donating doesn't give anything in game; it only goes toward the server bill. Sign-in happens on Microsoft's own page in your default browser, so the launcher never sees your password. See [PRIVACY.md](PRIVACY.md).
+It only works with our server. There are no ads and it doesn't collect any data. There's an optional donation page where friends can chip in a dollar or two for hosting. Donating doesn't give the donor anything in game; it only goes toward the server bill. If the month's hosting cost is covered, everyone on the server gets a little celebration, and donors' names go on a thank-you board. Sign-in happens on Microsoft's own page in your default browser, so the launcher never sees your password. See [PRIVACY.md](PRIVACY.md).
 
 Until our app ID is approved for Minecraft sign-in, the launcher sets everything up and then opens the official Minecraft Launcher with a "Korea War" installation, and you sign in there.
 
