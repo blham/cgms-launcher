@@ -99,6 +99,7 @@ func registerAPI(mux *http.ServeMux) {
 			MemoryMB *int    `json:"memoryMB"`
 			Host     *string `json:"host"`
 			AutoJoin *bool   `json:"autoJoin"`
+			RealName *string `json:"realName"`
 		}
 		_ = json.NewDecoder(io.LimitReader(r.Body, 4096)).Decode(&in)
 		cfgMu.Lock()
@@ -117,6 +118,15 @@ func registerAPI(mux *http.ServeMux) {
 		}
 		if in.AutoJoin != nil {
 			cfg.AutoJoin = *in.AutoJoin
+		}
+		if in.RealName != nil {
+			n := strings.TrimSpace(*in.RealName)
+			if !realNameRe.MatchString(n) {
+				cfgMu.Unlock()
+				writeJSON(w, map[string]string{"error": "이름은 한글이나 영문 2~10글자로 적어 주세요 (띄어쓰기·숫자·기호 없이)."})
+				return
+			}
+			cfg.RealName = n
 		}
 		cfgMu.Unlock()
 		saveConfig()

@@ -201,6 +201,11 @@ option{background:#16181d}
 .acts{display:flex;gap:22px;margin-top:22px;font-size:13px;letter-spacing:1px}
 .acts button{color:var(--mute)}.acts button:hover{color:var(--ink)}
 .acts .pri{color:#111;background:var(--ink);padding:9px 22px;font-weight:700}.acts .pri:hover{color:#111;background:var(--gold)}
+#nameGate{position:fixed;inset:0;z-index:60;background:rgba(6,6,9,.82);display:grid;place-items:center}
+#nameGate .box{width:min(440px,calc(100vw - 32px));background:#15171c;border:1px solid var(--line);padding:28px 30px}
+#nameGate h3{margin:0 0 8px;font-size:22px}#nameGate p{margin:0 0 18px;color:var(--mute);font-size:13px;line-height:1.6}
+#nameGate input{font-size:20px;padding:10px 4px;margin-bottom:6px}#nameGate .e{color:#ff8f78;font-size:12.5px;min-height:18px}
+#nameGate button{margin-top:14px;background:var(--ink);color:#111;padding:11px 26px;font-weight:750}#nameGate button:hover{background:var(--gold)}
 #saved{color:var(--green);font-size:12px;align-self:center;opacity:0;transition:opacity .3s}
 </style>
 </head>
@@ -241,6 +246,7 @@ option{background:#16181d}
 <button id="newsBtn" class="t" data-ov="news"><svg viewBox="0 0 24 24"><path d="M12 7l7 7-1.4 1.4L12 9.8l-5.6 5.6L5 14z"/></svg>소식<i class="badge" id="ncnt" hidden></i></button>
 <button id="bigDonate" class="t" data-ov="donate"><span class="h"><svg viewBox="0 0 24 24"><path d="M12 21.4 10.6 20C5.4 15.4 2 12.3 2 8.5 2 5.4 4.4 3 7.5 3c1.7 0 3.4.8 4.5 2.1C13.1 3.8 14.8 3 16.5 3 19.6 3 22 5.4 22 8.5c0 3.8-3.4 6.9-8.6 11.5z"/></svg>후원하기</span><small id="bigGoal">서버 운영비에 써요</small></button>
 <div id="ver"></div>
+<div id="nameGate" hidden><div class="box"><h3>게임 속 이름을 적어 주세요</h3><p>친구들에게 보일 이름(실명)이에요. 머리 위 이름표·탭 목록·채팅에 이 이름으로 보여요. 한글이나 영문 2~10글자, 나중에 설정에서 바꿀 수 있어요.</p><input type="text" id="gateName" maxlength="10" autocomplete="off" placeholder="예: 홍길동"><div class="e" id="gateErr"></div><button id="gateOk">확인</button></div></div>
 
 <!-- 소식 -->
 <section class="ov" id="ov-news">
@@ -295,6 +301,7 @@ option{background:#16181d}
   <button class="back" data-close>← 홈</button><h2 class="t">설정</h2><div class="sub">이 컴퓨터에만 저장돼요</div><button class="x" data-close>닫기 ✕</button>
   <div class="body"><div class="form">
     <div class="fr"><label for="mem">메모리</label><select id="mem"><option value="2048">2 GB</option><option value="3072">3 GB</option><option value="4096">4 GB (권장)</option><option value="6144">6 GB</option><option value="8192">8 GB</option></select></div>
+    <div class="fr"><label for="rname">게임 속 이름</label><input type="text" id="rname" maxlength="10" autocomplete="off"><small>실명. 다른 사람에게 머리 위·채팅에 이 이름으로 보여요</small></div>
     <div class="fr"><label for="auto">켜면 바로 접속</label><select id="auto"><option value="1">예</option><option value="0">아니요</option></select></div>
     <div class="acts"><button class="pri" id="save">저장</button><span id="saved">저장했어요</span><span style="flex:1"></span><button id="quit">런처 끄기</button></div>
   </div></div>
@@ -349,7 +356,9 @@ async function tick(){
   $("barv").style.width=(st.total>0?Math.min(100,Math.round(st.done*100/st.total)):(busy?8:(s.running||st.phase==="done"?100:0)))+"%";
   $("stat").textContent=(st.text||"")+(st.total>0&&busy?`  ${st.done} / ${st.total}`:"")||" ";
   $("err").hidden=!st.error; if(st.error)$("err").innerHTML=esc(st.error)+(st.logTail?`<pre>${esc(st.logTail)}</pre>`:"");
-  if(!filled){filled=true;$("mem").value=String(s.config.memoryMB);$("auto").value=s.config.autoJoin?"1":"0"}
+  if(!filled){filled=true;$("mem").value=String(s.config.memoryMB);$("auto").value=s.config.autoJoin?"1":"0";$("rname").value=s.config.realName||""}
+  const noName=!s.config.realName; $("nameGate").hidden=!noName; if(noName&&document.activeElement!==$("gateName"))$("gateName").focus();
+  if(noName) $("play").disabled=true;
   $("ver").textContent=`런처 ${s.version}`+(s.newerLauncher?` · 새 런처 ${s.newerLauncher} 이 나왔어요`:"");
 }
 // ---------------- 서버 정보 (공지·접속자·코어)
@@ -490,7 +499,9 @@ function drawMods(){
 // ---------------- 버튼
 $("play").onclick=async()=>{$("play").disabled=true;await post("/api/play");tick()};
 $("disc").onclick=()=>post("/api/open",{url:discordUrl});
-$("save").onclick=async()=>{await post("/api/config",{memoryMB:+$("mem").value,autoJoin:$("auto").value==="1"});filled=false;tick();$("saved").style.opacity=1;setTimeout(()=>$("saved").style.opacity=0,1600)};
+$("save").onclick=async()=>{const r=await post("/api/config",{memoryMB:+$("mem").value,autoJoin:$("auto").value==="1",realName:$("rname").value.trim()});filled=false;tick();$("saved").textContent=r.error?r.error:"저장했어요";$("saved").style.color=r.error?"#ff8f78":"";$("saved").style.opacity=1;setTimeout(()=>$("saved").style.opacity=0,r.error?3500:1600)};
+async function gateSave(){const r=await post("/api/config",{realName:$("gateName").value.trim()});if(r.error){$("gateErr").textContent=r.error;return}$("gateErr").textContent="";filled=false;tick()}
+$("gateOk").onclick=gateSave; $("gateName").addEventListener("keydown",e=>{if(e.key==="Enter")gateSave()});
 $("folder").onclick=()=>post("/api/openfolder");
 $("quit").onclick=async()=>{await post("/api/quit");document.body.innerHTML='<div style="padding:44px;color:#f2ede2">런처를 껐어요. 이 창은 닫아도 돼요.</div>'};
 {const h=location.hash.slice(1); if(["map","players","news","settings","mods","donate"].includes(h)) setTimeout(()=>openOv(h),50);}

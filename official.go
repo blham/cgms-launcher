@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 	"sync"
@@ -169,6 +170,28 @@ func writeProfile(versionID string) error {
 	return nil
 }
 
+// 1.4.6 게임 속 이름(실명): 한글·영문 2~10글자
+var realNameRe = regexp.MustCompile(`^[가-힣A-Za-z]{2,10}$`)
+
+// 1.4.6 보조 모드(1.2.6~)가 접속할 때 읽어서 서버로 보냄
+func writeRealName() {
+	n := getCfg().RealName
+	p := filepath.Join(gameDir(), "koreawar-profile.txt")
+	if n == "" {
+		_ = os.Remove(p)
+		return
+	}
+	_ = os.MkdirAll(gameDir(), 0o755)
+	_ = os.WriteFile(p, []byte(n+"\n"), 0o644)
+}
+
+func needRealName() error {
+	if !realNameRe.MatchString(getCfg().RealName) {
+		return errors.New("게임 속 이름(실명)을 먼저 적어 주세요. 다른 사람에게 그 이름으로 보여요.")
+	}
+	return nil
+}
+
 // 서버로 바로 접속: 보조 모드가 첫 화면에서 읽고 지움 (10분 안에 켠 게임만)
 func writeAutoJoin() {
 	p := filepath.Join(gameDir(), "koreawar-join.txt")
@@ -217,6 +240,13 @@ func gameRunning() bool {
 func directMode() bool { return clientID() != "" }
 
 func play() {
+	if err := needRealName(); err != nil {
+		statusMu.Lock()
+		status = Status{Phase: "error", Text: "이름이 필요해요", Error: err.Error()}
+		statusMu.Unlock()
+		return
+	}
+	writeRealName()
 	if directMode() {
 		playDirect()
 	} else {

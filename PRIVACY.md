@@ -1,8 +1,10 @@
 # Privacy
 
-CGMS Launcher doesn't collect personal data and doesn't send your account information to us.
+CGMS Launcher doesn't send your account information to us. The only personal info it handles is the in-game name you type in.
 
 **Sign-in.** You sign in on Microsoft's page (login.microsoftonline.com) in your default browser. The launcher gets a sign-in token from Microsoft, exchanges it with Xbox Live and Minecraft services, and stores the result only on your computer (on Windows it's encrypted with your Windows account). The token is only sent to Microsoft, Xbox Live and Mojang. Logging out deletes it.
+
+**In-game name.** The launcher asks for the name you want to be shown as in game (on our server we use real names among friends). It's saved in the launcher's settings on your computer and in a small file in the game folder; our companion mod sends it to our server when you join, and other players see it above your head, in the player list and in chat. You can change it in the launcher settings, and the server owner can remove it on request.
 
 **Our server.** The launcher downloads the mod list, mod files and launcher updates from our game server. It doesn't send your account or token there. Your Minecraft name reaches our server only when you join it in game, like any server.
 
