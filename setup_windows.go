@@ -134,6 +134,9 @@ func maybeInstall(args []string) bool {
 			return false
 		}
 	}
+	if devBuild { // 개발·시험용 빌드는 설치하지 않고 그 자리에서 켬 (진짜 런처를 덮어쓰지 않게)
+		return false
+	}
 	exe, target := selfExe(), installedExe()
 	if strings.EqualFold(filepath.Clean(exe), filepath.Clean(target)) {
 		return false
