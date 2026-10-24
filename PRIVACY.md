@@ -8,7 +8,7 @@ CGMS Launcher doesn't collect personal data and doesn't send your account inform
 
 **Other sites it talks to:** Mojang (game files, Java runtime), FabricMC (Fabric loader), and mc-heads.net (player head pictures by Minecraft name).
 
-**Donations.** The donation page only shows links (Toss, KakaoPay, Ko-fi) and our bank account from the server's settings, and opens them in your browser. The launcher doesn't handle any payment itself. Donations only help pay for hosting and don't give anything in game.
+**Donations.** The donation page only shows links (Toss, KakaoPay, Ko-fi) and our bank account from the server's settings, and opens them in your browser. The launcher doesn't handle any payment itself.
 
 **Files on your computer:** the launcher's own folder (game files, settings, logs). If you use the official launcher mode, it also adds a "Korea War" installation to the official launcher's settings and keeps a backup of that file.
 

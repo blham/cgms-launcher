@@ -267,18 +267,19 @@ option{background:#16181d}
 </section>
 <!-- 후원 -->
 <section class="ov" id="ov-donate">
-  <button class="back" data-close>← 홈</button><h2 class="t">후원</h2><div class="sub">후원은 서버 운영비에만 써요 · 후원해도 게임에서 달라지는 건 없어요</div><button class="x" data-close>닫기 ✕</button>
+  <button class="back" data-close>← 홈</button><h2 class="t">후원</h2><div class="sub">후원은 서버 운영비에 써요</div><button class="x" data-close>닫기 ✕</button>
   <div class="body"><div class="don">
     <div class="dcol">
       <div class="dbox">
         <h3 class="cap2" style="margin-top:0">후원하는 법</h3>
         <p class="dnote" id="dNote"></p>
         <ol class="steps"><li>토스·카카오페이 버튼을 누르거나 아래 계좌로 보내요.</li>
-        <li>보낼 때 메시지(받는 분 표시)에 마인크래프트 닉네임을 적어 주면 감사 인사에 이름이 나와요. (안 적어도 돼요)</li></ol>
+        <li>보낼 때 메시지(받는 분 표시)에 마인크래프트 닉네임을 적어 주세요. 감사판에 이름이 올라가요.</li></ol>
         <div class="pay"><button class="toss" id="dToss" hidden>토스로 후원 ↗</button><button class="kakao" id="dKakao" hidden>카카오페이로 후원 ↗</button><button class="kofi" id="dGo" hidden>Ko-fi ↗</button></div>
         <div class="bank" id="dBank" hidden><div><div class="exp" style="margin:0">계좌로 보내기</div><b id="dBankTxt"></b></div><button class="fbtn" id="dBankCopy">계좌번호 복사</button></div>
         <div class="exp" id="dGoNote"></div>
       </div>
+      <div id="dTierBox" hidden><h3 class="cap2">칭호 단계 (누적 금액)</h3><div id="dTiers"></div></div>
       <div id="dGoal" class="dbox" style="margin-top:16px" hidden><h3 class="cap2" style="margin-top:0">이번 달 서버비 목표</h3><div class="meTotal" id="dGoalPct"></div><div class="prog"><i id="dGoalBar"></i></div><div class="exp" id="dGoalTxt"></div></div>
     </div>
     <div class="dcol"><h3 class="cap2" style="margin-top:0">고마운 분들</h3><div id="dRecent"></div></div>
@@ -447,6 +448,8 @@ function drawDonate(dn){
   $("dBank").hidden=!bk;
   if(bk){$("dBankTxt").textContent=`${bk.name||""} ${bk.number}${bk.holder?" ("+bk.holder+")":""}`.trim();$("dBankCopy").onclick=()=>{try{navigator.clipboard.writeText(bk.number);$("dBankCopy").textContent="복사됨"}catch(e){}}}
   $("dNote").textContent=dn.note||"";
+  const ts=dn.tiers||[]; $("dTierBox").hidden=!ts.length;
+  $("dTiers").innerHTML=ts.map(t=>`<div class="tier"><span class="w">${wonF(t.min)} 이상</span>${titleSpan(t.title,t.color)}</div>`).join("");
   const g=dn.goal; $("dGoal").hidden=!g;
   if(g){const pc=Math.max(0,Math.min(100,num(g.percent)));$("dGoalPct").textContent=pc+"%";$("dGoalBar").style.width=pc+"%";
     $("dGoalTxt").textContent=(pc>=100?"이번 달 목표를 채웠어요. 모두 고마워요!":`목표 ${wonF(g.target)} · 채우면 서버 전체 축하 이벤트!`)+(g.reward?` (${g.reward})`:"");
