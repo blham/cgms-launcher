@@ -90,6 +90,28 @@ func registerAPI(mux *http.ServeMux) {
 		logout()
 		writeJSON(w, map[string]bool{"ok": true})
 	}))
+	// 1.4.8 디스코드 연결: 표를 만들고(없으면) 브라우저로 서버의 디스코드 승인 페이지를 엶
+	mux.HandleFunc("/api/discord", guard(func(w http.ResponseWriter, r *http.Request) {
+		cfgMu.Lock()
+		if cfg.DiscordS == "" {
+			cfg.DiscordS = randString(24)
+		}
+		s := cfg.DiscordS
+		cfgMu.Unlock()
+		saveConfig()
+		writeRealName()
+		openBrowser(filesBase() + "/discord/link?s=" + s)
+		writeJSON(w, map[string]bool{"opened": true})
+	}))
+	mux.HandleFunc("/api/discord/status", func(w http.ResponseWriter, r *http.Request) {
+		s := getCfg().DiscordS
+		var out map[string]any
+		if err := getJSON(filesBase()+"/discord/status?s="+s, &out); err != nil {
+			writeJSON(w, map[string]string{"state": "error"})
+			return
+		}
+		writeJSON(w, out)
+	})
 	mux.HandleFunc("/api/play", guard(func(w http.ResponseWriter, r *http.Request) {
 		go play()
 		writeJSON(w, map[string]bool{"ok": true})

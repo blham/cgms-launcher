@@ -10,6 +10,7 @@ What it does:
 - signs in with the player's own Microsoft account (Minecraft Java Edition required)
 - downloads the game, Fabric and our server's mods, checks them, and keeps them updated
 - starts the game and joins the server
+- optionally links your Discord account to our server's Discord bot (opens Discord's own approval page in your browser)
 - asks for the name you want to be shown as in game (we use real names among friends) and passes it to the server
 - shows server status, notices and the war map
 - has an optional donation page so friends can chip in for the server bill

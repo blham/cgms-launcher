@@ -181,8 +181,12 @@ func writeRealName() {
 		_ = os.Remove(p)
 		return
 	}
+	body := n + "\n"
+	if s := getCfg().DiscordS; s != "" { // 1.4.8 보조 모드가 실명과 같이 서버로 보냄 → 서버가 디스코드와 연결
+		body += "discord:" + s + "\n"
+	}
 	_ = os.MkdirAll(gameDir(), 0o755)
-	_ = os.WriteFile(p, []byte(n+"\n"), 0o644)
+	_ = os.WriteFile(p, []byte(body), 0o644)
 }
 
 func needRealName() error {

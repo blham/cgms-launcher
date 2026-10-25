@@ -24,7 +24,7 @@ import (
 
 // 빌드할 때 -ldflags "-X main.defaultHost=... -X main.defaultClientID=..." 로 바꿀 수 있음
 var (
-	LauncherVersion  = "1.4.7"
+	LauncherVersion  = "1.4.8"
 	defaultClientID  = "" // 모장 승인된 앱 ID (보통은 서버 config.yml launcher.client-id 로 받음)
 	defaultHost      = "" // 빌드할 때 -ldflags "-X main.defaultHost=서버주소" 로 넣음 (소스에 IP 를 안 남기려고)
 	defaultGamePort  = "25565"
@@ -63,6 +63,7 @@ type Config struct {
 	Mods      map[string]bool `json:"mods,omitempty"`     // 편의성 모드 켬/끔 (모드 id)
 	Exported  string          `json:"exported,omitempty"` // 다른 런처용으로 마지막에 받아 간 보조 모드 버전
 	RealName  string          `json:"realName,omitempty"` // 1.4.6 게임 속 이름(실명): 다른 사람에게 이 이름으로 보임
+	DiscordS  string          `json:"discordSession,omitempty"` // 1.4.8 디스코드 연결용 무작위 표 (서버가 디스코드 계정을 이 표에 붙임)
 }
 
 var (

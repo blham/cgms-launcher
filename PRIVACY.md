@@ -6,6 +6,8 @@ CGMS Launcher doesn't send your account information to us. The only personal inf
 
 **In-game name.** The launcher asks for the name you want to be shown as in game (on our server we use real names among friends). It's saved in the launcher's settings on your computer and in a small file in the game folder; our companion mod sends it to our server when you join, and other players see it above your head, in the player list and in chat. You can change it in the launcher settings, and the server owner can remove it on request.
 
+**Discord (optional).** If you press "Discord link" in settings, the launcher makes a random code, saves it on your computer and opens our server's page, which sends you to Discord's own approval page (scope: identify). Our server only receives your Discord user ID and display name, and links them to your Minecraft account for our Discord bot when you join. The launcher never sees your Discord password or token.
+
 **Our server.** The launcher downloads the mod list, mod files and launcher updates from our game server. It doesn't send your account or token there. Your Minecraft name reaches our server only when you join it in game, like any server.
 
 **Other sites it talks to:** Mojang (game files, Java runtime), FabricMC (Fabric loader), and mc-heads.net (player head pictures by Minecraft name).

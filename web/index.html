@@ -302,6 +302,7 @@ option{background:#16181d}
   <div class="body"><div class="form">
     <div class="fr"><label for="mem">메모리</label><select id="mem"><option value="2048">2 GB</option><option value="3072">3 GB</option><option value="4096">4 GB (권장)</option><option value="6144">6 GB</option><option value="8192">8 GB</option></select></div>
     <div class="fr"><label for="rname">게임 속 이름</label><input type="text" id="rname" maxlength="10" autocomplete="off"><small>인게임 이름으로 쓰이는 본인의 실명 (본명이 아닐 시 불이익)</small></div>
+    <div class="fr"><label>디스코드</label><div style="display:flex;align-items:center;gap:14px"><button class="fbtn" id="dcLink">디스코드 연결</button><span id="dcState" style="color:var(--mute);font-size:12.5px"></span></div><small>디스코드 계정과 마크 계정을 이어요. 승인한 뒤 게임에 접속하면 연결돼요</small></div>
     <div class="fr"><label for="auto">켜면 바로 접속</label><select id="auto"><option value="1">예</option><option value="0">아니요</option></select></div>
     <div class="acts"><button class="pri" id="save">저장</button><span id="saved">저장했어요</span><span style="flex:1"></span><button id="quit">런처 끄기</button></div>
   </div></div>
@@ -325,6 +326,7 @@ function openOv(n){
   ["launch","newsBtn","logo","acct","bigDonate"].forEach(id=>$(id).style.visibility=n?"hidden":"");
   if(n==="map") setTimeout(()=>{sizeMap();fitMap(false)},30);
   if(n==="mods") loadMods();
+  if(n==="settings") dcStatus();
   if(n==="news"){ try{localStorage.setItem("kwSeen",String(noticeKey()))}catch(e){} $("ncnt").hidden=true; badge(); }
 }
 document.querySelectorAll("[data-ov]").forEach(b=>b.onclick=()=>openOv(b.dataset.ov));
@@ -503,6 +505,11 @@ $("save").onclick=async()=>{const r=await post("/api/config",{memoryMB:+$("mem")
 async function gateSave(){const r=await post("/api/config",{realName:$("gateName").value.trim()});if(r.error){$("gateErr").textContent=r.error;return}$("gateErr").textContent="";filled=false;tick()}
 $("gateOk").onclick=gateSave; $("gateName").addEventListener("keydown",e=>{if(e.key==="Enter")gateSave()});
 $("folder").onclick=()=>post("/api/openfolder");
+async function dcStatus(){let d;try{d=await(await fetch("/api/discord/status",{cache:"no-store"})).json()}catch(e){return}
+  const t={linked:"연결됨: "+(d.name||""),pending:"디스코드 "+(d.name||"")+" 확인됨 · 게임에 접속하면 연결돼요",none:"아직 연결 안 됨",error:"서버에 연결하지 못했어요"}[d.state]||"";
+  $("dcState").textContent=d.ready===false?"서버장이 아직 디스코드 연결을 설정하지 않았어요":t; $("dcLink").textContent=d.state==="linked"?"다시 연결":"디스코드 연결";}
+$("dcLink").onclick=async()=>{await post("/api/discord");$("dcState").textContent="브라우저에서 디스코드 승인을 마쳐 주세요";setTimeout(dcStatus,8000)};
+setInterval(()=>{if(cur==="settings")dcStatus()},5000);
 $("quit").onclick=async()=>{await post("/api/quit");document.body.innerHTML='<div style="padding:44px;color:#f2ede2">런처를 껐어요. 이 창은 닫아도 돼요.</div>'};
 {const h=location.hash.slice(1); if(["map","players","news","settings","mods","donate"].includes(h)) setTimeout(()=>openOv(h),50);}
 // 1.2.7 인라인 이벤트 대신 (CSP): 그림 못 불러오면 숨기기, 코어 목록 누르면 그 자리로
