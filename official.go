@@ -171,7 +171,7 @@ func writeProfile(versionID string) error {
 }
 
 // 1.4.6 게임 속 이름(실명): 한글·영문 2~10글자
-var realNameRe = regexp.MustCompile(`^[가-힣A-Za-z]{2,10}$`)
+var realNameRe = regexp.MustCompile(`^[가-힣]{2,10}$`) // 1.4.9 한글만 (마크 닉네임과 겹치지 않게)
 
 // 1.4.6 보조 모드(1.2.6~)가 접속할 때 읽어서 서버로 보냄
 func writeRealName() {
@@ -181,17 +181,18 @@ func writeRealName() {
 		_ = os.Remove(p)
 		return
 	}
-	body := n + "\n"
+	// 1.4.9 보조 모드가 이 주소의 서버에만 보냄 (다른 서버에 실명·표가 새지 않게)
+	body := "server:" + serverAddr() + "\n" + n + "\n"
 	if s := getCfg().DiscordS; s != "" { // 1.4.8 보조 모드가 실명과 같이 서버로 보냄 → 서버가 디스코드와 연결
 		body += "discord:" + s + "\n"
 	}
 	_ = os.MkdirAll(gameDir(), 0o755)
-	_ = os.WriteFile(p, []byte(body), 0o644)
+	_ = os.WriteFile(p, []byte(body), 0o600)
 }
 
 func needRealName() error {
 	if !realNameRe.MatchString(getCfg().RealName) {
-		return errors.New("게임 속 이름(실명)을 먼저 적어 주세요. 다른 사람에게 그 이름으로 보여요.")
+		return errors.New("게임 속 이름(실명)을 먼저 적어 주세요. 한글 2~10글자, 다른 사람에게 그 이름으로 보여요.")
 	}
 	return nil
 }

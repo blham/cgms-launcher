@@ -110,6 +110,15 @@ func registerAPI(mux *http.ServeMux) {
 			writeJSON(w, map[string]string{"state": "error"})
 			return
 		}
+		if out["state"] == "linked" { // 1.4.9 연결이 끝난 표는 버리고 새로 (다시 쓰이지 않게)
+			cfgMu.Lock()
+			if cfg.DiscordS == s {
+				cfg.DiscordS = randString(24)
+			}
+			cfgMu.Unlock()
+			saveConfig()
+			writeRealName()
+		}
 		writeJSON(w, out)
 	})
 	mux.HandleFunc("/api/play", guard(func(w http.ResponseWriter, r *http.Request) {
@@ -145,7 +154,7 @@ func registerAPI(mux *http.ServeMux) {
 			n := strings.TrimSpace(*in.RealName)
 			if !realNameRe.MatchString(n) {
 				cfgMu.Unlock()
-				writeJSON(w, map[string]string{"error": "이름은 한글이나 영문 2~10글자로 적어 주세요 (띄어쓰기·숫자·기호 없이)."})
+				writeJSON(w, map[string]string{"error": "이름은 한글 2~10글자로 적어 주세요 (띄어쓰기·영문·숫자·기호 없이)."})
 				return
 			}
 			cfg.RealName = n
