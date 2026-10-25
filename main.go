@@ -8,6 +8,7 @@ import (
 	"embed"
 	"encoding/hex"
 	"encoding/json"
+	"io"
 	"fmt"
 	"io/fs"
 	"log"
@@ -24,7 +25,7 @@ import (
 
 // 빌드할 때 -ldflags "-X main.defaultHost=... -X main.defaultClientID=..." 로 바꿀 수 있음
 var (
-	LauncherVersion  = "1.5.6"
+	LauncherVersion  = "1.5.7"
 	defaultClientID  = "" // 모장 승인된 앱 ID (보통은 서버 config.yml launcher.client-id 로 받음)
 	defaultHost      = "" // 빌드할 때 -ldflags "-X main.defaultHost=서버주소" 로 넣음 (소스에 IP 를 안 남기려고)
 	defaultGamePort  = "25565"
@@ -189,6 +190,17 @@ func main() {
 		time.Sleep(300 * time.Millisecond)
 		ln, err = net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", uiPort))
 	}
+	takeover := false
+	if err != nil && !updated && takeOverRunning(ui) { // 1.5.7 뒤에 남아 있던 런처(게임 중이 아니면)는 끄고 이 런처가 이어서 켜짐
+		for i := 0; i < 40; i++ {
+			time.Sleep(150 * time.Millisecond)
+			if ln, err = net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", uiPort)); err == nil {
+				takeover = true
+				logger.Printf("뒤에 남아 있던 런처를 끄고 새로 켬")
+				break
+			}
+		}
+	}
 	if err != nil { // 이미 켜져 있음: 그 창만 다시 열기
 		logger.Printf("이미 켜져 있음: %v", err)
 		req, _ := http.NewRequest("POST", ui+"api/show", nil) // 이미 켜진 런처에게 창을 다시 열라고 (그 런처의 토큰으로)
@@ -234,9 +246,13 @@ func main() {
 
 	restartHook = func() { _ = srv.Close() }
 	go serverWatcher()
-	if updated { // 예전 창이 그대로 붙어 있으면 새 창을 안 띄움
+	if updated || takeover { // 예전 창이 그대로 붙어 있으면 새 창을 안 띄움
+		wait := 10 * time.Second
+		if takeover {
+			wait = 3 * time.Second // 예전 창은 1초마다 묻다가 새 런처가 뜨면 스스로 새로고침함
+		}
 		go func() {
-			time.Sleep(10 * time.Second)
+			time.Sleep(wait)
 			pollMu.Lock()
 			alive := time.Since(lastPoll) < 6*time.Second
 			pollMu.Unlock()
@@ -289,6 +305,31 @@ func hostGuard(h http.Handler) http.Handler {
 		}
 		h.ServeHTTP(w, r)
 	})
+}
+
+// 1.5.7 이미 켜져 있는 런처가 게임 중이 아니면 끄라고 함 (끄라고 했으면 true)
+func takeOverRunning(ui string) bool {
+	c := &http.Client{Timeout: 2 * time.Second}
+	resp, err := c.Get(ui + "api/state")
+	if err != nil {
+		return false
+	}
+	var st struct {
+		Running bool `json:"running"`
+	}
+	_ = json.NewDecoder(io.LimitReader(resp.Body, 1<<20)).Decode(&st)
+	resp.Body.Close()
+	if st.Running {
+		return false // 게임 중이면 그 런처를 그대로 둠 (창만 다시 열기)
+	}
+	req, _ := http.NewRequest("POST", ui+"api/quit", nil)
+	req.Header.Set("X-KW-Token", runningToken())
+	resp, err = c.Do(req)
+	if err != nil {
+		return false
+	}
+	resp.Body.Close()
+	return resp.StatusCode == 200
 }
 
 // 켜져 있는 런처의 토큰 (같은 사용자만 읽힘)
