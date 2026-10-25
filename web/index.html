@@ -525,6 +525,7 @@ $("quit").onclick=async()=>{await post("/api/quit");document.body.innerHTML='<di
 // 1.2.7 인라인 이벤트 대신 (CSP): 그림 못 불러오면 숨기기, 코어 목록 누르면 그 자리로
 document.addEventListener("error",e=>{const t=e.target;if(!t||t.tagName!=="IMG"||!t.dataset.fb)return;if(t.dataset.fb==="q"){const d=document.createElement("div");d.className="q";d.textContent="?";t.replaceWith(d)}else t.style.visibility="hidden"},true);
 $("coreList").addEventListener("click",e=>{const c=e.target.closest("[data-core]");if(c)focusCore(+c.dataset.core)});
+{let bye=false;const sayBye=()=>{if(bye)return;bye=true;try{navigator.sendBeacon("/api/bye",new Blob([TOKEN],{type:"text/plain"}))}catch(e){}};addEventListener("pagehide",sayBye);addEventListener("beforeunload",sayBye);} // 1.5.1 창을 닫으면 런처도 끝
 tick(); setInterval(tick,1000); infoTick(); setInterval(infoTick,5000);
 </script>
 </body>

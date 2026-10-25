@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"sync/atomic"
 	"time"
 )
 
@@ -41,10 +42,16 @@ func cleanOldExe() {
 
 var restartHook func() // 서버(포트) 닫기
 
+var updating atomic.Bool
+
 func checkUpdate() {
 	if devBuild && os.Getenv("KW_TEST_UPDATE") == "" {
 		return
 	}
+	if !updating.CompareAndSwap(false, true) { // 이미 확인 중
+		return
+	}
+	defer updating.Store(false)
 	doc, err := fetchSignedDoc() // 1.2.7 업데이트 여부·파일 모두 서명된 값으로만
 	if err != nil {
 		logger.Printf("런처 업데이트 확인 안 함: %v", err)

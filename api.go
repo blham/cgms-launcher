@@ -269,13 +269,37 @@ func registerAPI(mux *http.ServeMux) {
 			http.Error(w, "forbidden", 403)
 			return
 		}
+		logger.Printf("창 닫힘 알림")
 		writeJSON(w, map[string]bool{"ok": true})
 		go func() { time.Sleep(200 * time.Millisecond); os.Exit(0) }()
 	})
 	mux.HandleFunc("/api/show", guard(func(w http.ResponseWriter, r *http.Request) { // 1.2.7 토큰 있어야 (아무 사이트나 창을 띄우지 못하게)
 		openWindow(fmt.Sprintf("http://localhost:%d/", uiPort))
+		go checkUpdate() // 1.5.1 아이콘을 다시 눌렀을 때도 새 런처 확인
 		writeJSON(w, map[string]bool{"ok": true})
 	}))
+	// 1.5.1 창을 닫으면 화면이 알려 줌 → 잠깐 기다려서 다시 안 붙으면(새로고침이 아니면) 런처도 끝냄 (게임·받기·로그인 중이면 그대로)
+	mux.HandleFunc("/api/bye", func(w http.ResponseWriter, r *http.Request) {
+		// 닫히는 화면은 머리글을 못 붙이는 sendBeacon 으로 보내서, 토큰을 본문으로도 받음
+		b, _ := io.ReadAll(io.LimitReader(r.Body, 256))
+		if r.Method != "POST" || (r.Header.Get("X-KW-Token") != apiToken && strings.TrimSpace(string(b)) != apiToken) {
+			http.Error(w, "forbidden", 403)
+			return
+		}
+		logger.Printf("창 닫힘 알림")
+		writeJSON(w, map[string]bool{"ok": true})
+		go func() {
+			time.Sleep(5 * time.Second)
+			pollMu.Lock()
+			gone := time.Since(lastPoll) > 4*time.Second
+			pollMu.Unlock()
+			if gone && !gameRunning() && !busy() && !loginPending() {
+				logger.Printf("창을 닫아 끝냄")
+				os.Exit(0)
+			}
+			logger.Printf("창 닫힘 알림: 그대로 둠 (다시 열림 %v, 게임 %v, 받는 중 %v, 로그인 %v)", !gone, gameRunning(), busy(), loginPending())
+		}()
+	})
 	// 1.0.2 서버 화면 정보 (접속자·코어·공지·디스코드), 고화질 지도
 	mux.HandleFunc("/api/info", func(w http.ResponseWriter, r *http.Request) {
 		b, err := serverInfo()
