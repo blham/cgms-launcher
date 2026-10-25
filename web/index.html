@@ -276,6 +276,7 @@ option{background:#16181d}
   <button class="back" data-close>← 홈</button><h2 class="t">후원</h2><div class="sub">후원은 서버 운영비에 써요</div><button class="x" data-close>닫기 ✕</button>
   <div class="body"><div class="don">
     <div class="dcol">
+      <div id="dGoal" class="dbox" style="margin-bottom:16px" hidden><h3 class="cap2" style="margin-top:0">이번 달 서버비 목표</h3><div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap"><div class="meTotal" id="dGoalPct"></div><div class="dnote" style="margin:0;font-size:15px;font-weight:700" id="dGoalAmt"></div></div><div class="prog"><i id="dGoalBar"></i></div><div class="exp" id="dGoalTxt"></div></div>
       <div class="dbox">
         <h3 class="cap2" style="margin-top:0">후원하는 법</h3>
         <p class="dnote" id="dNote"></p>
@@ -286,7 +287,6 @@ option{background:#16181d}
         <div class="exp" id="dGoNote"></div>
       </div>
       <div id="dTierBox" hidden><h3 class="cap2">칭호 단계 (누적 금액)</h3><div id="dTiers"></div></div>
-      <div id="dGoal" class="dbox" style="margin-top:16px" hidden><h3 class="cap2" style="margin-top:0">이번 달 서버비 목표</h3><div class="meTotal" id="dGoalPct"></div><div class="prog"><i id="dGoalBar"></i></div><div class="exp" id="dGoalTxt"></div></div>
     </div>
     <div class="dcol"><h3 class="cap2" style="margin-top:0">고마운 분들</h3><div id="dRecent"></div></div>
   </div></div>
@@ -475,7 +475,8 @@ function drawDonate(dn){
   $("dTiers").innerHTML=ts.map(t=>`<div class="tier"><span class="w">${wonF(t.min)} 이상</span>${titleSpan(t.title,t.color)}</div>`).join("");
   const g=dn.goal; $("dGoal").hidden=!g;
   if(g){const pc=Math.max(0,Math.min(100,num(g.percent)));$("dGoalPct").textContent=pc+"%";$("dGoalBar").style.width=pc+"%";
-    $("dGoalTxt").textContent=(pc>=100?"이번 달 목표를 채웠어요. 모두 고마워요!":`목표 ${wonF(g.target)} · 채우면 서버 전체 축하 이벤트!`)+(g.reward?` (${g.reward})`:"");
+    $("dGoalAmt").textContent="목표 "+wonF(g.target);
+    $("dGoalTxt").textContent=(pc>=100?"이번 달 목표를 채웠어요. 모두 고마워요!":"채우면 서버 전체 축하 이벤트!")+(g.reward?` (${g.reward})`:"");
     $("bigGoal").textContent=pc>=100?"이번 달 서버비 목표 달성!":`서버 운영비에 써요 · 이번 달 목표 ${pc}%`;}
   $("dGoNote").textContent=(toss||kakao||page||bk)?"":"서버장이 아직 후원 방법을 설정하지 않았어요.";
   const row=x=>`<div class="dn"><img alt="" src="https://mc-heads.net/avatar/${encodeURIComponent(x.name)}/22" data-fb="hide">${esc(x.name)}<small>${titleSpan(x.title,x.color)}</small></div>`;
