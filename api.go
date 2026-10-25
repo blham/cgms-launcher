@@ -32,6 +32,38 @@ var (
 	srvInfoMu sync.Mutex
 )
 
+// 1.5.2 창이 둘 이상 붙어 있으면 (업데이트 뒤 새 창이 하나 더 뜬 경우 등) 가장 나중에 연 창만 남기고 나머지는 스스로 닫게 함
+var (
+	winSeen   = map[string][2]time.Time{} // 창 id → {처음 본 때, 마지막으로 본 때}
+	winSeenMu sync.Mutex
+)
+
+func noteWindow(id string) string {
+	if len(id) < 8 || len(id) > 40 {
+		return ""
+	}
+	winSeenMu.Lock()
+	defer winSeenMu.Unlock()
+	now := time.Now()
+	v, ok := winSeen[id]
+	if !ok {
+		v[0] = now
+	}
+	v[1] = now
+	winSeen[id] = v
+	best, bestAt := "", time.Time{}
+	for k, t := range winSeen {
+		if now.Sub(t[1]) > 90*time.Second { // 오래 소식 없는 창은 잊음 (내려 둔 창은 1분에 한 번쯤 물어봄)
+			delete(winSeen, k)
+			continue
+		}
+		if t[0].After(bestAt) {
+			best, bestAt = k, t[0]
+		}
+	}
+	return best
+}
+
 func registerAPI(mux *http.ServeMux) {
 	guard := func(h http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
@@ -51,6 +83,7 @@ func registerAPI(mux *http.ServeMux) {
 		pollMu.Lock()
 		lastPoll = time.Now()
 		pollMu.Unlock()
+		primary := noteWindow(r.URL.Query().Get("w"))
 		srvInfoMu.Lock()
 		si := srvInfo
 		srvInfoMu.Unlock()
@@ -73,7 +106,7 @@ func registerAPI(mux *http.ServeMux) {
 			"status": st, "server": si, "mcDir": mcDir(),
 			"direct": directMode(), "account": acc, "authError": hideHost(authError),
 			"config": c, "address": "", "version": LauncherVersion, "newerLauncher": newer,
-			"running": gameRunning(),
+			"running": gameRunning(), "primary": primary,
 		})
 	})
 	mux.HandleFunc("/api/login", guard(func(w http.ResponseWriter, r *http.Request) {
