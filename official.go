@@ -93,7 +93,7 @@ func installFabricVersion(man *Manifest) (string, error) {
 
 func javaArgs() string {
 	m := getCfg().MemoryMB
-	return fmt.Sprintf("-Xmx%dM -XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:G1NewSizePercent=20 -XX:G1ReservePercent=20 -XX:MaxGCPauseMillis=50 -XX:G1HeapRegionSize=32M", m)
+	return fmt.Sprintf("-Xmx%dM -XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:G1NewSizePercent=20 -XX:G1ReservePercent=20 -XX:MaxGCPauseMillis=50 -XX:G1HeapRegionSize=32M -XX:-OmitStackTraceInFastThrow", m) // 1.5.6 튕길 때 오류 위치가 남게
 }
 
 // 공식 런처 설치 프로필 파일들 (마이크로소프트 스토어판은 따로)
