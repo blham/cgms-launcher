@@ -34,6 +34,8 @@ Korea War 서버용 런처예요. Fabric이랑 서버 모드를 손으로 깔고
 
 Not an official Minecraft product. Not approved by or associated with Mojang or Microsoft.
 
+Uses [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) by Kazuhiko Arase (MIT) for the donation QR code.
+
 Questions or problems: open an issue here.
 
 MIT License

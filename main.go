@@ -24,7 +24,7 @@ import (
 
 // 빌드할 때 -ldflags "-X main.defaultHost=... -X main.defaultClientID=..." 로 바꿀 수 있음
 var (
-	LauncherVersion  = "1.4.9"
+	LauncherVersion  = "1.5.0"
 	defaultClientID  = "" // 모장 승인된 앱 ID (보통은 서버 config.yml launcher.client-id 로 받음)
 	defaultHost      = "" // 빌드할 때 -ldflags "-X main.defaultHost=서버주소" 로 넣음 (소스에 IP 를 안 남기려고)
 	defaultGamePort  = "25565"
@@ -221,7 +221,7 @@ func main() {
 			w.Header().Set("X-Frame-Options", "DENY")
 			w.Header().Set("Referrer-Policy", "no-referrer")
 			html := strings.Replace(string(b), "__TOKEN__", apiToken, 1)
-			html = strings.Replace(html, "__NONCE__", nonce, 1)
+			html = strings.ReplaceAll(html, "__NONCE__", nonce)
 			_, _ = w.Write([]byte(html))
 			return
 		}
