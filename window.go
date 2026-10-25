@@ -66,9 +66,14 @@ func openWindow(url string) {
 	if known && alive {
 		return
 	}
+	if bs := appBrowsers(); len(bs) > 0 { // 1.5.8 전에 남은 이 프로필의 브라우저(빈 창을 되살리는)를 끄고 세션 기록을 지운 뒤 띄움
+		killWindowProfile()
+		cleanWindowProfile()
+	}
 	for _, b := range appBrowsers() {
-		cmd := exec.Command(b, "--app="+url, "--window-size=1180,800", "--user-data-dir="+filepath.Join(dataDir, "window"),
-			"--no-first-run", "--no-default-browser-check", "--disable-features=Translate")
+		cmd := exec.Command(b, "--app="+url, "--window-size=1180,800", "--user-data-dir="+windowProfileDir(),
+			"--no-first-run", "--no-default-browser-check", "--disable-features=Translate", "--disable-background-mode",
+			"--hide-crash-restore-bubble", "--disable-session-crashed-bubble")
 		hideWindow(cmd)
 		if err := cmd.Start(); err != nil {
 			continue
@@ -101,6 +106,6 @@ func gameEnded() {
 	pollMu.Unlock()
 	if a && !o && !alive {
 		logger.Printf("게임 끝, 창도 닫혀 있어 끝냄")
-		os.Exit(0)
+		quitLauncher(0)
 	}
 }

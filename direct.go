@@ -203,7 +203,6 @@ type Prepared struct {
 	Manifest  *Manifest
 }
 
-
 func prepare() (*Prepared, error) {
 	setStatus("prepare", "서버 정보 확인 중", 0)
 	man, err := fetchManifest()
@@ -684,8 +683,6 @@ func tail(path string, n int) string {
 	}
 	return strings.Join(lines, "\n")
 }
-
-
 
 // 게임 시작 버튼 (직접 실행): 토큰 확인 -> 받기·업데이트 -> 실행
 func playDirect() {

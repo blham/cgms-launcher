@@ -304,7 +304,7 @@ func registerAPI(mux *http.ServeMux) {
 		}
 		logger.Printf("창 닫힘 알림")
 		writeJSON(w, map[string]bool{"ok": true})
-		go func() { time.Sleep(200 * time.Millisecond); os.Exit(0) }()
+		go func() { time.Sleep(200 * time.Millisecond); quitLauncher(0) }()
 	})
 	mux.HandleFunc("/api/show", guard(func(w http.ResponseWriter, r *http.Request) { // 1.2.7 토큰 있어야 (아무 사이트나 창을 띄우지 못하게)
 		openWindow(fmt.Sprintf("http://localhost:%d/", uiPort))
@@ -328,7 +328,7 @@ func registerAPI(mux *http.ServeMux) {
 			pollMu.Unlock()
 			if gone && !gameRunning() && !busy() && !loginPending() {
 				logger.Printf("창을 닫아 끝냄")
-				os.Exit(0)
+				quitLauncher(0)
 			}
 			logger.Printf("창 닫힘 알림: 그대로 둠 (다시 열림 %v, 게임 %v, 받는 중 %v, 로그인 %v)", !gone, gameRunning(), busy(), loginPending())
 		}()
@@ -376,7 +376,7 @@ func registerAPI(mux *http.ServeMux) {
 	}))
 	mux.HandleFunc("/api/quit", guard(func(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, map[string]bool{"ok": true})
-		go func() { time.Sleep(300 * time.Millisecond); os.Exit(0) }()
+		go func() { time.Sleep(300 * time.Millisecond); quitLauncher(0) }()
 	}))
 }
 
