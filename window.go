@@ -63,7 +63,7 @@ func openWindow(url string) {
 	winMu.Lock()
 	known := winOpen || usedApp
 	winMu.Unlock()
-	if known && alive {
+	if known && (alive || loginPending()) { // 1.5.9 창이 마이크로소프트 로그인 화면에 가 있는 동안은 그 창을 그대로 둠
 		return
 	}
 	if bs := appBrowsers(); len(bs) > 0 { // 1.5.8 전에 남은 이 프로필의 브라우저(빈 창을 되살리는)를 끄고 세션 기록을 지운 뒤 띄움

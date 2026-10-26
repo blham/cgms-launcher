@@ -145,7 +145,7 @@ func beginLogin() (string, error) {
 
 func handleAuthCallback(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
-	// 1.2.7 로그인은 기본 브라우저에서 하므로 결과는 짧은 안내 페이지로 (런처 창은 상태를 보고 알아서 바뀜)
+	// 1.5.9 로그인은 런처 창 안에서 하므로 결과를 잠깐 보여 주고 런처 화면으로 돌아감 (기본 브라우저로 했으면 탭을 닫으라고 안내)
 	page := func(ok bool, msg string) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.Header().Set("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'")
@@ -153,7 +153,7 @@ func handleAuthCallback(w http.ResponseWriter, r *http.Request) {
 		if !ok {
 			t = "로그인하지 못했어요"
 		}
-		_, _ = fmt.Fprintf(w, `<!doctype html><meta charset="utf-8"><title>CGMS Launcher</title><body style="font-family:sans-serif;background:#111;color:#eee;display:grid;place-items:center;height:90vh;margin:0"><div style="text-align:center"><h2>%s</h2><p>%s</p><p style="color:#999">이 탭은 닫고 런처로 돌아가세요.</p></div>`, html.EscapeString(t), html.EscapeString(msg))
+		_, _ = fmt.Fprintf(w, `<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="%d;url=/"><title>CGMS Launcher</title><body style="font-family:sans-serif;background:#111;color:#eee;display:grid;place-items:center;height:90vh;margin:0"><div style="text-align:center"><h2>%s</h2><p>%s</p><p style="color:#999">잠시 뒤 런처 화면으로 돌아가요. 브라우저 탭에서 로그인했다면 이 탭은 닫아도 돼요.</p></div>`, map[bool]int{true: 1, false: 4}[ok], html.EscapeString(t), html.EscapeString(msg))
 	}
 	back := func(msg string) {
 		authError = msg

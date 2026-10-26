@@ -116,8 +116,13 @@ func registerAPI(mux *http.ServeMux) {
 			return
 		}
 		authError = ""
-		openBrowser(u) // 주소창이 보이는 기본 브라우저에서 로그인 (진짜 마이크로소프트 페이지인지 직접 확인할 수 있게)
-		writeJSON(w, map[string]bool{"opened": true})
+		// 1.5.9 런처 창 안에서 바로 마이크로소프트 로그인 (끝나면 /auth 가 런처 화면으로 되돌림). 주소는 늘 login.microsoftonline.com
+		if r.URL.Query().Get("browser") == "1" {
+			openBrowser(u) // 원하면 기본 브라우저에서
+			writeJSON(w, map[string]any{"opened": true})
+			return
+		}
+		writeJSON(w, map[string]any{"url": u})
 	}))
 	mux.HandleFunc("/api/logout", guard(func(w http.ResponseWriter, r *http.Request) {
 		logout()

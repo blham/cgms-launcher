@@ -355,7 +355,7 @@ async function tick(){
     else if(a){ $("acct").innerHTML=`<div><div class="n">${esc(a.name)}</div><div class="k">마이크로소프트 계정 · <button id="logout">로그아웃</button></div></div><div id="avatar"><img alt="" src="https://mc-heads.net/head/${encodeURIComponent(a.uuid)}/58" data-fb="q"></div>`;
       $("logout").onclick=async()=>{await post("/api/logout");tick()}; }
     else { $("acct").innerHTML=`<div><div class="n">로그인이 필요해요</div><div class="k">마인크래프트 자바 에디션</div></div><button id="loginBtn">로그인</button>`;
-      $("loginBtn").onclick=async()=>{const r=await post("/api/login");$("autherr").hidden=false;$("autherr").textContent=r.opened?"브라우저에서 마이크로소프트 로그인을 마치면 여기로 자동으로 돌아와요.":(r.error||"")}; }
+      $("loginBtn").onclick=async()=>{$("loginBtn").disabled=true;const r=await post("/api/login");if(r.url&&/^https:\/\/login\.microsoftonline\.com\//.test(r.url)){location.href=r.url;return}$("loginBtn").disabled=false;$("autherr").hidden=false;$("autherr").textContent=r.error||"로그인 화면을 열지 못했어요"}; }
   }
   if(s.authError){$("autherr").hidden=false;$("autherr").textContent=s.authError} else if(a) $("autherr").hidden=true;
   const st=s.status||{}, busy=st.phase==="prepare";
