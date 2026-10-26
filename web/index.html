@@ -342,8 +342,8 @@ let tickT;
 const WID=(crypto.randomUUID?crypto.randomUUID():String(Math.random()).slice(2)+Date.now()).replace(/-/g,"").slice(0,24);
 async function tick(){
   let s; try{s=lastState=await(await fetch("/api/state?w="+WID,{cache:"no-store"})).json()}catch(e){wasDown=true;$("stat").textContent=upd?"새 런처로 다시 켜는 중…":"런처가 꺼져 있어요. 다시 실행해 주세요.";$("play").disabled=true;return}
-  if(wasDown){location.reload();return}   // 런처가 새 버전으로 다시 켜졌으면 새 화면으로
-  if(s.primary&&s.primary!==WID){window.close();setTimeout(()=>{document.body.innerHTML='<div style="padding:40px;color:#ccc;font:16px sans-serif">다른 런처 창이 열려 있어요. 이 창은 닫아도 돼요.</div>'},300);clearInterval(tickT);return}   // 1.5.2 다른 창이 새로 열렸으면 이 창은 닫음
+  if(wasDown){window.__noBye=true;location.reload();return}   // 런처가 새 버전으로 다시 켜졌으면 새 화면으로
+  if(s.primary&&s.primary!==WID){window.__noBye=true;window.close();setTimeout(()=>{document.body.innerHTML='<div style="padding:40px;color:#ccc;font:16px sans-serif">다른 런처 창이 열려 있어요. 이 창은 닫아도 돼요.</div>'},300);clearInterval(tickT);return}   // 1.5.2 다른 창이 새로 열렸으면 이 창은 닫음
   upd=/새 런처/.test((s.status||{}).text||"");
   $("addr").textContent=(s.server||{}).online?"서버 열림":"서버 꺼짐"; 
   const sv=s.server||{}; $("dot").className=sv.online?"on":"";
@@ -532,7 +532,7 @@ $("quit").onclick=async()=>{await post("/api/quit");document.body.innerHTML='<di
 // 1.2.7 인라인 이벤트 대신 (CSP): 그림 못 불러오면 숨기기, 코어 목록 누르면 그 자리로
 document.addEventListener("error",e=>{const t=e.target;if(!t||t.tagName!=="IMG"||!t.dataset.fb)return;if(t.dataset.fb==="q"){const d=document.createElement("div");d.className="q";d.textContent="?";t.replaceWith(d)}else t.style.visibility="hidden"},true);
 $("coreList").addEventListener("click",e=>{const c=e.target.closest("[data-core]");if(c)focusCore(+c.dataset.core)});
-{let bye=false;const sayBye=()=>{if(bye)return;bye=true;try{navigator.sendBeacon("/api/bye",new Blob([TOKEN],{type:"text/plain"}))}catch(e){}};addEventListener("pagehide",sayBye);addEventListener("beforeunload",sayBye);} // 1.5.1 창을 닫으면 런처도 끝
+{let bye=false;const sayBye=()=>{if(bye||window.__noBye)return;bye=true;try{navigator.sendBeacon("/api/bye",new Blob([TOKEN],{type:"text/plain"}))}catch(e){}};addEventListener("pagehide",sayBye);addEventListener("beforeunload",sayBye);} // 1.5.1 창을 닫으면 런처도 끝
 tick(); tickT=setInterval(tick,1000); infoTick(); setInterval(infoTick,5000);
 </script>
 </body>

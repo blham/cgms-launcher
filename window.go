@@ -13,10 +13,18 @@ import (
 )
 
 var (
-	winMu   sync.Mutex
-	winOpen bool
-	usedApp bool
+	winMu     sync.Mutex
+	winOpen   bool
+	usedApp   bool
+	spawnedAt time.Time
 )
+
+// 1.6.0 창을 막 띄운 뒤 20초 동안은 "창 닫힘" 알림으로 런처를 끄지 않음 (창이 뜨면서 화면을 다시 불러오는 동안 생기는 알림)
+func justSpawned() bool {
+	winMu.Lock()
+	defer winMu.Unlock()
+	return !spawnedAt.IsZero() && time.Since(spawnedAt) < 20*time.Second
+}
 
 func appBrowsers() []string {
 	var c []string
@@ -68,8 +76,13 @@ func openWindow(url string) {
 	}
 	if bs := appBrowsers(); len(bs) > 0 { // 1.5.8 전에 남은 이 프로필의 브라우저(빈 창을 되살리는)를 끄고 세션 기록을 지운 뒤 띄움
 		killWindowProfile()
+		time.Sleep(700 * time.Millisecond) // 1.6.0 꺼지는 중인 프로세스가 새 창을 가로채지 않게 한 번 더
+		killWindowProfile()
 		cleanWindowProfile()
 	}
+	winMu.Lock()
+	spawnedAt = time.Now()
+	winMu.Unlock()
 	for _, b := range appBrowsers() {
 		cmd := exec.Command(b, "--app="+url, "--window-size=1180,800", "--user-data-dir="+windowProfileDir(),
 			"--no-first-run", "--no-default-browser-check", "--disable-features=Translate", "--disable-background-mode",

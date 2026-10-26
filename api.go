@@ -331,6 +331,10 @@ func registerAPI(mux *http.ServeMux) {
 			pollMu.Lock()
 			gone := time.Since(lastPoll) > 4*time.Second
 			pollMu.Unlock()
+			if gone && justSpawned() {
+				logger.Printf("창 닫힘 알림: 창을 막 새로 띄운 참이라 그대로 둠")
+				return
+			}
 			if gone && !gameRunning() && !busy() && !loginPending() {
 				logger.Printf("창을 닫아 끝냄")
 				quitLauncher(0)
@@ -381,7 +385,9 @@ func registerAPI(mux *http.ServeMux) {
 	}))
 	mux.HandleFunc("/api/quit", guard(func(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, map[string]bool{"ok": true})
-		go func() { time.Sleep(300 * time.Millisecond); quitLauncher(0) }()
+		// 1.6.0 새로 켠 런처가 이어받을 때도 이 길로 옴: 창은 새 런처가 정리하고 다시 띄우니 여기선 창을 건드리지 않음
+		// (여기서 창을 끄면 새 런처가 막 띄운 창까지 같이 꺼질 수 있음)
+		go func() { time.Sleep(300 * time.Millisecond); os.Exit(0) }()
 	}))
 }
 
