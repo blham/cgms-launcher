@@ -407,6 +407,16 @@ func pingServer() {
 	srvInfoMu.Lock()
 	srvInfo = si
 	srvInfoMu.Unlock()
+	// 1.6.1 런처를 켤 때 서버가 꺼져 있어 서명된 정보(로그인 앱 ID 등)를 못 받았으면, 서버가 켜지는 대로 다시 받음
+	if err == nil {
+		if m := cachedManifest(); m == nil || m.Launcher == "" {
+			if _, e := fetchManifest(); e == nil {
+				if m2 := cachedManifest(); m2 != nil && m2.Launcher != "" {
+					logger.Printf("서버가 켜져 서버 정보를 다시 받음 (직접 실행 %v)", directMode())
+				}
+			}
+		}
+	}
 }
 
 // ---------------------------------------------------------------- 서버 목록 핑 (접속자 수·MOTD)

@@ -103,7 +103,12 @@ func editJSON(path string, f func(map[string]any)) {
 
 // 런처가 끝날 때: 창 프로필 정리하고 끝냄
 func quitLauncher(code int) {
-	killWindowProfile()
-	cleanWindowProfile()
+	winMu.Lock()
+	b := usedBrowserApp
+	winMu.Unlock()
+	if b {
+		killWindowProfile()
+		cleanWindowProfile()
+	}
 	os.Exit(code)
 }

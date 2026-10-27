@@ -252,6 +252,14 @@ func play() {
 		return
 	}
 	writeRealName()
+	// 1.6.1 실행 방식(런처에서 직접 / 공식 런처)은 누를 때 서버 정보를 새로 받아서 정함
+	// (런처를 켤 때 서버가 꺼져 있었으면 로그인 앱 ID 를 못 받아 공식 런처로 넘어가던 것)
+	if m, err := fetchManifest(); err != nil || m == nil || m.Launcher == "" {
+		statusMu.Lock()
+		status = Status{Phase: "error", Text: "서버에 연결하지 못했어요", Error: "서버가 꺼져 있거나 인터넷 연결 문제예요. 서버가 켜진 뒤 다시 눌러 주세요."}
+		statusMu.Unlock()
+		return
+	}
 	if directMode() {
 		playDirect()
 	} else {

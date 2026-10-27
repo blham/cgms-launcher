@@ -17,6 +17,8 @@ var (
 	winOpen   bool
 	usedApp   bool
 	spawnedAt time.Time
+	// 1.6.1 브라우저 앱 창을 쓴 적이 있으면 끝날 때 그 프로필을 정리 (런처 자체 창만 썼으면 정리할 것이 없음)
+	usedBrowserApp bool
 )
 
 // 1.6.0 창을 막 띄운 뒤 20초 동안은 "창 닫힘" 알림으로 런처를 끄지 않음 (창이 뜨면서 화면을 다시 불러오는 동안 생기는 알림)
@@ -62,8 +64,9 @@ func appBrowsers() []string {
 	return out
 }
 
-// 런처 창 열기 (이미 열려 있으면 아무것도 안 함)
-func openWindow(url string) {
+// 크롬 계열 브라우저의 "앱 창"으로 런처 화면 열기 (이미 열려 있으면 아무것도 안 함).
+// 1.6.1 윈도우는 런처 자체 창(WebView2)을 먼저 쓰고, 그게 안 될 때만 이걸 씀 (window_windows.go)
+func openAppWindow(url string) {
 	// 1.1.1 "열려 있다"고 알고 있어도 화면이 상태를 안 물은 지 6초가 넘었으면 실제로는 안 보이는 것 → 새로 띄움
 	pollMu.Lock()
 	alive := time.Since(lastPoll) < 6*time.Second
@@ -95,6 +98,7 @@ func openWindow(url string) {
 		winMu.Lock()
 		winOpen = true
 		usedApp = true
+		usedBrowserApp = true
 		winMu.Unlock()
 		go func() {
 			_ = cmd.Wait()

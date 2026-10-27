@@ -25,7 +25,7 @@ import (
 
 // 빌드할 때 -ldflags "-X main.defaultHost=... -X main.defaultClientID=..." 로 바꿀 수 있음
 var (
-	LauncherVersion  = "1.6.0"
+	LauncherVersion  = "1.6.1"
 	defaultClientID  = "" // 모장 승인된 앱 ID (보통은 서버 config.yml launcher.client-id 로 받음)
 	defaultHost      = "" // 빌드할 때 -ldflags "-X main.defaultHost=서버주소" 로 넣음 (소스에 IP 를 안 남기려고)
 	defaultGamePort  = "25565"
@@ -246,8 +246,9 @@ func main() {
 
 	restartHook = func() { _ = srv.Close() }
 	go serverWatcher()
-	if updated || takeover { // 예전 창이 그대로 붙어 있으면 새 창을 안 띄움
-		wait := 10 * time.Second
+	go cleanupOldWindowProfile() // 1.6.1 윈도우: 예전 엣지 앱 창이 남긴 프로필·프로세스 정리
+	if updated || takeover {     // 예전 창이 그대로 붙어 있으면 새 창을 안 띄움
+		wait := 4 * time.Second
 		if takeover {
 			wait = 3 * time.Second // 예전 창은 1초마다 묻다가 새 런처가 뜨면 스스로 새로고침함
 		}
