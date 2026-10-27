@@ -238,7 +238,7 @@ option{background:#16181d}
   <button id="play" disabled><span id="playTxt">게임 시작</span><svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9z"/></svg></button>
   <div class="bar" id="bar"><i id="barv"></i></div>
   <div id="stat">&nbsp;</div>
-  <div id="motd"></div>
+  <div id="motd"></div><div id="hours" hidden style="font-size:12px;color:var(--mute);margin-top:4px"></div>
   <div class="err warn" id="autherr" hidden></div>
   <div class="err" id="err" hidden></div>
 </div>
@@ -345,10 +345,9 @@ async function tick(){
   if(wasDown){window.__noBye=true;location.reload();return}   // 런처가 새 버전으로 다시 켜졌으면 새 화면으로
   if(s.primary&&s.primary!==WID){window.__noBye=true;window.close();setTimeout(()=>{document.body.innerHTML='<div style="padding:40px;color:#ccc;font:16px sans-serif">다른 런처 창이 열려 있어요. 이 창은 닫아도 돼요.</div>'},300);clearInterval(tickT);return}   // 1.5.2 다른 창이 새로 열렸으면 이 창은 닫음
   upd=/새 런처/.test((s.status||{}).text||"");
-  $("addr").textContent=(s.server||{}).online?"서버 열림":"서버 꺼짐"; 
-  const sv=s.server||{}; $("dot").className=sv.online?"on":"";
+  const sv=s.server||{}; srvUp=!!sv.online; showHours();
   if(!info){ $("cnt").textContent=sv.online?sv.players:"-"; $("cntmax").textContent=sv.online?" / "+sv.max:""; }
-  $("motd").textContent=sv.online?(sv.motd||""):"서버가 꺼져 있어요";
+  if(sv.online) $("motd").textContent=sv.motd||"";
   const a=s.account, key=s.direct?(a?"a:"+a.name+a.uuid:"login"):"official";
   if($("acct").dataset.k!==key){ $("acct").dataset.k=key;
     if(!s.direct) $("acct").innerHTML=`<div><div class="n">공식 런처로 실행</div><div class="k">로그인은 마인크래프트 공식 런처에서 해요</div></div>`;
@@ -359,7 +358,7 @@ async function tick(){
   }
   if(s.authError){$("autherr").hidden=false;$("autherr").textContent=s.authError} else if(a) $("autherr").hidden=true;
   const st=s.status||{}, busy=st.phase==="prepare";
-  $("play").disabled=busy||s.running||(s.direct&&!a); $("playTxt").textContent=s.running?(s.direct?"게임 실행 중":"공식 런처 여는 중"):busy?"준비 중":"게임 시작";
+  $("play").disabled=busy||s.running||(s.direct&&!a); const hs=hoursState(); $("playTxt").textContent=s.running?(s.direct?"게임 실행 중":"공식 런처 여는 중"):busy?"준비 중":(hs&&!hs.open&&hs.next?"닫혀 있어요 · "+whenTxt(hs.next).replace(/^오늘 /,"")+" 열림":"게임 시작");
   $("bar").classList.toggle("on",busy||st.total>0);
   $("barv").style.width=(st.total>0?Math.min(100,Math.round(st.done*100/st.total)):(busy?8:(s.running||st.phase==="done"?100:0)))+"%";
   $("stat").textContent=(st.text||"")+(st.total>0&&busy?`  ${st.done} / ${st.total}`:"")||" ";
@@ -369,12 +368,36 @@ async function tick(){
   if(noName) $("play").disabled=true;
   $("ver").textContent=`런처 ${s.version}`+(s.newerLauncher?` · 새 런처 ${s.newerLauncher} 이 나왔어요`:"");
 }
+// ---------------- 2.5.9 여는 시간 (서버가 꺼져 있어도 마지막으로 받은 시간표로 계산)
+let srvUp=false;
+function hoursState(){const h=info&&info.hours; if(!h||!h.enabled||!h.days) return null;
+  const now=Date.now(), off=(h.offset||540)*60000, loc=new Date(now+off);
+  const dow=(loc.getUTCDay()+6)%7, min=loc.getUTCHours()*60+loc.getUTCMinutes();
+  const at=(d,m)=>{for(const r of h.days[d]||[]) if(r[0]<r[1]?(m>=r[0]&&m<r[1]):m>=r[0]) return true; for(const r of h.days[(d+6)%7]||[]) if(r[1]<=r[0]&&m<r[1]) return true; return false};
+  const forced=!info.stale&&h.mode!=="auto";
+  const open=forced?h.mode==="open":at(dow,min);
+  let next=null; if(!forced){ for(let i=1;i<8*1440;i++){const t=min+i; if(at((dow+Math.floor(t/1440))%7,t%1440)!==open){next=now+i*60000-loc.getUTCSeconds()*1000-loc.getUTCMilliseconds();break}} }
+  return {open,next,off,text:h.text||""}}
+function whenTxt(ms){const h=info&&info.hours,off=((h&&h.offset)||540)*60000,t=new Date(ms+off),n=new Date(Date.now()+off),dd=["일","월","화","수","목","금","토"];
+  const days=Math.round((Date.UTC(t.getUTCFullYear(),t.getUTCMonth(),t.getUTCDate())-Date.UTC(n.getUTCFullYear(),n.getUTCMonth(),n.getUTCDate()))/864e5);
+  const hm=String(t.getUTCHours()).padStart(2,"0")+":"+String(t.getUTCMinutes()).padStart(2,"0");
+  return (days===0?"오늘":days===1?`내일(${dd[t.getUTCDay()]})`:`${t.getUTCMonth()+1}/${t.getUTCDate()}(${dd[t.getUTCDay()]})`)+" "+(hm==="00:00"&&days>0?"00:00":hm)}
+function ago(ms){const m=Math.max(0,Math.round((Date.now()-ms)/60000));return m<1?"방금":m<60?m+"분 전":m<1440?Math.floor(m/60)+"시간 전":Math.floor(m/1440)+"일 전"}
+function showHours(){const hs=hoursState(), stale=info&&info.stale;
+  $("dot").className=srvUp&&(!hs||hs.open)?"on":"";
+  let a, m=null;
+  if(!srvUp){ a="서버 꺼짐"; m="서버가 꺼져 있어요"+(info&&info.savedAt?` · 아래는 마지막 정보 (${ago(info.savedAt)})`:"")+(hs&&!hs.open&&hs.next?` · 다음 열림 ${whenTxt(hs.next)}`:""); }
+  else if(hs&&!hs.open){ a="닫힘"+(hs.next?" · 다음 열림 "+whenTxt(hs.next):""); m=`지금은 서버 문이 닫혀 있어요${hs.next?" · 다음 열림 "+whenTxt(hs.next):""}`; }
+  else { a="서버 열림"+(hs&&hs.next?" · "+whenTxt(hs.next).replace(/^오늘 /,"")+" 닫힘":""); }
+  $("addr").textContent=a; if(m!==null) $("motd").textContent=m;
+  $("hours").hidden=!(hs&&hs.text&&(!hs.open||!srvUp||stale)); if(hs) $("hours").textContent="여는 시간  "+hs.text.split("\n").join("  ·  ");
+}
 // ---------------- 서버 정보 (공지·접속자·코어)
 function noticeKey(){return info&&info.notices&&info.notices.length?(info.notices[0].date+info.notices[0].title):""}
 async function infoTick(){
   let d; try{d=await(await fetch("/api/info",{cache:"no-store"})).json()}catch(e){return}
   if(d.error){ if(!info) $("notice").innerHTML=`<div class="empty">${esc(d.error)}</div>`; return }
-  const first=!info; info=d;
+  const first=!info; info=d; showHours();
   const nm=d.name||"Korea War"; document.title=nm;
   const parts=nm.trim().split(/\s+/); $("sname").innerHTML=parts.length>1?esc(parts.slice(0,-1).join(" "))+"<br><em>"+esc(parts[parts.length-1])+"</em>":esc(nm);
   $("cnt").textContent=d.online; $("cntmax").textContent=" / "+d.max;

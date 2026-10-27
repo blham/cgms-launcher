@@ -549,23 +549,27 @@ func serverInfo() ([]byte, error) {
 	if infoCache != nil && time.Since(infoAt) < 4*time.Second {
 		return infoCache, nil
 	}
+	if !infoAt.IsZero() && infoCache == nil && time.Since(infoAt) < 15*time.Second {
+		return lastInfo() // 1.6.2 서버가 꺼져 있으면 15초에 한 번만 다시 시도 (그동안 마지막 정보)
+	}
 	c := &http.Client{Timeout: 5 * time.Second}
 	resp, err := c.Get(filesBase() + "/launcher/status.json")
-	if err != nil {
-		if infoCache != nil {
-			return infoCache, nil
+	var b []byte
+	if err == nil {
+		defer resp.Body.Close()
+		if resp.StatusCode != 200 {
+			err = fmt.Errorf("서버 정보 없음 (HTTP %d)", resp.StatusCode)
+		} else {
+			b, err = io.ReadAll(io.LimitReader(resp.Body, 4<<20))
 		}
-		return nil, errors.New("서버에 연결하지 못했어요")
 	}
-	defer resp.Body.Close()
-	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("서버 정보 없음 (HTTP %d)", resp.StatusCode)
-	}
-	b, err := io.ReadAll(io.LimitReader(resp.Body, 4<<20))
 	if err != nil {
-		return nil, err
+		infoCache, infoAt = nil, time.Now()
+		return lastInfo()
 	}
 	infoCache, infoAt = b, time.Now()
+	_ = os.MkdirAll(dirs("cache"), 0o755)
+	_ = os.WriteFile(dirs("cache", "status-last.json"), b, 0o644) // 1.6.2 서버가 꺼졌을 때 보여 줄 마지막 정보
 	var mv struct {
 		Map string `json:"map"`
 	}
@@ -573,6 +577,31 @@ func serverInfo() ([]byte, error) {
 		curMapV = mv.Map
 	}
 	return b, nil
+}
+
+// 1.6.2 서버가 꺼져 있을 때: 마지막으로 받은 정보에 "꺼짐"·받은 시각을 붙여 줌 (접속자는 비움)
+func lastInfo() ([]byte, error) {
+	p := dirs("cache", "status-last.json")
+	b, err := os.ReadFile(p)
+	if err != nil {
+		return nil, errors.New("서버에 연결하지 못했어요")
+	}
+	var m map[string]any
+	if json.Unmarshal(b, &m) != nil || m == nil {
+		return nil, errors.New("서버에 연결하지 못했어요")
+	}
+	at := int64(0)
+	if t, ok := m["time"].(float64); ok {
+		at = int64(t)
+	} else if st, err := os.Stat(p); err == nil {
+		at = st.ModTime().UnixMilli()
+	}
+	m["stale"], m["savedAt"] = true, at
+	m["online"], m["players"] = 0, []any{}
+	if v, ok := m["map"].(string); ok && curMapV == "" {
+		curMapV = v
+	}
+	return json.Marshal(m)
 }
 
 var curMapV string // 1.2.7 서버가 알려 준 지금 지도 판 (그 판만 받음)
