@@ -29,7 +29,36 @@ var (
 	procSetForeground    = user32.NewProc("SetForegroundWindow")
 	procIsIconic         = user32.NewProc("IsIconic")
 	procBringWindowToTop = user32.NewProc("BringWindowToTop")
+
+	procSetDpiCtx   = user32.NewProc("SetProcessDpiAwarenessContext")
+	procSetDpiAware = user32.NewProc("SetProcessDPIAware")
+	procGetDpiSys   = user32.NewProc("GetDpiForSystem")
 )
+
+// 1.6.3 화면 배율(125%·150% 등)을 런처가 직접 처리하게 함.
+// 이걸 안 하면 윈도우가 작게 그린 화면을 억지로 늘려서 글씨·그림이 전부 흐릿하게 보임.
+func init() {
+	if procSetDpiCtx.Find() == nil {
+		// -4 = 모니터마다 배율을 따로 처리 (v2)
+		if r, _, _ := procSetDpiCtx.Call(^uintptr(3)); r != 0 {
+			return
+		}
+	}
+	if procSetDpiAware.Find() == nil {
+		procSetDpiAware.Call()
+	}
+}
+
+// 배율 적용한 창 크기 (96 DPI 기준 값을 화면 배율에 맞춰 키움)
+func dpiScale(n int) uint {
+	dpi := uintptr(96)
+	if procGetDpiSys.Find() == nil {
+		if d, _, _ := procGetDpiSys.Call(); d != 0 {
+			dpi = d
+		}
+	}
+	return uint(n) * uint(dpi) / 96
+}
 
 // WebView2 런타임이 깔려 있는지 (레지스트리의 버전 값)
 func webview2Installed() bool {
@@ -85,14 +114,14 @@ func openWindow(url string) {
 			DataPath:  filepath.Join(dataDir, "webview2"),
 			AutoFocus: true,
 			WindowOptions: webview2.WindowOptions{
-				Title: "CGMS Launcher", Width: 1180, Height: 800, IconId: 1, Center: true,
+				Title: "CGMS Launcher", Width: dpiScale(1180), Height: dpiScale(800), IconId: 1, Center: true,
 			},
 		})
 		if w == nil {
 			ready <- false
 			return
 		}
-		w.SetSize(900, 620, webview2.HintMin)
+		w.SetSize(int(dpiScale(900)), int(dpiScale(620)), webview2.HintMin)
 		w.Navigate(url)
 		wvMu.Lock()
 		wvView = w
