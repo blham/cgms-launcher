@@ -25,7 +25,7 @@ import (
 
 // 빌드할 때 -ldflags "-X main.defaultHost=... -X main.defaultClientID=..." 로 바꿀 수 있음
 var (
-	LauncherVersion  = "1.6.3"
+	LauncherVersion  = "1.6.4"
 	defaultClientID  = "" // 모장 승인된 앱 ID (보통은 서버 config.yml launcher.client-id 로 받음)
 	defaultHost      = "" // 빌드할 때 -ldflags "-X main.defaultHost=서버주소" 로 넣음 (소스에 IP 를 안 남기려고)
 	defaultGamePort  = "25565"
@@ -303,6 +303,17 @@ func hostGuard(h http.Handler) http.Handler {
 		if !ok[strings.ToLower(r.Host)] {
 			http.Error(w, "forbidden", http.StatusForbidden)
 			return
+		}
+		// 1.6.4 다른 사이트가 런처 API 를 부르지 못하게 (브라우저가 붙이는 Sec-Fetch-Site / Origin 으로 확인)
+		if strings.HasPrefix(r.URL.Path, "/api/") {
+			if sf := r.Header.Get("Sec-Fetch-Site"); sf == "cross-site" || sf == "same-site" {
+				http.Error(w, "forbidden", http.StatusForbidden)
+				return
+			}
+			if o := r.Header.Get("Origin"); o != "" && !ok[strings.ToLower(strings.TrimPrefix(strings.TrimPrefix(o, "http://"), "https://"))] {
+				http.Error(w, "forbidden", http.StatusForbidden)
+				return
+			}
 		}
 		h.ServeHTTP(w, r)
 	})

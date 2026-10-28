@@ -552,7 +552,7 @@ func serverInfo() ([]byte, error) {
 	if !infoAt.IsZero() && infoCache == nil && time.Since(infoAt) < 15*time.Second {
 		return lastInfo() // 1.6.2 서버가 꺼져 있으면 15초에 한 번만 다시 시도 (그동안 마지막 정보)
 	}
-	c := &http.Client{Timeout: 5 * time.Second}
+	c := &http.Client{Timeout: 5 * time.Second, Transport: fallbackRT{http.DefaultTransport}}
 	resp, err := c.Get(filesBase() + "/launcher/status.json")
 	var b []byte
 	if err == nil {

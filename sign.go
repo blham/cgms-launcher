@@ -35,6 +35,9 @@ type SignedDoc struct {
 	Server          string            `json:"server"`
 	BlockedMods     []string          `json:"blockedMods"`
 	Files           map[string]string `json:"files"`
+	HTTPS           string            `json:"https"`        // 1.6.4 서버 파일을 받을 https 주소 (서명 안에 있어서 바꿔치기 못함)
+	Minecraft       string            `json:"minecraft"`    // 1.6.4 마크 버전 (서명된 값이 있으면 그것만)
+	FabricLoader    string            `json:"fabricLoader"` // 1.6.4 Fabric 버전
 }
 
 var (
@@ -116,6 +119,9 @@ func fetchSignedDoc() (*SignedDoc, error) {
 	if d.LauncherVersion != "" && !verRe.MatchString(d.LauncherVersion) {
 		return nil, bad
 	}
+	if d.HTTPS != "" {
+		rememberHTTPS(d.HTTPS)
+	}
 	signedCache, signedAt = &d, time.Now()
 	return &d, nil
 }
@@ -137,6 +143,13 @@ func applySigned(m *Manifest) {
 		return
 	}
 	m.Launcher, m.ClientID, m.Server, m.BlockedMods = d.LauncherVersion, d.ClientID, d.Server, d.BlockedMods
+	// 1.6.4 마크·Fabric 버전도 서명된 값으로 (중간에서 예전 버전으로 바꿔치기 못하게)
+	if d.Minecraft != "" && verRe.MatchString(d.Minecraft) {
+		m.Minecraft = d.Minecraft
+	}
+	if d.FabricLoader != "" && verRe.MatchString(d.FabricLoader) {
+		m.FabricLoader = d.FabricLoader
+	}
 	size := map[string]int64{}
 	for _, f := range m.Mods {
 		size[f.File] = f.Size

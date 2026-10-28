@@ -5,6 +5,9 @@ package main
 
 import (
 	"archive/zip"
+	"errors"
+	"net"
+	"net/url"
 	"crypto/sha1"
 	"crypto/sha256"
 	"encoding/hex"
@@ -65,7 +68,7 @@ type dlTask struct {
 	TrustSize bool
 }
 
-var dlClient = &http.Client{Timeout: 10 * time.Minute}
+var dlClient = &http.Client{Timeout: 10 * time.Minute, Transport: fallbackRT{http.DefaultTransport}}
 
 func fileSha1(p string) string {
 	f, err := os.Open(p)
@@ -318,9 +321,93 @@ var (
 	manifestMu sync.Mutex
 )
 
+// 1.6.4 서버 파일 주소: 서명 목록이 https 주소를 알려 줬으면 그것으로 (주고받는 내용이 암호화돼서 엿보기·바꿔치기 못함).
+// https 연결이 아예 안 될 때만(서버의 https 가 꺼짐) http 로 한 번 더 (fallbackRT). 인증서가 틀리면 http 로 안 내려감
 func filesBase() string {
+	if b := httpsBase(); b != "" {
+		return b
+	}
+	return plainBase()
+}
+
+func plainBase() string {
 	c := getCfg()
 	return fmt.Sprintf("http://%s:%d", c.Host, c.FilesPort)
+}
+
+var (
+	httpsMu     sync.Mutex
+	httpsCached *string
+)
+
+func httpsPath() string { return filepath.Join(dataDir, "https-base") }
+
+// 서명 목록의 https 주소가 지금 접속 주소와 같은 곳일 때만 씀
+func validHTTPS(u string) bool {
+	pu, err := url.Parse(u)
+	if err != nil || pu.Scheme != "https" || pu.Path != "" && pu.Path != "/" || pu.RawQuery != "" || pu.User != nil {
+		return false
+	}
+	return strings.EqualFold(pu.Hostname(), getCfg().Host)
+}
+
+func httpsBase() string {
+	httpsMu.Lock()
+	defer httpsMu.Unlock()
+	if httpsCached == nil {
+		b, _ := os.ReadFile(httpsPath())
+		v := strings.TrimSpace(string(b))
+		httpsCached = &v
+	}
+	if *httpsCached != "" && validHTTPS(*httpsCached) {
+		return strings.TrimRight(*httpsCached, "/")
+	}
+	return ""
+}
+
+func rememberHTTPS(u string) {
+	u = strings.TrimRight(strings.TrimSpace(u), "/")
+	if !validHTTPS(u) {
+		return
+	}
+	httpsMu.Lock()
+	defer httpsMu.Unlock()
+	if httpsCached != nil && *httpsCached == u {
+		return
+	}
+	httpsCached = &u
+	_ = os.WriteFile(httpsPath(), []byte(u), 0o644)
+	logger.Printf("서버 파일은 이제 https 로 받아요: %s", u)
+}
+
+// https 로 연결 자체가 안 될 때(연결 거부·시간 초과)만 같은 요청을 http 로 (GET 만). 인증서 오류는 그대로 실패
+type fallbackRT struct{ base http.RoundTripper }
+
+var warnedFallback atomic.Bool
+
+func (f fallbackRT) RoundTrip(r *http.Request) (*http.Response, error) {
+	resp, err := f.base.RoundTrip(r)
+	if err == nil || r.URL.Scheme != "https" || (r.Method != http.MethodGet && r.Method != http.MethodHead) {
+		return resp, err
+	}
+	hb := httpsBase()
+	if hb == "" || !strings.HasPrefix(r.URL.String(), hb+"/") {
+		return resp, err
+	}
+	var op *net.OpError
+	if !errors.As(err, &op) || op.Op != "dial" {
+		return resp, err
+	}
+	nu, perr := url.Parse(plainBase() + r.URL.RequestURI())
+	if perr != nil {
+		return resp, err
+	}
+	if !warnedFallback.Swap(true) {
+		logger.Printf("https 연결이 안 돼서 http 로 받아요: %v", err)
+	}
+	r2 := r.Clone(r.Context())
+	r2.URL, r2.Host = nu, ""
+	return f.base.RoundTrip(r2)
 }
 
 func cachedManifest() *Manifest {

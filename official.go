@@ -22,7 +22,7 @@ import (
 	"time"
 )
 
-var httpc = &http.Client{Timeout: 60 * time.Second}
+var httpc = &http.Client{Timeout: 60 * time.Second, Transport: fallbackRT{http.DefaultTransport}}
 
 const profileKey = "koreawar"
 
