@@ -207,6 +207,7 @@ option{background:#16181d}
 #nameGate input{font-size:20px;padding:10px 4px;margin-bottom:6px}#nameGate .e{color:#ff8f78;font-size:12.5px;min-height:18px}
 #nameGate button{margin-top:14px;background:var(--ink);color:#111;padding:11px 26px;font-weight:750}#nameGate button:hover{background:var(--gold)}
 #saved{color:var(--green);font-size:12px;align-self:center;opacity:0;transition:opacity .3s}
+.nat .tier{margin-left:6px;font-size:11px;color:var(--gold);font-weight:600;letter-spacing:1px}
 </style>
 </head>
 <body>
@@ -234,7 +235,7 @@ option{background:#16181d}
 </nav>
 
 <div id="launch" class="t">
-  <div id="stats"><div>접속<b><span id="cnt">-</span><span id="cntmax" style="font-size:13px;color:var(--mute);font-weight:400"></span></b></div><div>국가<b id="natCnt">-</b></div><div>코어<b id="coreCnt">-</b></div></div>
+  <div id="stats"><div>접속<b><span id="cnt">-</span><span id="cntmax" style="font-size:13px;color:var(--mute);font-weight:400"></span></b></div><div>세력<b id="natCnt">-</b></div><div>코어<b id="coreCnt">-</b></div></div>
   <button id="play" disabled><span id="playTxt">게임 시작</span><svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9z"/></svg></button>
   <div class="bar" id="bar"><i id="barv"></i></div>
   <div id="stat">&nbsp;</div>
@@ -257,7 +258,7 @@ option{background:#16181d}
 <section class="ov" id="ov-map">
   <button class="back" data-close>← 홈</button><h2 class="t">지도</h2><div class="sub">끌어서 옮기고 휠로 확대 · 코어를 누르면 그 자리로</div><button class="x" data-close>닫기 ✕</button>
   <div class="mapwrap">
-    <aside class="side left"><div class="big2"><div>점령된 코어<b id="mTaken">-</b></div><div>지금 접속<b id="mOn">-</b></div></div><h4>국가 현황</h4><div id="nat"></div><h4 style="margin-top:18px">접속 중</h4><div id="natPl" class="scroll"></div></aside>
+    <aside class="side left"><div class="big2"><div>점령된 코어<b id="mTaken">-</b></div><div>지금 접속<b id="mOn">-</b></div></div><h4>세력 현황</h4><div id="nat"></div><h4 style="margin-top:18px">접속 중</h4><div id="natPl" class="scroll"></div></aside>
     <div id="mapBox">
       <div id="world"><img id="mapimg" alt=""><div id="marks"></div></div>
       <div class="mapbtns"><button id="zin">＋</button><button id="zout">－</button><button id="zfit">전체</button></div>
@@ -455,17 +456,17 @@ function drawMarks(col){
   });
   apply();
 }
-// ---------------- 국가 현황 · 코어 목록 · 전쟁 소식
+// ---------------- 세력 현황 · 코어 목록 · 전쟁 소식
 function ago(t){const m=Math.floor((Date.now()-t)/60000);return m<1?"방금":m<60?m+"분 전":m<1440?Math.floor(m/60)+"시간 전":Math.floor(m/1440)+"일 전"}
 function focusCore(i){const c=info.cores[i],b=info.bounds,img=$("mapimg");if(!c||!img.naturalWidth)return;const p=$("mapBox"),k=Math.max(view.k,1.2);
   const x=(c.x-b.minX)/b.width*img.naturalWidth,y=(c.z-b.minZ)/b.height*img.naturalHeight;view={k,x:p.clientWidth/2-x*k,y:p.clientHeight/2-y*k};apply();
   const m=document.querySelector(`.core[data-i="${i}"] i`);if(m){m.animate([{transform:"rotate(45deg) scale(1)"},{transform:"rotate(45deg) scale(2.2)"},{transform:"rotate(45deg) scale(1)"}],{duration:700,iterations:2})}}
 function drawSides(col){
   const cores=info.cores||[], ps=info.players||[];
-  const nat=(info.nations||[]).map(n=>({n:n.name,c:sc(n.color),cores:cores.filter(x=>x.owner===n.name).length,on:ps.filter(p=>p.nation===n.name).length}));
+  const nat=(info.nations||[]).map(n=>({n:n.name,t:typeof n.tier==="string"?n.tier:"",c:sc(n.color),cores:cores.filter(x=>x.owner===n.name).length,on:ps.filter(p=>p.nation===n.name).length}));
   nat.sort((a,b)=>b.cores-a.cores||b.on-a.on);
   const free=cores.filter(x=>!x.owner).length;
-  $("nat").innerHTML=(nat.length?nat.map((n,i)=>`<div class="nat"><div class="tt"><b style="background:${n.c}"></b>${esc(n.n)}<span class="rank">${i+1}위</span></div><div class="r"><span>코어 ${n.cores}</span><span>접속 ${n.on}</span></div><div class="share"><i style="width:${cores.length?Math.round(n.cores*100/cores.length):0}%;background:${n.c}"></i></div></div>`).join(""):`<div class="empty">아직 국가가 없어요</div>`)
+  $("nat").innerHTML=(nat.length?nat.map((n,i)=>`<div class="nat"><div class="tt"><b style="background:${n.c}"></b>${esc(n.n)}${n.t?`<small class="tier">${esc(n.t)}</small>`:""}<span class="rank">${i+1}위</span></div><div class="r"><span>코어 ${n.cores}</span><span>접속 ${n.on}</span></div><div class="share"><i style="width:${cores.length?Math.round(n.cores*100/cores.length):0}%;background:${n.c}"></i></div></div>`).join(""):`<div class="empty">아직 세력이 없어요</div>`)
     +`<div class="nat"><div class="tt"><b style="background:#8a8a8a"></b>주인 없음</div><div class="r"><span>코어 ${free}</span></div></div>`;
   $("coreList").innerHTML=cores.map((c,i)=>({c,i})).sort((a,b)=>(a.c.owner||"~").localeCompare(b.c.owner||"~")).map(({c,i})=>{const cl=c.owner?(col[c.owner]||"#ccc"):"#8a8a8a",pct=c.maxHp?Math.round(c.hp*100/c.maxHp):0;
     return `<div class="ci" data-core="${i}"><div class="tt"><b style="background:${cl}"></b>${esc(c.name)}<small>${esc(c.owner||"주인 없음")}</small></div><div class="hp"><i style="width:${pct}%;background:${pct<35?"#e0533b":pct<70?"#e2b45a":"#7bd389"}"></i></div></div>`}).join("");
