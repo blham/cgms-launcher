@@ -93,8 +93,8 @@ button:disabled{cursor:default}
 .ov .back{align-self:flex-start;font-size:12.5px;letter-spacing:1px;color:var(--mute);margin:-6px 0 14px;padding:6px 12px 6px 0}.ov .back:hover{color:var(--gold)}
 .ov h2{margin:0 0 4px;font-size:28px;font-weight:750;letter-spacing:-.3px}
 .ov .sub{color:var(--mute);font-size:12px;letter-spacing:2px;margin-bottom:22px}
-.ov .x{position:absolute;right:96px;top:36px;font-size:12px;letter-spacing:2px;color:var(--mute)}
-.ov .x:hover{color:var(--ink)}
+.ov>.x{position:absolute;right:96px;top:36px;font-size:12px;letter-spacing:2px;color:var(--mute)}
+.ov>.x:hover{color:var(--ink)}
 .body{flex:1;min-height:0;overflow:auto;user-select:text}
 .body::-webkit-scrollbar,.scroll::-webkit-scrollbar{width:6px}
 .body::-webkit-scrollbar-thumb,.scroll::-webkit-scrollbar-thumb{background:var(--line)}
@@ -252,7 +252,7 @@ option{background:#16181d}
 <!-- 소식 -->
 <section class="ov" id="ov-news">
   <button class="back" data-close>← 홈</button><h2 class="t">소식</h2><div class="sub">공지 · 전쟁 소식</div><button class="x" data-close>닫기 ✕</button>
-  <div class="body"><div class="news"><div><h3 class="cap">공지</h3><div id="notice"></div></div><div><h3 class="cap">전쟁 소식</h3><div id="feed2"></div></div></div></div>
+  <div class="body"><div class="news"><div><h3 class="cap">공지</h3><div id="notice"></div><h3 class="cap" style="margin-top:28px">세력 연대기</h3><div id="chron"></div></div><div><h3 class="cap">전쟁 소식</h3><div id="feed2"></div></div></div></div>
 </section>
 <!-- 지도 -->
 <section class="ov" id="ov-map">
@@ -463,10 +463,10 @@ function focusCore(i){const c=info.cores[i],b=info.bounds,img=$("mapimg");if(!c|
   const m=document.querySelector(`.core[data-i="${i}"] i`);if(m){m.animate([{transform:"rotate(45deg) scale(1)"},{transform:"rotate(45deg) scale(2.2)"},{transform:"rotate(45deg) scale(1)"}],{duration:700,iterations:2})}}
 function drawSides(col){
   const cores=info.cores||[], ps=info.players||[];
-  const nat=(info.nations||[]).map(n=>({n:n.name,t:typeof n.tier==="string"?n.tier:"",c:sc(n.color),cores:cores.filter(x=>x.owner===n.name).length,on:ps.filter(p=>p.nation===n.name).length}));
+  const nat=(info.nations||[]).map(n=>({n:n.name,t:typeof n.tier==="string"?n.tier:"",p:typeof n.policy==="string"?n.policy:"",c:sc(n.color),cores:cores.filter(x=>x.owner===n.name).length,on:ps.filter(p=>p.nation===n.name).length}));
   nat.sort((a,b)=>b.cores-a.cores||b.on-a.on);
   const free=cores.filter(x=>!x.owner).length;
-  $("nat").innerHTML=(nat.length?nat.map((n,i)=>`<div class="nat"><div class="tt"><b style="background:${n.c}"></b>${esc(n.n)}${n.t?`<small class="tier">${esc(n.t)}</small>`:""}<span class="rank">${i+1}위</span></div><div class="r"><span>코어 ${n.cores}</span><span>접속 ${n.on}</span></div><div class="share"><i style="width:${cores.length?Math.round(n.cores*100/cores.length):0}%;background:${n.c}"></i></div></div>`).join(""):`<div class="empty">아직 세력이 없어요</div>`)
+  $("nat").innerHTML=(nat.length?nat.map((n,i)=>`<div class="nat"><div class="tt"><b style="background:${n.c}"></b>${esc(n.n)}${n.t?`<small class="tier">${esc(n.t)}${n.p?" · "+esc(n.p):""}</small>`:""}<span class="rank">${i+1}위</span></div><div class="r"><span>코어 ${n.cores}</span><span>접속 ${n.on}</span></div><div class="share"><i style="width:${cores.length?Math.round(n.cores*100/cores.length):0}%;background:${n.c}"></i></div></div>`).join(""):`<div class="empty">아직 세력이 없어요</div>`)
     +`<div class="nat"><div class="tt"><b style="background:#8a8a8a"></b>주인 없음</div><div class="r"><span>코어 ${free}</span></div></div>`;
   $("coreList").innerHTML=cores.map((c,i)=>({c,i})).sort((a,b)=>(a.c.owner||"~").localeCompare(b.c.owner||"~")).map(({c,i})=>{const cl=c.owner?(col[c.owner]||"#ccc"):"#8a8a8a",pct=c.maxHp?Math.round(c.hp*100/c.maxHp):0;
     return `<div class="ci" data-core="${i}"><div class="tt"><b style="background:${cl}"></b>${esc(c.name)}<small>${esc(c.owner||"주인 없음")}</small></div><div class="hp"><i style="width:${pct}%;background:${pct<35?"#e0533b":pct<70?"#e2b45a":"#7bd389"}"></i></div></div>`}).join("");
@@ -475,6 +475,9 @@ function drawSides(col){
   const ev=info.events||[];
   const fe=n=>ev.length?ev.slice(0,n).map(e=>`<div class="ev ${esc(e.kind)}"><div class="w">${ago(e.t)}</div><div class="x">${esc(e.text)}</div></div>`).join(""):`<div class="empty">아직 소식이 없어요. 코어를 점령하거나 공격하면 여기에 떠요.</div>`;
   $("feed").innerHTML=fe(25); $("feed2").innerHTML=fe(40);
+  // 1.6.6 세력 연대기 (서버의 큰일 기록, 새것 먼저)
+  const ch=info.chronicle||[], dd=t=>{const d=new Date(num(t));return (d.getMonth()+1)+"."+d.getDate()};
+  $("chron").innerHTML=ch.length?ch.slice(0,30).map(e=>`<div class="ev"><div class="w">${dd(e.t)}</div><div class="x">${esc(e.text)}</div></div>`).join(""):`<div class="empty">아직 기록이 없어요. 세력이 세워지고 동맹·통합이 일어나면 여기에 남아요.</div>`;
 }
 // ---------------- 후원
 const wonF=v=>num(v).toLocaleString("ko-KR")+"원";
