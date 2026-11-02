@@ -154,6 +154,24 @@ func main() {
 		fmt.Printf("새 열쇠를 만들었어요: %s\n확인용 열쇠(런처에 넣는 것): %s\n", keyPath(), base64.StdEncoding.EncodeToString(pub))
 		return
 	}
+	if len(args) > 0 && args[0] == "check" { // 이 컴퓨터의 열쇠가 지금 런처·플러그인이 믿는 열쇠와 같은지 (비밀 열쇠는 보여 주지 않음)
+		const want = "9QaY6jmmp+5wo2+Wm+/ybKpqDcshIb3fACyc1sLHMmE="
+		kb, err := os.ReadFile(keyPath())
+		if err != nil {
+			fail("서명 열쇠가 없어요: %s", keyPath())
+		}
+		seed, _ := base64.StdEncoding.DecodeString(strings.TrimSpace(string(kb)))
+		if len(seed) != ed25519.SeedSize {
+			fail("열쇠 파일이 망가졌어요")
+		}
+		pub := base64.StdEncoding.EncodeToString(ed25519.NewKeyFromSeed(seed).Public().(ed25519.PublicKey))
+		if pub == want {
+			fmt.Println("OK: 이 컴퓨터의 열쇠가 지금 런처·플러그인이 믿는 열쇠와 같아요. 이 컴퓨터에서 서명할 수 있어요.")
+		} else {
+			fmt.Println("DIFFERENT: 이 컴퓨터의 열쇠는 지금 런처가 믿는 열쇠와 달라요. 확인용 열쇠: " + pub)
+		}
+		return
+	}
 	if len(args) == 2 && args[0] == "sign-file" { // 업데이트 정보(update.json) 같은 파일 하나에 서명 → <파일 이름에서 .json 뺀>.sig
 		kb, err := os.ReadFile(keyPath())
 		if err != nil {
