@@ -187,12 +187,17 @@ canvas#fib{position:absolute;inset:0}
 #mapBox.drag{cursor:grabbing}
 #world{position:absolute;left:0;top:0;transform-origin:0 0}
 #world canvas{display:block}
+#mapOld,#mapHl{position:absolute;left:0;top:0;pointer-events:none}#mapOld,#miniOld{opacity:0}
 .core{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;cursor:pointer}
 .core i{display:block;width:13px;height:13px;transform:rotate(45deg);border:1.5px solid #fff3dc;box-shadow:0 0 0 2px rgba(73,48,31,.35),0 2px 4px rgba(0,0,0,.25)}
 .core span{margin-top:3px;white-space:nowrap;font:700 12px var(--serif);color:var(--meok);text-shadow:0 0 3px #f1e5c9,0 0 3px #f1e5c9,0 0 2px #f1e5c9}
-.core.hit i{animation:pulse 1s infinite;border-color:#ffd0c0}
-.core .flag{position:absolute;left:9px;top:-15px;font-size:13px;color:var(--juH);filter:drop-shadow(0 1px 0 #fff)}
-.core.sel i{box-shadow:0 0 0 3px var(--geum),0 2px 4px rgba(0,0,0,.25)}
+.core.own>i{box-shadow:0 0 0 1.5px rgba(73,48,31,.55),0 0 0 3.5px var(--geum),0 2px 5px rgba(0,0,0,.28)}
+.core.hit>i{animation:ring .9s infinite;border-color:#ffd0c0}
+@keyframes ring{0%,100%{box-shadow:0 0 0 1.5px rgba(73,48,31,.55),0 0 0 3.5px #c8382a,0 0 10px 3px rgba(200,56,42,.55)}50%{box-shadow:0 0 0 1.5px rgba(73,48,31,.55),0 0 0 3.5px rgba(200,56,42,.12),0 0 0 0 rgba(200,56,42,0)}}
+.core .ob{position:absolute;left:calc(50% + 6px);top:-12px}.core .ob .em{width:12px;height:12px;box-shadow:0 0 0 1px rgba(255,245,220,.9),0 1px 2px rgba(0,0,0,.3)}.core .ob .em svg{width:8px;height:8px}
+.core u{display:block;width:24px;height:3px;margin-top:4px;background:rgba(73,48,31,.25);box-shadow:0 0 0 1px rgba(241,229,201,.8)}.core u i{display:block;height:100%;width:auto;transform:none;border:0;box-shadow:none}
+.core .flag{position:absolute;right:calc(50% + 7px);top:-15px;font-size:13px;color:var(--juH);filter:drop-shadow(0 1px 0 #fff)}
+.core.sel>i{box-shadow:0 0 0 1.5px #fff3dc,0 0 0 4px var(--sel),0 2px 4px rgba(0,0,0,.25)}
 .mapbtns{position:absolute;right:10px;bottom:10px;display:flex;flex-direction:column;gap:5px}
 .mapbtns .bs{height:32px;width:36px;padding:0;font-size:14px}.mapbtns .bs.w{width:auto;padding:0 8px;font-size:11px}
 #legend{position:absolute;left:10px;bottom:10px;padding:7px 9px;background:rgba(245,236,216,.92);border:1px solid rgba(73,48,31,.4);font:600 11.5px var(--sans);display:flex;flex-direction:column;gap:4px;max-width:150px}
@@ -386,7 +391,7 @@ canvas#fib{position:absolute;inset:0}
 
   <div class="doc cl rc" id="tCard"><svg width="92" height="80" viewBox="0 0 96 80" id="sun"></svg>
     <div class="tx"><div class="cap" id="tCap">탈취 개전까지<span id="tWin"></span></div><div id="tNum">--<em>:</em>--<em>:</em>--</div><div id="tSub">&nbsp;</div></div></div>
-  <div class="doc cl rc" id="mCard"><div id="miniWrap" data-ov="map"><canvas id="miniCv" width="276" height="552"></canvas><div id="miniMk"></div></div>
+  <div class="doc cl rc" id="mCard"><div id="miniWrap" data-ov="map"><canvas id="miniCv" width="276" height="552"></canvas><canvas id="miniOld" width="276" height="552"></canvas><div id="miniMk"></div></div>
     <div id="natMini"><div class="cap">세력 판도<span id="coreCnt"></span></div><div id="natMiniL"></div><div class="tot"><span id="natCnt"></span><a class="cap" style="margin:0;padding:0;letter-spacing:0" data-ov="map"><span style="color:var(--sel);font-weight:700;margin:0">지도 크게 보기 →</span></a></div></div></div>
   <div class="doc cl rc" id="nCard"><div class="cap">승정원 전갈<a data-ov="news" id="newsBtn">전체 보기 <i id="ncnt" hidden>·새 공지</i></a></div><div class="rule" id="homeFeed"></div></div>
   <div id="ver"></div>
@@ -409,7 +414,7 @@ canvas#fib{position:absolute;inset:0}
       <div class="cap">세력 현황</div><div id="nat" class="scroll" style="flex:1.3"></div>
       <div class="cap" style="margin-top:10px">접속 중</div><div id="natPl" class="scroll onl" style="flex:1"></div></div>
     <div id="mapBox">
-      <div id="world"><canvas id="mapCv"></canvas><div id="marks"></div></div>
+      <div id="world"><canvas id="mapCv"></canvas><canvas id="mapOld"></canvas><canvas id="mapHl"></canvas><div id="marks"></div></div>
       <svg id="rose" viewBox="0 0 40 40"><circle cx="20" cy="20" r="17" fill="rgba(245,236,216,.8)" stroke="#982D25" stroke-width="1"/><path d="M20 3 L23 20 L20 37 L17 20Z" fill="#982D25"/><path d="M3 20 L20 17 L37 20 L20 23Z" fill="#49301F" opacity=".55"/><text x="20" y="11.5" font-size="7" text-anchor="middle" fill="#FFF0D0" font-family="KWSerif" font-weight="700">北</text></svg>
       <div id="legend"></div>
       <div class="mapbtns"><button class="bs" id="zin">＋</button><button class="bs" id="zout">－</button><button class="bs w" id="zfit">전체</button></div>
@@ -690,7 +695,8 @@ function prepOld(img){
   const W=img.naturalWidth,H=img.naturalHeight; if(!W) return false;
   const c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d",{willReadFrequently:true});x.drawImage(img,0,0);
   const d=x.getImageData(0,0,W,H).data, n=W*H; let L=new Float32Array(n);
-  for(let i=0;i<n;i++){const r=d[i*4],g=d[i*4+1],b=d[i*4+2];L[i]=(b>Math.max(r,g)+20)?0:1}
+  const wat=new Uint8Array(n);
+  for(let i=0;i<n;i++){const r=d[i*4],g=d[i*4+1],b=d[i*4+2];wat[i]=(b>Math.max(r,g)+20)?1:0;L[i]=1-wat[i]}
   // 두 번 흐리게 해서 바닷가를 매끈하게
   for(let pass=0;pass<2;pass++){const T=new Float32Array(n);const R=2;
     for(let y=0;y<H;y++){let s=0;for(let k=-R;k<=R;k++)s+=L[y*W+Math.min(W-1,Math.max(0,k))];for(let xx=0;xx<W;xx++){T[y*W+xx]=s/(2*R+1);const a=Math.max(0,xx-R),b=Math.min(W-1,xx+R+1);s+=L[y*W+b]-L[y*W+a]}}
@@ -699,7 +705,24 @@ function prepOld(img){
   // 바다에서 땅까지 거리 (8칸까지): 바닷가 선·물결선
   const dist=new Uint8Array(n).fill(255);let q=[];for(let i=0;i<n;i++)if(land[i]){dist[i]=0;q.push(i)}
   for(let step=1;step<=9&&q.length;step++){const nq=[];for(const i of q){const xx=i%W,y=(i/W)|0;for(const j of [xx>0?i-1:-1,xx<W-1?i+1:-1,y>0?i-W:-1,y<H-1?i+W:-1])if(j>=0&&dist[j]===255){dist[j]=step;nq.push(j)}}q=nq}
-  OM.W=W;OM.H=H;OM.land=land;OM.dist=dist;OM.key="";OM.prov=null;return true}
+  // 1.7.3 걷는 값 (반 크기 칸): 짙은 초록·눈 덮인 곳은 산이라 비싸고, 강(흐리기 전엔 물인 땅)은 건너기 비쌈
+  const hw=Math.ceil(W/2),hh=Math.ceil(H/2),hn=hw*hh,mt=new Float32Array(hn),cn=new Uint8Array(hn),riv=new Uint8Array(hn);
+  for(let y=0;y<H;y++)for(let xx=0;xx<W;xx++){const i=y*W+xx,j=(y>>1)*hw+(xx>>1);if(wat[i]){if(land[i])riv[j]=1;continue}
+    const r=d[i*4],g=d[i*4+1],b=d[i*4+2];mt[j]+=(r>170&&g>170&&b>170)?1:Math.min(1,Math.max(0,(175-g)/90));cn[j]++}
+  for(let j=0;j<hn;j++)mt[j]=cn[j]?mt[j]/cn[j]:0;
+  const box=(A,w,h,R)=>{const T=new Float32Array(A.length);for(let y=0;y<h;y++){let s=0,c=0;for(let k=0;k<=R&&k<w;k++){s+=A[y*w+k];c++}for(let x=0;x<w;x++){T[y*w+x]=s/c;if(x+R+1<w){s+=A[y*w+x+R+1];c++}if(x-R>=0){s-=A[y*w+x-R];c--}}}
+    for(let x=0;x<w;x++){let s=0,c=0;for(let k=0;k<=R&&k<h;k++){s+=T[k*w+x];c++}for(let y=0;y<h;y++){A[y*w+x]=s/c;if(y+R+1<h){s+=T[(y+R+1)*w+x];c++}if(y-R>=0){s-=T[(y-R)*w+x];c--}}}};
+  box(mt,hw,hh,3);
+  const cost=new Uint8Array(hn);for(let j=0;j<hn;j++)cost[j]=4+Math.round(8*Math.pow(mt[j],1.5))+(riv[j]?20:0);
+  // 한지 결: 큰 얼룩 + 가로로 긴 섬유 + 잔 티 (매번 같은 무늬)
+  const hsh=(a,b)=>{let h=Math.imul(a,374761393)+Math.imul(b,668265263)|0;h=Math.imul(h^(h>>>13),1274126177);return ((h^(h>>>16))>>>0)/4294967296};
+  const grid=(sx,sy,sd)=>{const gw=Math.ceil(W/sx)+2,gh=Math.ceil(H/sy)+2,g=new Float32Array(gw*gh);for(let k=0;k<g.length;k++)g[k]=hsh(k%gw+sd*7919,((k/gw)|0)+sd*104729);
+    return (x,y)=>{const fx=x/sx,fy=y/sy,ix=fx|0,iy=fy|0,u=fx-ix,v=fy-iy,a=g[iy*gw+ix],b=g[iy*gw+ix+1],c=g[(iy+1)*gw+ix],e=g[(iy+1)*gw+ix+1];return (a*(1-u)+b*u)*(1-v)+(c*(1-u)+e*u)*v}};
+  const big=grid(46,46,1),fib=grid(26,3,2),jx=grid(9,9,3),jy=grid(9,9,4);
+  const tex=new Float32Array(n),jit=new Int8Array(n*2);
+  for(let y=0;y<H;y++)for(let xx=0;xx<W;xx++){const i=y*W+xx;tex[i]=.975+(big(xx,y)-.5)*.06+Math.max(0,fib(xx,y)-.62)*.12+(hsh(xx,y)-.5)*.035;
+    jit[i*2]=Math.round((jx(xx,y)-.5)*5);jit[i*2+1]=Math.round((jy(xx,y)-.5)*5)}
+  OM.W=W;OM.H=H;OM.land=land;OM.dist=dist;OM.cost=cost;OM.tex=tex;OM.jit=jit;OM.key="";OM.prov=null;OM.tkey="";return true}
 function koreaOK(){const b=info&&info.bounds;return b&&b.minX===-4000&&b.minZ===-10000&&b.width===8000&&b.height===20000}
 // ---- 1.7.0 조선 8도: 게임 지도는 위경도와 선형으로 맞물림 (플러그인 MapData). 도마다 고을 자리를 씨앗으로 나누고 경계는 살짝 구불구불하게
 const LONW=124.25, LATN=30.75+20000/(7000/(43-32.95)*2), KX=4508/(132.06333969159274-123.85)*2, KZ=7000/(43-32.95)*2;
@@ -738,43 +761,99 @@ function buildProv(){
   // 도 이름 자리 (가운데)
   const sum=DO.map(()=>[0,0,0]);for(let y=0;y<hh;y++)for(let x=0;x<hw;x++){const p=g[y*hw+x];if(p>=0&&p!==R_KYU){sum[p][0]+=x*2;sum[p][1]+=y*2;sum[p][2]++}}
   OM.prov=g;OM.hw=hw;OM.pc=sum.map(v=>v[2]?[v[0]/v[2],v[1]/v[2]]:null)}
+// 1.7.3 땅길 거리 (산·강은 비쌈). 칸 하나씩 퍼져 나가는 다익스트라 (값이 작은 정수라 통 큐로)
+function dij(srcs,dom,lab){const hw=OM.hw,C=OM.cost,hn=dom.length,D=new Int32Array(hn).fill(2147483647),done=new Uint8Array(hn),NB=128,B=[];for(let k=0;k<NB;k++)B.push([]);
+  let left=0;for(const [c,l,d0] of srcs){const d=d0||0;if(c<0||d>=D[c])continue;D[c]=d;if(lab)lab[c]=l;B[d%NB].push(c);left++}
+  const DX=[1,-1,0,0,1,1,-1,-1],DY=[0,0,1,-1,1,-1,1,-1];
+  for(let cur=0;left>0;cur++){const bk=B[cur%NB];while(bk.length){const c=bk.pop();left--;if(done[c]||D[c]!==cur)continue;done[c]=1;const x=c%hw,y=(c/hw)|0;
+    for(let k=0;k<8;k++){const nx=x+DX[k],ny=y+DY[k];if(nx<0||nx>=hw||ny<0)continue;const j=ny*hw+nx;if(j>=hn||!dom[j]||done[j])continue;
+      const w=k<4?C[c]+C[j]:Math.round((C[c]+C[j])*1.414),nd=cur+w;if(nd<D[j]){D[j]=nd;if(lab)lab[j]=lab[c];B[nd%NB].push(j);left++}}}}
+  return D}
+const terrKey=()=>(info.cores||[]).map(c=>c.name+"@"+Math.round(c.x)+","+Math.round(c.z)).join("|");
+// 영토는 성 자리로 한 번만 나눠 두고(성 주인이 바뀌면 색만 바뀜). 도 규칙은 1.7.1 그대로, 도 안을 나눌 때만 땅길 거리
+function buildTerr(){
+  const {W,H,hw,prov:P,land,jit}=OM, b=info.bounds, bpp=b.width/W, hn=P.length;
+  const cs=(info.cores||[]).map((c,i)=>({i,name:c.name||"",x:(c.x-b.minX)/bpp,y:(c.z-b.minZ)/bpp,p:regionOfCore(c)}));
+  const REG=DO.map((d,r)=>cs.filter(c=>c.p===r));
+  if(!REG[5].length) REG[5]=REG[6].slice();   // 황해도는 평안도 성(평양) 몫
+  const main=cs.filter(c=>c.p>=0&&c.p<8);
+  for(let r=0;r<8;r++) if(!REG[r].length) REG[r]=main;   // 성 없는 도: 붙어 있는 도의 성들이 땅길로 가까운 만큼 나눠 가짐
+  const dom=new Uint8Array(hn);for(let j=0;j<hn;j++)if(P[j]>=0)dom[j]=1;
+  // 성 둘레 땅을 모두 출발점으로 (성이 호수 섬·산꼭대기에 있어도 갇히지 않게), 가까울수록 먼저
+  const seed=c=>{const cx=Math.round(c.x/2),cy=Math.round(c.y/2),o=[];for(let dy=-14;dy<=14;dy++)for(let dx=-14;dx<=14;dx++){const r=Math.hypot(dx,dy);if(r>14)continue;const x=cx+dx,y=cy+dy;if(x>=0&&x<hw&&y>=0&&y*hw+x<hn&&dom[y*hw+x])o.push([y*hw+x,c.i,Math.round(r*6)])}return o};
+  const T=new Int16Array(hn).fill(-1), runs={}, kf=L=>L.map(c=>c.i).join(",");
+  for(let r=0;r<DO.length;r++){const L=REG[r];if(L.length<2)continue;const key=kf(L);if(runs[key])continue;
+    const lab=new Int16Array(hn).fill(-1);
+    if(r===R_MAN&&L.length===2){   // 만주는 두 성이 반씩: 땅길 거리 차이의 가운데 값에서 가름
+      const d1=dij(seed(L[0]),dom),d2=dij(seed(L[1]),dom),df=[];
+      for(let j=0;j<hn;j++)if(P[j]===R_MAN&&d1[j]<2e9&&d2[j]<2e9)df.push(d1[j]-d2[j]);
+      df.sort((a,b)=>a-b);const m=df.length?df[df.length>>1]:0;
+      for(let j=0;j<hn;j++)if(dom[j])lab[j]=(d1[j]<2e9&&d2[j]<2e9)?(d1[j]-d2[j]<=m?L[0].i:L[1].i):-1;
+    } else dij(L.flatMap(seed),dom,lab);
+    runs[key]=lab}
+  for(let j=0;j<hn;j++){const p=P[j];if(p<0)continue;const L=REG[p];if(!L.length)continue;
+    if(L.length===1){T[j]=L[0].i;continue}
+    let t=runs[kf(L)][j];
+    if(t<0){const x=(j%hw)*2,y=((j/hw)|0)*2;let bd=1e18;for(const c of L){const q=(x-c.x)**2+(y-c.y)**2;if(q<bd){bd=q;t=c.i}}}   // 땅길이 끊긴 곳은 곧은 거리로
+    T[j]=t}
+  // 물가 칸도 옆 영토로 채워 둠 (흔들어 읽을 때 호수·강가에 빈 칸이 안 생기게)
+  const TT=T.slice();for(let it=0;it<3;it++){const S2=TT.slice();for(let j=0;j<hn;j++){if(S2[j]>=0)continue;const x=j%hw;if(land[Math.min(H-1,((j/hw)|0)*2)*W+Math.min(W-1,x*2)])continue;for(const k of [x>0?j-1:-1,x<hw-1?j+1:-1,j-hw,j+hw])if(k>=0&&k<hn&&S2[k]>=0){TT[j]=S2[k];break}}}
+  // 온 크기 픽셀마다 영토 번호 (살짝 흔들어 계단 없이 조금 불규칙한 경계)
+  const n=W*H, tp=new Int16Array(n).fill(-1);
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x;if(!land[i])continue;
+    const sx=Math.min(W-1,Math.max(0,x+jit[i*2])),sy=Math.min(H-1,Math.max(0,y+jit[i*2+1]));let t=TT[(sy>>1)*hw+(sx>>1)];if(t<0)t=TT[(y>>1)*hw+(x>>1)];tp[i]=t}
+  // 영토 목록 (성 소유와 따로 둠): 이름·걸친 도·넓이
+  const tot=DO.map(()=>0),per=cs.map(()=>DO.map(()=>0)),cnt=cs.map(()=>0);let all=0;
+  for(let j=0;j<hn;j++){const p=P[j];if(p<0)continue;tot[p]++;all++;const t=T[j];if(t>=0){per[t][p]++;cnt[t]++}}
+  OM.terr=cs.map(c=>{const ds=DO.map((d,p)=>({p,k:per[c.i][p]})).filter(o=>o.k>0&&o.k>=cnt[c.i]*.04&&o.p!==R_KYU).sort((a,b)=>b.k-a.k);
+    return {id:"t"+c.i,core:c.i,name:c.name+" 권역",dos:ds.map(o=>DO[o.p][0]+(o.k<tot[o.p]*.96?" 일부":"")).concat(per[c.i][R_KYU]?["규슈"]:[]),
+      share:all?cnt[c.i]/all:0,provs:ds.map(o=>o.p).concat(per[c.i][R_KYU]?[R_KYU]:[]),owner:""}});
+  OM.T=T;OM.tp=tp;OM.tkey=terrKey()}
 function paintOld(){
-  if(!OM.land||!info||!info.bounds) return; const {W,H,land,dist}=OM, b=info.bounds, bpp=b.width/W, n=W*H, kor=koreaOK();
-  if(kor&&!OM.prov) buildProv();
-  const cores=(info.cores||[]).map(c=>({x:(c.x-b.minX)/bpp,y:(c.z-b.minZ)/bpp,o:c.owner||"",p:kor?regionOfCore(c):-1}));
-  // 땅마다 맡는 성들
-  const REG=DO.map((d,r)=>cores.filter(c=>c.p===r));
-  if(kor){ if(!REG[5].length) REG[5]=REG[6].slice();   // 황해도는 평안도 성(평양) 몫
-    const main=cores.filter(c=>c.p>=0&&c.p<8);
-    for(let r=0;r<8;r++) if(!REG[r].length) REG[r]=main;   // 성 없는 도: 붙어 있는 도의 성들이 가까운 만큼 나눠 가짐
-  }
-  const paper=[236,224,196], sea=[226,212,178], ink=[58,40,28];
-  const cols={}; for(const c of cores) if(c.o&&!cols[c.o]) cols[c.o]=hex(ncol(c.o));
-  // 도마다 주인: 그 도의 성이 모두 같은 세력이면 그 색, 여럿이면 가까운 성 주인 색으로 나눔, 하나도 없으면 비움
-  const seen=DO.map(()=>new Set());
-  const out=new ImageData(W,H), o=out.data, own=new Array(n);
-  const R=2300/bpp,R2=R*R;
-  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x,p=i*4;
-    if(!land[i]){const dd=dist[i];let c=sea;if(dd===6||dd===7){c=[198,180,146]}else if(((x+y*2)%13)===0)c=[220,205,170];o[p]=c[0];o[p+1]=c[1];o[p+2]=c[2];o[p+3]=255;continue}
-    let who="";
-    if(kor){const pv=OM.prov[(y>>1)*OM.hw+(x>>1)];if(pv>=0){const L=REG[pv];let k=null;if(L.length===1)k=L[0];else if(L.length){const wx=x+(vnoise(x/45,y/45)-.5)*70,wy=y+(vnoise(x/45+9,y/45+9)-.5)*70,man=pv===R_MAN;let bd=1e18;for(const c of L){const q=man?Math.abs(wx-c.x):(wx-c.x)**2+(wy-c.y)**2;if(q<bd){bd=q;k=c}}}   // 만주는 동서로 반씩
-      if(k){who=k.o;seen[pv].add(k.o||"·")}}}
-    else{let bd=R2;for(const c of cores){const q=(x-c.x)**2+(y-c.y)**2;if(q<bd){bd=q;who=c.o}}}
-    own[i]=who; let c=paper; if(who){const cc=cols[who],f=.5;c=[paper[0]*(1-f)+cc[0]*f,paper[1]*(1-f)+cc[1]*f,paper[2]*(1-f)+cc[2]*f]}
-    o[p]=c[0];o[p+1]=c[1];o[p+2]=c[2];o[p+3]=255}
-  for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){const i=y*W+x,p=i*4;if(!land[i])continue;
-    if(!land[i-1]||!land[i+1]||!land[i-W]||!land[i+W]){o[p]=ink[0];o[p+1]=ink[1];o[p+2]=ink[2];continue}
-    if(kor){const a=OM.prov[(y>>1)*OM.hw+(x>>1)],r=OM.prov[(y>>1)*OM.hw+((x+1)>>1)],d=OM.prov[((y+1)>>1)*OM.hw+(x>>1)];
-      if(a>=0&&((r>=0&&r!==a)||(d>=0&&d!==a))){if(((x+y)%7)<4){o[p]=110;o[p+1]=82;o[p+2]=56}continue}}   // 도 경계: 점선
-    if(own[i]&&((own[i+1]&&own[i+1]!==own[i])||(own[i+W]&&own[i+W]!==own[i]))){o[p]=95;o[p+1]=62;o[p+2]=40}}
-  const cv=$("mapCv");cv.width=W;cv.height=H;const cx=cv.getContext("2d");cx.putImageData(out,0,0);
-  if(kor&&OM.pc){cx.textAlign="center";cx.textBaseline="middle";cx.font=`800 ${Math.round(W/17)}px KWSerif, serif`;cx.fillStyle="rgba(58,40,28,.30)";
+  if(!OM.land||!info||!info.bounds) return; const {W,H,land,dist,tex}=OM, b=info.bounds, bpp=b.width/W, n=W*H, kor=koreaOK(), cores=info.cores||[];
+  if(kor){ if(!OM.prov) buildProv(); if(OM.tkey!==terrKey()) buildTerr() } else OM.terr=null;
+  const paper=[236,224,196], sea=[226,212,178], ink=[58,40,28], brown=[78,50,30];
+  const NAT=[...new Set(cores.map(c=>c.owner).filter(Boolean))], ni={}; NAT.forEach((o,k)=>ni[o]=k);
+  const cols=NAT.map(o=>hex(ncol(o))), band=NAT.map(o=>hex(ncol(o)).map((v,i)=>v*.82+ink[i]*.18));
+  // 영토 주인 = 그 영토에 딸린 성의 주인 (영토 데이터는 따로 두고 주인만 옮겨 적음)
+  let tOwn=null; if(kor){OM.terr.forEach(t=>t.owner=(cores[t.core]&&cores[t.core].owner)||"");tOwn=OM.terr.map(t=>t.owner?ni[t.owner]:-1)}
+  const own=new Int16Array(n).fill(-1), R2=(2300/bpp)**2, cx0=cores.map(c=>[(c.x-b.minX)/bpp,(c.z-b.minZ)/bpp,c.owner?ni[c.owner]:-1]);
+  for(let i=0;i<n;i++){if(!land[i])continue;
+    if(kor){const t=OM.tp[i];own[i]=t>=0?tOwn[t]:-1}
+    else{const x=i%W,y=(i/W)|0;let bd=R2,w=-1;for(const c of cx0){const q=(x-c[0])**2+(y-c[1])**2;if(q<bd){bd=q;w=c[2]}}own[i]=w}}
+  // 국경: 주인이 다른 두 땅 사이 한 줄(갈색 1px), 그 안쪽 2px 은 나라 색 띠
+  const bd=new Uint8Array(n).fill(255); let q=[];
+  for(let y=0;y<H-1;y++)for(let x=0;x<W-1;x++){const i=y*W+x;if(!land[i])continue;const a=own[i];
+    if((land[i+1]&&own[i+1]!==a)||(land[i+W]&&own[i+W]!==a)){bd[i]=0;q.push(i)}}
+  for(let st=1;st<=2&&q.length;st++){const nq=[];for(const i of q){const x=i%W;for(const j of [x>0?i-1:-1,x<W-1?i+1:-1,i-W,i+W])if(j>=0&&j<n&&land[j]&&bd[j]===255){bd[j]=st;nq.push(j)}}q=nq}
+  const out=new ImageData(W,H), o=out.data;
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x,p=i*4,t=tex[i];let c;
+    if(!land[i]){const dd=dist[i];c=sea;if(dd===6||dd===7)c=[198,180,146];else if(((x+y*2)%13)===0)c=[220,205,170]}
+    else{const w=own[i],e=bd[i];
+      if(e===0)c=brown;
+      else if(w>=0&&e<=2)c=band[w];
+      else if(w>=0){const cc=cols[w],f=.6;c=[paper[0]*(1-f)+cc[0]*f,paper[1]*(1-f)+cc[1]*f,paper[2]*(1-f)+cc[2]*f]}
+      else c=paper;
+      if(x>0&&y>0&&x<W-1&&y<H-1&&(!land[i-1]||!land[i+1]||!land[i-W]||!land[i+W]))c=ink;   // 바닷가 선
+      else if(kor&&e>2&&OM.prov){const hw=OM.hw,A=OM.prov[(y>>1)*hw+(x>>1)],r=OM.prov[(y>>1)*hw+((x+1)>>1)],d=OM.prov[((y+1)>>1)*hw+(x>>1)];
+        if(A>=0&&((r>=0&&r!==A)||(d>=0&&d!==A))&&((x+y)%7)<4)c=[c[0]*.62+110*.38,c[1]*.62+82*.38,c[2]*.62+56*.38]}}   // 도 경계: 옅은 점선
+    o[p]=c[0]*t;o[p+1]=c[1]*t;o[p+2]=c[2]*t;o[p+3]=255}
+  const cv=$("mapCv"), fade=!!OM.key&&cv.width===W;
+  if(fade){const old=$("mapOld");old.width=W;old.height=H;old.getContext("2d").drawImage(cv,0,0);xfade(old)}
+  cv.width=W;cv.height=H;const cx=cv.getContext("2d");cx.putImageData(out,0,0);
+  if(kor&&OM.pc){cx.textAlign="center";cx.textBaseline="middle";cx.font=`800 ${Math.round(W/17)}px KWSerif, serif`;cx.fillStyle="rgba(52,34,22,.42)";
     const nudge={"만주":[0,.3],"경기도":[-1.0,.05],"충청도":[.05,-.2],"강원도":[.15,-.15],"함경도":[.05,-.2],"평안도":[-.15,.05],"전라도":[-.55,-.6],"경상도":[.1,-.15],"황해도":[0,.1]};
     DO.forEach((d,p)=>{const c=OM.pc[p];if(!c||p===R_KYU)return;if(p===R_JEJU){cx.save();cx.font=`800 ${Math.round(W/30)}px KWSerif, serif`;cx.fillText("제주",c[0],c[1]+W/22);cx.restore();return}const nd=nudge[d[0]]||[0,0],fs=W/17;cx.fillText(d[0],c[0]+nd[0]*fs*3,c[1]+nd[1]*fs*3)})}
   // 홈 작은 지도: 한반도 쪽만 잘라서
-  const m=$("miniCv"),mx=m.getContext("2d"),y0=Math.round(H*.132),hh=Math.round(H*.8);mx.clearRect(0,0,m.width,m.height);mx.imageSmoothingQuality="high";mx.drawImage(cv,0,y0,W,hh,0,0,m.width,m.height);
-  OM.key=ownKey(); OM.doOwn=kor?seen.map(st=>({one:st.size===1&&!st.has("·")?[...st][0]:null})):null;
+  const m=$("miniCv"),mx=m.getContext("2d"),y0=Math.round(H*.132),hh=Math.round(H*.8);
+  if(fade){const mo=$("miniOld");mo.width=m.width;mo.height=m.height;mo.getContext("2d").drawImage(m,0,0);xfade(mo)}
+  mx.clearRect(0,0,m.width,m.height);mx.imageSmoothingQuality="high";mx.drawImage(cv,0,y0,W,hh,0,0,m.width,m.height);
+  OM.key=ownKey(); OM.hlT=-2;
+  // 도마다 한 세력이 다 가졌는지 (세력 판도의 'N도')
+  OM.doOwn=kor?DO.map((d,p)=>{const st=new Set();OM.terr.forEach(t=>{if(t.provs.includes(p))st.add(t.owner||"·")});return {one:st.size===1&&!st.has("·")?[...st][0]:null}}):null;
 }
+// 주인이 바뀌면 옛 그림을 위에 얹어 0.8초 동안 사라지게
+function xfade(el){el.style.transition="none";el.style.opacity="1";void el.offsetWidth;el.style.transition="opacity .8s ease";el.style.opacity="0"}
 const ownKey=()=>(info.cores||[]).map(c=>c.owner).join("|")+"#"+(info.nations||[]).map(n=>n.name+n.color).join("|");
 function paintIfChanged(){if(OM.land&&OM.key!==ownKey()){paintOld();drawMarks();drawHomeNat()}else if(OM.land)drawMarks()}
 $("mapimg").onload=()=>{if(prepOld($("mapimg"))){paintOld();fitted=false;fitMap(true);drawMarks();drawHomeNat()}};
@@ -800,16 +879,28 @@ $("mapBox").addEventListener("pointerup",()=>{drag=null;$("mapBox").classList.re
 const mid=()=>{const p=$("mapBox");return[p.clientWidth/2,p.clientHeight/2]};
 $("zin").onclick=()=>zoomAt(1.5,...mid()); $("zout").onclick=()=>zoomAt(1/1.5,...mid()); $("zfit").onclick=()=>fitMap(true);
 let selCore=-1;
+// 1.7.3 영토 위에 마우스를 올리면 그 권역을 밝히고 정보를 보여 줌
+function hlTerr(t){if(!OM.tp||OM.hlT===t)return;OM.hlT=t;const c=$("mapHl"),W=OM.W,H=OM.H;if(c.width!==W||c.height!==H){c.width=W;c.height=H}const x=c.getContext("2d");x.clearRect(0,0,W,H);if(t<0)return;
+  const im=x.createImageData(W,H),d=im.data,tp=OM.tp;for(let i=0;i<tp.length;i++)if(tp[i]===t){d[i*4]=255;d[i*4+1]=247;d[i*4+2]=222;d[i*4+3]=78}x.putImageData(im,0,0)}
+$("mapBox").addEventListener("pointermove",e=>{if(drag||!OM.tp||!OM.terr||e.target.closest(".core,.mapbtns,#cdet,#legend")){return}
+  const r=$("mapBox").getBoundingClientRect(),mx=(e.clientX-r.left)/S,my=(e.clientY-r.top)/S,px=Math.floor((mx-view.x)/view.k),py=Math.floor((my-view.y)/view.k);
+  const t=px>=0&&py>=0&&px<OM.W&&py<OM.H?OM.tp[py*OM.W+px]:-1, T=t>=0?OM.terr[t]:null;
+  if(!T){hlTerr(-1);$("tip").style.display="none";return}
+  hlTerr(t);const c=(info.cores||[])[T.core]||{},col=T.owner?inkTone(ncol(T.owner)):"#6a5236";
+  $("tip").style.display="block";$("tip").style.left=(mx+14)+"px";$("tip").style.top=(my+14)+"px";
+  $("tip").innerHTML=`<b>${esc(T.name)}</b> · <span style="color:${col};font-weight:700">${esc(T.owner||"주인 없음")}</span><br><span style="color:#6a5236">${esc(T.dos.join(" · "))} · 온 땅의 ${Math.max(1,Math.round(T.share*100))}%</span>${c.attacked?`<br><span style="color:var(--juH);font-weight:700">⚑ ${esc(c.name)} 성이 공격받는 중</span>`:""}`});
+$("mapBox").addEventListener("pointerleave",()=>{hlTerr(-1);$("tip").style.display="none"});
 function drawMarks(){
   if(!info||!info.bounds) return; drawSides(); if(!OM.W) return;
   const b=info.bounds, bpp=b.width/OM.W;
   $("marks").innerHTML=(info.cores||[]).map((c,i)=>{const x=(c.x-b.minX)/bpp, y=(c.z-b.minZ)/bpp, cl=c.owner?ncol(c.owner):"#8a7a62";
-    return `<div class="core${c.attacked?" hit":""}${i===selCore?" sel":""}" data-i="${i}" style="left:${x}px;top:${y}px"><i style="background:${cl}"></i>${c.attacked?`<b class="flag">⚑</b>`:""}<span>${esc(c.name)}</span></div>`}).join("");
+    const pct=c.maxHp?Math.max(0,Math.min(100,Math.round(c.hp*100/c.maxHp))):100;   // 1.7.3 차지한 성은 금테, 공격받는 성은 붉게 깜빡, 옆에 주인 표식·성벽 기운
+    return `<div class="core${c.owner?" own":""}${c.attacked?" hit":""}${i===selCore?" sel":""}" data-i="${i}" style="left:${x}px;top:${y}px"><i style="background:${cl}"></i>${c.owner?`<b class="ob">${emb(c.owner,cl)}</b>`:""}${c.attacked?`<b class="flag">⚑</b>`:""}<span>${esc(c.name)}</span>${pct<100?`<u><i style="width:${pct}%;background:${pct<35?"#b83c2e":pct<70?"#c5a04d":"#24695d"}"></i></u>`:""}</div>`}).join("");
   document.querySelectorAll(".core").forEach(m=>{
     m.onclick=e=>{e.stopPropagation();showCore(+m.dataset.i)};
-    m.onpointerenter=()=>{const c=info.cores[+m.dataset.i];$("tip").style.display="block";$("tip").innerHTML=`<b>${esc(c.name)}</b> · ${esc(c.owner||"주인 없음")}${c.attacked?`<br><span style="color:var(--juH);font-weight:700">공격받는 중!</span>`:""}`};
+    m.onpointerenter=()=>{const c=info.cores[+m.dataset.i];$("tip").style.display="block";const Tt=OM.terr&&OM.terr[+m.dataset.i];hlTerr(Tt?+m.dataset.i:-1);$("tip").innerHTML=`<b>${esc(c.name)}</b> · ${esc(c.owner||"주인 없음")}${Tt?`<br><span style="color:#6a5236">${esc(Tt.name)}: ${esc(Tt.dos.join(" · "))}</span>`:""}${c.attacked?`<br><span style="color:var(--juH);font-weight:700">공격받는 중!</span>`:""}`};
     m.onpointermove=e=>{const r=$("mapBox").getBoundingClientRect();$("tip").style.left=((e.clientX-r.left)/S+14)+"px";$("tip").style.top=((e.clientY-r.top)/S+14)+"px"};
-    m.onpointerleave=()=>$("tip").style.display="none";
+    m.onpointerleave=()=>{$("tip").style.display="none";hlTerr(-1)};
   });
   const nat=natStats(); $("legend").innerHTML=nat.length?nat.map(n=>`<div><i style="background:${n.c}"></i>${esc(n.n)}</div>`).join("")+`<div><i style="background:#ece0c4;border:1px solid #9a8a6c"></i>주인 없음</div><div><i style="background:var(--juH);transform:rotate(45deg);width:9px;height:9px;margin:0 1.5px"></i>공격받는 성</div>`:"";
   // 홈 작은 지도의 성 표시 (공격받는 성은 깜빡임)
