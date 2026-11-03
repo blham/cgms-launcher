@@ -678,10 +678,11 @@ function warTick(){
 setInterval(()=>{if(info)warTick()},1000);
 // ---------------- 홈: 세력 판도
 function natStats(){const cores=info.cores||[], ps=info.players||[];
-  return (info.nations||[]).map(n=>({n:n.name,t:typeof n.tier==="string"?n.tier:"",p:typeof n.policy==="string"?n.policy:"",c:ncol(n.name),cores:cores.filter(x=>x.owner===n.name).length,on:ps.filter(p=>p.nation===n.name).length})).sort((a,b)=>b.cores-a.cores||b.on-a.on)}
+  const dos=n=>OM.doOwn?OM.doOwn.slice(0,8).filter(d=>d.one===n).length:0;
+  return (info.nations||[]).map(n=>({n:n.name,t:typeof n.tier==="string"?n.tier:"",p:typeof n.policy==="string"?n.policy:"",c:ncol(n.name),cores:cores.filter(x=>x.owner===n.name).length,on:ps.filter(p=>p.nation===n.name).length,dos:dos(n.name)})).sort((a,b)=>b.cores-a.cores||b.on-a.on)}
 function drawHomeNat(){const nat=natStats(),cores=info.cores||[],free=cores.filter(x=>!x.owner).length;
   $("coreCnt").textContent=`성 ${cores.length}개`; $("natCnt").textContent=`세력 ${nat.length} · 빈 성 ${free}`;
-  $("natMiniL").innerHTML=nat.length?nat.slice(0,4).map(n=>`<div class="nm">${emb(n.n,n.c)}<div><b>${esc(n.n)}</b><small>${esc(n.t||"세력")}${n.on?` · 접속 ${n.on}`:""}</small></div><em><strong>${n.cores}</strong>성</em></div>`).join(""):`<div class="empty">아직 세력이 없어요</div>`}
+  $("natMiniL").innerHTML=nat.length?nat.slice(0,4).map(n=>`<div class="nm">${emb(n.n,n.c)}<div><b>${esc(n.n)}</b><small>${esc(n.t||"세력")}${n.dos?` · ${n.dos}도`:""}${n.on?` · 접속 ${n.on}`:""}</small></div><em><strong>${n.cores}</strong>성</em></div>`).join(""):`<div class="empty">아직 세력이 없어요</div>`}
 
 // ---------------- 고지도: 서버 지형 그림(/api/map.png)에서 바다·땅을 가려 한지 위 옛 지도처럼 다시 그림. 세력 땅은 가장 가까운 성의 주인 색
 const OM={W:0,H:0,land:null,coast:null,wave:null,key:""};
@@ -698,36 +699,73 @@ function prepOld(img){
   // 바다에서 땅까지 거리 (8칸까지): 바닷가 선·물결선
   const dist=new Uint8Array(n).fill(255);let q=[];for(let i=0;i<n;i++)if(land[i]){dist[i]=0;q.push(i)}
   for(let step=1;step<=9&&q.length;step++){const nq=[];for(const i of q){const xx=i%W,y=(i/W)|0;for(const j of [xx>0?i-1:-1,xx<W-1?i+1:-1,y>0?i-W:-1,y<H-1?i+W:-1])if(j>=0&&dist[j]===255){dist[j]=step;nq.push(j)}}q=nq}
-  OM.W=W;OM.H=H;OM.land=land;OM.dist=dist;OM.key="";return true}
+  OM.W=W;OM.H=H;OM.land=land;OM.dist=dist;OM.key="";OM.prov=null;return true}
 function koreaOK(){const b=info&&info.bounds;return b&&b.minX===-4000&&b.minZ===-10000&&b.width===8000&&b.height===20000}
-function paintOld(){
-  if(!OM.land||!info||!info.bounds) return; const {W,H,land,dist}=OM, b=info.bounds, bpp=b.width/W, n=W*H;
-  const cores=(info.cores||[]).map(c=>({x:(c.x-b.minX)/bpp,y:(c.z-b.minZ)/bpp,o:c.owner||""}));
-  const R=2300/bpp, R2=R*R, kor=koreaOK();
+// ---- 1.7.0 조선 8도: 게임 지도는 위경도와 선형으로 맞물림 (플러그인 MapData). 도마다 고을 자리를 씨앗으로 나누고 경계는 살짝 구불구불하게
+const LONW=124.25, LATN=30.75+20000/(7000/(43-32.95)*2), KX=4508/(132.06333969159274-123.85)*2, KZ=7000/(43-32.95)*2;
+const lonOf=x=>LONW+(x+4000.5)/KX, latOf=z=>LATN-(z+10000.5)/KZ;
+const DO=[
+ ["경기도",[[37.57,126.98],[37.26,127.03],[37.46,126.71],[37.97,126.55],[37.76,126.78],[37.27,127.44],[37.89,127.2],[36.99,127.09],[37.83,127.51],[37.66,126.45],[37.1,126.9]]],
+ ["강원도",[[37.88,127.73],[37.34,127.92],[37.75,128.88],[38.2,128.59],[37.16,128.99],[37.45,129.17],[39.15,127.44],[38.15,127.31],[38.4,127.3],[38.95,127.88],[38.6,128.3],[37.38,128.66],[37.18,128.46],[38.75,127.6],[37.6,128.3]]],
+ ["충청도",[[36.64,127.49],[36.35,127.38],[36.81,127.15],[36.46,127.12],[36.99,127.93],[36.6,126.66],[36.78,126.45],[36.33,126.61],[36.98,128.37],[36.3,127.57],[36.19,127.1],[36.1,127.8]]],
+ ["전라도",[[35.82,127.15],[35.16,126.85],[34.81,126.39],[34.76,127.66],[34.95,127.49],[35.97,126.74],[35.41,127.39],[36.0,127.66],[33.5,126.53],[33.25,126.56],[34.6,127.28],[34.57,126.6],[35.3,126.5],[35.6,127.0]]],
+ ["경상도",[[35.18,129.08],[35.87,128.6],[35.54,129.31],[35.86,129.22],[36.57,128.73],[36.02,129.34],[35.18,128.11],[35.23,128.68],[36.41,128.16],[36.81,128.62],[35.69,127.91],[36.99,129.4],[36.14,128.11],[35.07,127.75],[36.4,129.3]]],
+ ["황해도",[[38.04,125.71],[38.51,125.76],[38.67,125.78],[37.93,125.36],[37.91,126.16],[38.35,125.48],[38.24,125.1],[38.33,126.39],[38.68,126.67],[38.1,126.0]]],
+ ["평안도",[[39.03,125.75],[40.1,124.4],[39.62,125.66],[39.69,125.21],[40.97,126.59],[39.81,125.8],[40.17,126.28],[38.73,125.4],[39.75,126.3],[41.15,126.29],[40.83,125.8],[39.43,125.93],[39.25,126.25],[40.4,125.1],[41.4,127.0]]],
+ ["함경도",[[39.92,127.54],[41.8,129.78],[40.67,129.2],[41.4,128.18],[42.44,129.75],[42.3,130.3],[40.0,128.3],[40.46,128.91],[41.08,128.3],[40.38,127.25],[39.5,127.25],[42.23,129.21],[42.0,128.06],[41.6,129.6],[41.0,127.6],[40.9,129.6]]],
+ ["규슈",[[33.0,131.0],[33.6,130.4],[32.8,130.7],[31.6,130.6],[33.2,131.6],[32.3,131.2]]]];
+function vnoise(x,y){const f=(a,b)=>{let h=Math.sin(a*127.1+b*311.7)*43758.5453;return h-Math.floor(h)};const xi=Math.floor(x),yi=Math.floor(y),xf=x-xi,yf=y-yi,u=xf*xf*(3-2*xf),v=yf*yf*(3-2*yf);
+  return (f(xi,yi)*(1-u)+f(xi+1,yi)*u)*(1-v)+(f(xi,yi+1)*(1-u)+f(xi+1,yi+1)*u)*v}
+function provAt(lat,lon){   // 가장 가까운 고을의 도 (경도는 위도에 맞춰 줄임)
+  const w1=vnoise(lon*3.1,lat*3.1)-.5, w2=vnoise(lon*3.1+40,lat*3.1+40)-.5, w3=vnoise(lon*9,lat*9)-.5;
+  const la=lat+w1*.22+w3*.06, lo=lon+w2*.26+w3*.06, k=Math.cos(lat*Math.PI/180);
+  let best=-1,bd=1e9; for(let p=0;p<DO.length;p++)for(const q of DO[p][1]){const dy=la-q[0],dx=(lo-q[1])*k,d=dx*dx+dy*dy;if(d<bd){bd=d;best=p}} return best}
+function buildProv(){
+  const {W,H,land}=OM, b=info.bounds, bpp=b.width/W, hw=Math.ceil(W/2), hh=Math.ceil(H/2), g=new Int8Array(hw*hh).fill(-1);
   const toPx=(x,z)=>[(x-b.minX)/bpp,(z-b.minZ)/bpp];
   const [sx,sy]=toPx(-3794,-3024),[bx,by]=toPx(185,-5672),[tx,ty]=toPx(1240,-3920),[,ey]=toPx(0,-760);
+  for(let y=0;y<hh;y++)for(let x=0;x<hw;x++){const X=x*2,Y=y*2;if(!land[Math.min(H-1,Y)*W+Math.min(W-1,X)])continue;
+    const lon=lonOf(b.minX+X*bpp),lat=latOf(b.minZ+Y*bpp);
+    if(lon>129.6&&lat<34.6){if(lon>129.9)g[y*hw+x]=8;continue}   // 규슈 (아소)
+    const line=(X<bx?sy+(by-sy)*(X-sx)/(bx-sx):by+(ty-by)*(X-bx)/(tx-bx))+(vnoise(X/38,3.3)-.5)*34+(vnoise(X/11,7.7)-.5)*9;if(!((Y>line-4||X>tx)&&!(X>tx&&Y<ey)))continue;   // 압록강·두만강 너머는 칠하지 않음
+    g[y*hw+x]=provAt(lat,lon)}
+  // 도 이름 자리 (가운데)
+  const sum=DO.map(()=>[0,0,0]);for(let y=0;y<hh;y++)for(let x=0;x<hw;x++){const p=g[y*hw+x];if(p>=0&&p<8){sum[p][0]+=x*2;sum[p][1]+=y*2;sum[p][2]++}}
+  OM.prov=g;OM.hw=hw;OM.pc=sum.map(v=>v[2]?[v[0]/v[2],v[1]/v[2]]:null)}
+function paintOld(){
+  if(!OM.land||!info||!info.bounds) return; const {W,H,land,dist}=OM, b=info.bounds, bpp=b.width/W, n=W*H, kor=koreaOK();
+  if(kor&&!OM.prov) buildProv();
+  const cores=(info.cores||[]).map(c=>({x:(c.x-b.minX)/bpp,y:(c.z-b.minZ)/bpp,o:c.owner||"",p:kor?provAt(latOf(c.z),lonOf(c.x)):-1}));
+  if(kor) cores.forEach(c=>{if(lonOf((c.x*bpp)+b.minX)>129.6&&latOf(c.y*bpp+b.minZ)<34.6)c.p=8});
   const paper=[236,224,196], sea=[226,212,178], ink=[58,40,28];
   const cols={}; for(const c of cores) if(c.o&&!cols[c.o]) cols[c.o]=hex(ncol(c.o));
-  const out=new ImageData(W,H), o=out.data, own=new Int16Array(n).fill(-1);
+  // 도마다 주인: 그 도의 성이 모두 같은 세력이면 그 색, 여럿이면 가까운 성 주인 색으로 나눔, 하나도 없으면 비움
+  const pOwn=DO.map((d,p)=>{const os=cores.filter(c=>c.p===p&&c.o);return {list:os,one:os.length&&os.every(c=>c.o===os[0].o)?os[0].o:null}});
+  const out=new ImageData(W,H), o=out.data, own=new Array(n);
+  const R=2300/bpp,R2=R*R;
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x,p=i*4;
     if(!land[i]){const dd=dist[i];let c=sea;if(dd===6||dd===7){c=[198,180,146]}else if(((x+y*2)%13)===0)c=[220,205,170];o[p]=c[0];o[p+1]=c[1];o[p+2]=c[2];o[p+3]=255;continue}
-    let best=-1,bd=R2;for(let k=0;k<cores.length;k++){const dx=x-cores[k].x,dy=y-cores[k].y,q=dx*dx+dy*dy;if(q<bd){bd=q;best=k}}
-    let inK=true; if(kor){const line=x<bx?sy+(by-sy)*(x-sx)/(bx-sx):by+(ty-by)*(x-bx)/(tx-bx);inK=(y>line-4||x>tx)&&!(x>tx&&y<ey)}
-    let c=paper;
-    if(best>=0&&inK&&cores[best].o){own[i]=best;const cc=cols[cores[best].o],f=Math.min(1,(R-Math.sqrt(bd))/(R*.12))*.5;c=[paper[0]*(1-f)+cc[0]*f,paper[1]*(1-f)+cc[1]*f,paper[2]*(1-f)+cc[2]*f]}
+    let who="";
+    if(kor){const pv=OM.prov[(y>>1)*OM.hw+(x>>1)];if(pv>=0){const po=pOwn[pv];if(po.one)who=po.one;else if(po.list.length){const wx=x+(vnoise(x/45,y/45)-.5)*70,wy=y+(vnoise(x/45+9,y/45+9)-.5)*70;let bd=1e18;for(const c of po.list){const q=(wx-c.x)**2+(wy-c.y)**2;if(q<bd){bd=q;who=c.o}}}}}
+    else{let bd=R2;for(const c of cores){const q=(x-c.x)**2+(y-c.y)**2;if(q<bd){bd=q;who=c.o}}}
+    own[i]=who; let c=paper; if(who){const cc=cols[who],f=.5;c=[paper[0]*(1-f)+cc[0]*f,paper[1]*(1-f)+cc[1]*f,paper[2]*(1-f)+cc[2]*f]}
     o[p]=c[0];o[p+1]=c[1];o[p+2]=c[2];o[p+3]=255}
   for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){const i=y*W+x,p=i*4;if(!land[i])continue;
     if(!land[i-1]||!land[i+1]||!land[i-W]||!land[i+W]){o[p]=ink[0];o[p+1]=ink[1];o[p+2]=ink[2];continue}
-    const a=own[i];if(a>=0&&((own[i+1]>=0&&cores[own[i+1]].o!==cores[a].o)||(own[i+W]>=0&&cores[own[i+W]].o!==cores[a].o))){o[p]=95;o[p+1]=62;o[p+2]=40}}
-  const cv=$("mapCv");cv.width=W;cv.height=H;cv.getContext("2d").putImageData(out,0,0);
+    if(kor){const a=OM.prov[(y>>1)*OM.hw+(x>>1)],r=OM.prov[(y>>1)*OM.hw+((x+1)>>1)],d=OM.prov[((y+1)>>1)*OM.hw+(x>>1)];
+      if(a>=0&&((r>=0&&r!==a)||(d>=0&&d!==a))){if(((x+y)%7)<4){o[p]=110;o[p+1]=82;o[p+2]=56}continue}}   // 도 경계: 점선
+    if(own[i]&&((own[i+1]&&own[i+1]!==own[i])||(own[i+W]&&own[i+W]!==own[i]))){o[p]=95;o[p+1]=62;o[p+2]=40}}
+  const cv=$("mapCv");cv.width=W;cv.height=H;const cx=cv.getContext("2d");cx.putImageData(out,0,0);
+  if(kor&&OM.pc){cx.textAlign="center";cx.textBaseline="middle";cx.font=`800 ${Math.round(W/17)}px KWSerif, serif`;cx.fillStyle="rgba(58,40,28,.30)";
+    const nudge={"경기도":[-1.0,.05],"충청도":[-.1,.1],"강원도":[.15,-.15],"함경도":[.05,-.2],"평안도":[-.15,.05],"전라도":[0,-.85],"경상도":[.1,-.15],"황해도":[0,.1]};
+    DO.forEach((d,p)=>{const c=OM.pc[p];if(!c||p>7)return;const nd=nudge[d[0]]||[0,0],fs=W/17;cx.fillText(d[0],c[0]+nd[0]*fs*3,c[1]+nd[1]*fs*3)})}
   // 홈 작은 지도: 한반도 쪽만 잘라서
   const m=$("miniCv"),mx=m.getContext("2d"),y0=Math.round(H*.132),hh=Math.round(H*.8);mx.clearRect(0,0,m.width,m.height);mx.imageSmoothingQuality="high";mx.drawImage(cv,0,y0,W,hh,0,0,m.width,m.height);
-  $("miniMk").innerHTML=(info.cores||[]).map(c=>{const [px,py]=toPx(c.x,c.z);return `<i class="c${c.attacked?" hit":""}" style="left:${px/W*138}px;top:${(py-y0)/hh*276}px;background:${c.owner?ncol(c.owner):"#8a7a62"}"></i>`}).join("");
-  OM.key=ownKey();
+  OM.key=ownKey(); OM.doOwn=kor?pOwn:null;
 }
 const ownKey=()=>(info.cores||[]).map(c=>c.owner).join("|")+"#"+(info.nations||[]).map(n=>n.name+n.color).join("|");
-function paintIfChanged(){if(OM.land&&OM.key!==ownKey()){paintOld();drawMarks()}else if(OM.land)drawMarks()}
-$("mapimg").onload=()=>{if(prepOld($("mapimg"))){paintOld();fitted=false;fitMap(true);drawMarks()}};
+function paintIfChanged(){if(OM.land&&OM.key!==ownKey()){paintOld();drawMarks();drawHomeNat()}else if(OM.land)drawMarks()}
+$("mapimg").onload=()=>{if(prepOld($("mapimg"))){paintOld();fitted=false;fitMap(true);drawMarks();drawHomeNat()}};
 // ---------------- 지도 (끌어서 옮기기, 휠로 확대). 무대가 늘고 줄어도 맞게 S 로 나눔
 let view={x:0,y:0,k:1}, fitted=false;
 const MW=()=>OM.W||1, MH=()=>OM.H||1;
@@ -778,7 +816,7 @@ function focusCore(i){const c=info.cores[i],b=info.bounds;if(!c||!OM.W)return;co
 // ---------------- 세력 현황 · 성 목록 · 전쟁 소식 · 실록
 function drawSides(){
   const cores=info.cores||[], ps=info.players||[], nat=natStats(), free=cores.filter(x=>!x.owner).length;
-  $("nat").innerHTML=(nat.length?nat.map((n,i)=>`<div class="nat"><div class="tt">${emb(n.n,n.c)}${esc(n.n)}${n.t?`<small>${esc(n.t)}${n.p?" · "+esc(n.p):""}</small>`:""}<span class="rank">${i+1}위</span></div><div class="r"><span>성 ${n.cores}</span><span>접속 ${n.on}</span></div><div class="share"><i style="width:${cores.length?Math.round(n.cores*100/cores.length):0}%;background:${n.c}"></i></div></div>`).join(""):`<div class="empty">아직 세력이 없어요</div>`)
+  $("nat").innerHTML=(nat.length?nat.map((n,i)=>`<div class="nat"><div class="tt">${emb(n.n,n.c)}${esc(n.n)}${n.t?`<small>${esc(n.t)}${n.p?" · "+esc(n.p):""}</small>`:""}<span class="rank">${i+1}위</span></div><div class="r"><span>성 ${n.cores}</span>${n.dos?`<span>${n.dos}도</span>`:""}<span>접속 ${n.on}</span></div><div class="share"><i style="width:${cores.length?Math.round(n.cores*100/cores.length):0}%;background:${n.c}"></i></div></div>`).join(""):`<div class="empty">아직 세력이 없어요</div>`)
     +`<div class="nat"><div class="tt"><span class="em" style="background:#b9aa8d"></span>주인 없음</div><div class="r"><span>성 ${free}</span></div></div>`;
   $("coreList").innerHTML=cores.map((c,i)=>({c,i})).sort((a,b)=>(b.c.attacked?1:0)-(a.c.attacked?1:0)||(a.c.owner||"~").localeCompare(b.c.owner||"~")).map(({c,i})=>{const cl=c.owner?ncol(c.owner):"#8a7a62",pct=c.maxHp?Math.round(c.hp*100/c.maxHp):0;
     return `<div class="ci${c.attacked?" hit":""}" data-core="${i}"><i style="background:${cl}"></i><span>${c.attacked?"⚑ ":""}${esc(c.name)}<small>${esc(c.owner||"주인 없음")}</small></span><div class="hp"><b style="width:${pct}%;background:${pct<35?"#b83c2e":pct<70?"#c5a04d":"#24695d"}"></b></div></div>`}).join("")||`<div class="empty">아직 성이 없어요</div>`;
