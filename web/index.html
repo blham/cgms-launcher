@@ -708,12 +708,16 @@ const DO=[
  ["경기도",[[37.57,126.98],[37.26,127.03],[37.46,126.71],[37.97,126.55],[37.76,126.78],[37.27,127.44],[37.89,127.2],[36.99,127.09],[37.83,127.51],[37.66,126.45],[37.1,126.9]]],
  ["강원도",[[37.88,127.73],[37.34,127.92],[37.75,128.88],[38.2,128.59],[37.16,128.99],[37.45,129.17],[39.15,127.44],[38.15,127.31],[38.4,127.3],[38.95,127.88],[38.6,128.3],[37.38,128.66],[37.18,128.46],[38.75,127.6],[37.6,128.3]]],
  ["충청도",[[36.64,127.49],[36.35,127.38],[36.81,127.15],[36.46,127.12],[36.99,127.93],[36.6,126.66],[36.78,126.45],[36.33,126.61],[36.98,128.37],[36.3,127.57],[36.19,127.1],[36.1,127.8]]],
- ["전라도",[[35.82,127.15],[35.16,126.85],[34.81,126.39],[34.76,127.66],[34.95,127.49],[35.97,126.74],[35.41,127.39],[36.0,127.66],[33.5,126.53],[33.25,126.56],[34.6,127.28],[34.57,126.6],[35.3,126.5],[35.6,127.0]]],
+ ["전라도",[[35.82,127.15],[35.16,126.85],[34.81,126.39],[34.76,127.66],[34.95,127.49],[35.97,126.74],[35.41,127.39],[36.0,127.66],[34.6,127.28],[34.57,126.6],[35.3,126.5],[35.6,127.0]]],
  ["경상도",[[35.18,129.08],[35.87,128.6],[35.54,129.31],[35.86,129.22],[36.57,128.73],[36.02,129.34],[35.18,128.11],[35.23,128.68],[36.41,128.16],[36.81,128.62],[35.69,127.91],[36.99,129.4],[36.14,128.11],[35.07,127.75],[36.4,129.3]]],
  ["황해도",[[38.04,125.71],[38.51,125.76],[38.67,125.78],[37.93,125.36],[37.91,126.16],[38.35,125.48],[38.24,125.1],[38.33,126.39],[38.68,126.67],[38.1,126.0]]],
  ["평안도",[[39.03,125.75],[40.1,124.4],[39.62,125.66],[39.69,125.21],[40.97,126.59],[39.81,125.8],[40.17,126.28],[38.73,125.4],[39.75,126.3],[41.15,126.29],[40.83,125.8],[39.43,125.93],[39.25,126.25],[40.4,125.1],[41.4,127.0]]],
  ["함경도",[[39.92,127.54],[41.8,129.78],[40.67,129.2],[41.4,128.18],[42.44,129.75],[42.3,130.3],[40.0,128.3],[40.46,128.91],[41.08,128.3],[40.38,127.25],[39.5,127.25],[42.23,129.21],[42.0,128.06],[41.6,129.6],[41.0,127.6],[40.9,129.6]]],
- ["규슈",[[33.0,131.0],[33.6,130.4],[32.8,130.7],[31.6,130.6],[33.2,131.6],[32.3,131.2]]]];
+ ["제주",[[33.4,126.55]]],["규슈",[[33.0,131.0]]],["만주",[[43,126]]]];
+const R_JEJU=8,R_KYU=9,R_MAN=10;
+// 1.7.1 성 하나가 맡는 땅: 대개 그 성이 있는 도. 백두산·신의주는 만주를 나눠 갖고, 황해도는 평양(평안도) 몫, 성이 없는 도는 붙어 있는 도의 성들이 나눠 가짐
+function regionOfCore(c){const lat=latOf(c.z),lon=lonOf(c.x);if(/백두|신의주/.test(c.name||""))return R_MAN;return regionAt(lat,lon)}
+function regionAt(lat,lon){if(lon>129.6&&lat<34.6)return R_KYU;if(lat<33.75&&lon>125.9&&lon<127.2)return R_JEJU;return provAt(lat,lon)}
 function vnoise(x,y){const f=(a,b)=>{let h=Math.sin(a*127.1+b*311.7)*43758.5453;return h-Math.floor(h)};const xi=Math.floor(x),yi=Math.floor(y),xf=x-xi,yf=y-yi,u=xf*xf*(3-2*xf),v=yf*yf*(3-2*yf);
   return (f(xi,yi)*(1-u)+f(xi+1,yi)*u)*(1-v)+(f(xi,yi+1)*(1-u)+f(xi+1,yi+1)*u)*v}
 function provAt(lat,lon){   // 가장 가까운 고을의 도 (경도는 위도에 맞춰 줄임)
@@ -726,27 +730,35 @@ function buildProv(){
   const [sx,sy]=toPx(-3794,-3024),[bx,by]=toPx(185,-5672),[tx,ty]=toPx(1240,-3920),[,ey]=toPx(0,-760);
   for(let y=0;y<hh;y++)for(let x=0;x<hw;x++){const X=x*2,Y=y*2;if(!land[Math.min(H-1,Y)*W+Math.min(W-1,X)])continue;
     const lon=lonOf(b.minX+X*bpp),lat=latOf(b.minZ+Y*bpp);
-    if(lon>129.6&&lat<34.6){if(lon>129.9)g[y*hw+x]=8;continue}   // 규슈 (아소)
-    const line=(X<bx?sy+(by-sy)*(X-sx)/(bx-sx):by+(ty-by)*(X-bx)/(tx-bx))+(vnoise(X/38,3.3)-.5)*34+(vnoise(X/11,7.7)-.5)*9;if(!((Y>line-4||X>tx)&&!(X>tx&&Y<ey)))continue;   // 압록강·두만강 너머는 칠하지 않음
-    g[y*hw+x]=provAt(lat,lon)}
+    if(lon>129.6&&lat<34.6){if(lon>129.9)g[y*hw+x]=R_KYU;continue}   // 규슈 (아소)
+    if(lat>42.25&&lon>130.62+Math.max(0,lat-42.4)*.55+(vnoise(lat*4,1.7)-.5)*.35)continue;   // 연해주(러시아) 쪽은 칠하지 않음
+    const line=(X<bx?sy+(by-sy)*(X-sx)/(bx-sx):by+(ty-by)*(X-bx)/(tx-bx))+(vnoise(X/38,3.3)-.5)*34+(vnoise(X/11,7.7)-.5)*9;
+    if(!(Y>line-4||X>tx)||(X>tx&&Y<ey)){g[y*hw+x]=R_MAN;continue}   // 압록강·두만강 너머 = 만주
+    g[y*hw+x]=(lat<33.75&&lon>125.9&&lon<127.2)?R_JEJU:provAt(lat,lon)}
   // 도 이름 자리 (가운데)
-  const sum=DO.map(()=>[0,0,0]);for(let y=0;y<hh;y++)for(let x=0;x<hw;x++){const p=g[y*hw+x];if(p>=0&&p<8){sum[p][0]+=x*2;sum[p][1]+=y*2;sum[p][2]++}}
+  const sum=DO.map(()=>[0,0,0]);for(let y=0;y<hh;y++)for(let x=0;x<hw;x++){const p=g[y*hw+x];if(p>=0&&p!==R_KYU){sum[p][0]+=x*2;sum[p][1]+=y*2;sum[p][2]++}}
   OM.prov=g;OM.hw=hw;OM.pc=sum.map(v=>v[2]?[v[0]/v[2],v[1]/v[2]]:null)}
 function paintOld(){
   if(!OM.land||!info||!info.bounds) return; const {W,H,land,dist}=OM, b=info.bounds, bpp=b.width/W, n=W*H, kor=koreaOK();
   if(kor&&!OM.prov) buildProv();
-  const cores=(info.cores||[]).map(c=>({x:(c.x-b.minX)/bpp,y:(c.z-b.minZ)/bpp,o:c.owner||"",p:kor?provAt(latOf(c.z),lonOf(c.x)):-1}));
-  if(kor) cores.forEach(c=>{if(lonOf((c.x*bpp)+b.minX)>129.6&&latOf(c.y*bpp+b.minZ)<34.6)c.p=8});
+  const cores=(info.cores||[]).map(c=>({x:(c.x-b.minX)/bpp,y:(c.z-b.minZ)/bpp,o:c.owner||"",p:kor?regionOfCore(c):-1}));
+  // 땅마다 맡는 성들
+  const REG=DO.map((d,r)=>cores.filter(c=>c.p===r));
+  if(kor){ if(!REG[5].length) REG[5]=REG[6].slice();   // 황해도는 평안도 성(평양) 몫
+    const main=cores.filter(c=>c.p>=0&&c.p<8);
+    for(let r=0;r<8;r++) if(!REG[r].length) REG[r]=main;   // 성 없는 도: 붙어 있는 도의 성들이 가까운 만큼 나눠 가짐
+  }
   const paper=[236,224,196], sea=[226,212,178], ink=[58,40,28];
   const cols={}; for(const c of cores) if(c.o&&!cols[c.o]) cols[c.o]=hex(ncol(c.o));
   // 도마다 주인: 그 도의 성이 모두 같은 세력이면 그 색, 여럿이면 가까운 성 주인 색으로 나눔, 하나도 없으면 비움
-  const pOwn=DO.map((d,p)=>{const os=cores.filter(c=>c.p===p&&c.o);return {list:os,one:os.length&&os.every(c=>c.o===os[0].o)?os[0].o:null}});
+  const seen=DO.map(()=>new Set());
   const out=new ImageData(W,H), o=out.data, own=new Array(n);
   const R=2300/bpp,R2=R*R;
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x,p=i*4;
     if(!land[i]){const dd=dist[i];let c=sea;if(dd===6||dd===7){c=[198,180,146]}else if(((x+y*2)%13)===0)c=[220,205,170];o[p]=c[0];o[p+1]=c[1];o[p+2]=c[2];o[p+3]=255;continue}
     let who="";
-    if(kor){const pv=OM.prov[(y>>1)*OM.hw+(x>>1)];if(pv>=0){const po=pOwn[pv];if(po.one)who=po.one;else if(po.list.length){const wx=x+(vnoise(x/45,y/45)-.5)*70,wy=y+(vnoise(x/45+9,y/45+9)-.5)*70;let bd=1e18;for(const c of po.list){const q=(wx-c.x)**2+(wy-c.y)**2;if(q<bd){bd=q;who=c.o}}}}}
+    if(kor){const pv=OM.prov[(y>>1)*OM.hw+(x>>1)];if(pv>=0){const L=REG[pv];let k=null;if(L.length===1)k=L[0];else if(L.length){const wx=x+(vnoise(x/45,y/45)-.5)*70,wy=y+(vnoise(x/45+9,y/45+9)-.5)*70,man=pv===R_MAN;let bd=1e18;for(const c of L){const q=man?Math.abs(wx-c.x):(wx-c.x)**2+(wy-c.y)**2;if(q<bd){bd=q;k=c}}}   // 만주는 동서로 반씩
+      if(k){who=k.o;seen[pv].add(k.o||"·")}}}
     else{let bd=R2;for(const c of cores){const q=(x-c.x)**2+(y-c.y)**2;if(q<bd){bd=q;who=c.o}}}
     own[i]=who; let c=paper; if(who){const cc=cols[who],f=.5;c=[paper[0]*(1-f)+cc[0]*f,paper[1]*(1-f)+cc[1]*f,paper[2]*(1-f)+cc[2]*f]}
     o[p]=c[0];o[p+1]=c[1];o[p+2]=c[2];o[p+3]=255}
@@ -757,11 +769,11 @@ function paintOld(){
     if(own[i]&&((own[i+1]&&own[i+1]!==own[i])||(own[i+W]&&own[i+W]!==own[i]))){o[p]=95;o[p+1]=62;o[p+2]=40}}
   const cv=$("mapCv");cv.width=W;cv.height=H;const cx=cv.getContext("2d");cx.putImageData(out,0,0);
   if(kor&&OM.pc){cx.textAlign="center";cx.textBaseline="middle";cx.font=`800 ${Math.round(W/17)}px KWSerif, serif`;cx.fillStyle="rgba(58,40,28,.30)";
-    const nudge={"경기도":[-1.0,.05],"충청도":[-.1,.1],"강원도":[.15,-.15],"함경도":[.05,-.2],"평안도":[-.15,.05],"전라도":[0,-.85],"경상도":[.1,-.15],"황해도":[0,.1]};
-    DO.forEach((d,p)=>{const c=OM.pc[p];if(!c||p>7)return;const nd=nudge[d[0]]||[0,0],fs=W/17;cx.fillText(d[0],c[0]+nd[0]*fs*3,c[1]+nd[1]*fs*3)})}
+    const nudge={"만주":[0,.3],"경기도":[-1.0,.05],"충청도":[.05,-.2],"강원도":[.15,-.15],"함경도":[.05,-.2],"평안도":[-.15,.05],"전라도":[-.55,-.6],"경상도":[.1,-.15],"황해도":[0,.1]};
+    DO.forEach((d,p)=>{const c=OM.pc[p];if(!c||p===R_KYU)return;if(p===R_JEJU){cx.save();cx.font=`800 ${Math.round(W/30)}px KWSerif, serif`;cx.fillText("제주",c[0],c[1]+W/22);cx.restore();return}const nd=nudge[d[0]]||[0,0],fs=W/17;cx.fillText(d[0],c[0]+nd[0]*fs*3,c[1]+nd[1]*fs*3)})}
   // 홈 작은 지도: 한반도 쪽만 잘라서
   const m=$("miniCv"),mx=m.getContext("2d"),y0=Math.round(H*.132),hh=Math.round(H*.8);mx.clearRect(0,0,m.width,m.height);mx.imageSmoothingQuality="high";mx.drawImage(cv,0,y0,W,hh,0,0,m.width,m.height);
-  OM.key=ownKey(); OM.doOwn=kor?pOwn:null;
+  OM.key=ownKey(); OM.doOwn=kor?seen.map(st=>({one:st.size===1&&!st.has("·")?[...st][0]:null})):null;
 }
 const ownKey=()=>(info.cores||[]).map(c=>c.owner).join("|")+"#"+(info.nations||[]).map(n=>n.name+n.color).join("|");
 function paintIfChanged(){if(OM.land&&OM.key!==ownKey()){paintOld();drawMarks();drawHomeNat()}else if(OM.land)drawMarks()}
