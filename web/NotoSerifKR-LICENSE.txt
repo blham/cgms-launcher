@@ -1,0 +1,4 @@
+Noto Serif KR (https://fonts.google.com/noto/specimen/Noto+Serif+KR)
+Copyright 2017 Adobe Systems Incorporated, with Reserved Font Name Source.
+SIL Open Font License 1.1 — https://openfontlicense.org
+이 런처에는 한글 2350자·영문만 남긴 줄인 판(serif700.woff2, serif900.woff2)이 들어 있어요.
