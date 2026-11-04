@@ -106,7 +106,7 @@ func registerAPI(mux *http.ServeMux) {
 			"status": st, "server": si, "mcDir": mcDir(),
 			"direct": directMode(), "account": acc, "authError": hideHost(authError),
 			"config": c, "address": "", "version": LauncherVersion, "newerLauncher": newer,
-			"running": gameRunning(), "primary": primary,
+			"running": gameRunning(), "primary": primary, "termsVersion": TermsVersion,
 		})
 	})
 	mux.HandleFunc("/api/login", guard(func(w http.ResponseWriter, r *http.Request) {
@@ -159,6 +159,10 @@ func registerAPI(mux *http.ServeMux) {
 		}
 		writeJSON(w, out)
 	})
+	mux.HandleFunc("/api/terms", guard(func(w http.ResponseWriter, r *http.Request) { // 1.7.4 이용약관·개인정보 동의
+		acceptTerms()
+		writeJSON(w, map[string]bool{"ok": true})
+	}))
 	mux.HandleFunc("/api/play", guard(func(w http.ResponseWriter, r *http.Request) {
 		go play()
 		writeJSON(w, map[string]bool{"ok": true})
@@ -377,8 +381,7 @@ func registerAPI(mux *http.ServeMux) {
 			URL string `json:"url"`
 		}
 		_ = json.NewDecoder(io.LimitReader(r.Body, 4096)).Decode(&in)
-		ok := regexp.MustCompile(`^https://(discord\.gg|discord\.com|(www\.)?github\.com|modrinth\.com|(www\.)?curseforge\.com|ko-fi\.com|toss\.me|qr\.kakaopay\.com)/[A-Za-z0-9/_\-.]+$`).MatchString(in.URL) // 1.2.7 정해진 곳만
-		if ok {
+		if allowedLink(in.URL) {
 			openBrowser(in.URL)
 		}
 		writeJSON(w, map[string]bool{"ok": true})

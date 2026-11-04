@@ -65,7 +65,11 @@ type Config struct {
 	Exported  string          `json:"exported,omitempty"`       // 다른 런처용으로 마지막에 받아 간 보조 모드 버전
 	RealName  string          `json:"realName,omitempty"`       // 1.4.6 게임 속 이름(실명): 다른 사람에게 이 이름으로 보임
 	DiscordS  string          `json:"discordSession,omitempty"` // 1.4.8 디스코드 연결용 무작위 표 (서버가 디스코드 계정을 이 표에 붙임)
+	Terms     string          `json:"terms,omitempty"`          // 1.7.4 동의한 이용약관 판 (TermsVersion 과 다르면 런처가 다시 물음)
 }
+
+// 1.7.4 이용약관·개인정보 안내 판 (web/terms.html 을 바꾸면 올릴 것)
+const TermsVersion = "2026-11-04"
 
 var (
 	dataDir  string
@@ -168,6 +172,12 @@ func main() {
 	}
 	logger.Printf("CGMS Launcher %s (%s/%s) 자료 폴더 %s", LauncherVersion, runtime.GOOS, runtime.GOARCH, dataDir)
 	loadConfig()
+	for _, a := range os.Args[1:] {
+		if a == "--setup-preview" && devBuild { // 1.7.4 개발용: 설치 화면만 (가짜 진행)
+			setupPreview()
+			return
+		}
+	}
 	if maybeInstall(os.Args[1:]) { // 윈도우: 설치 안 된 자리에서 켜면 설치하고 설치된 런처를 켬
 		return
 	}

@@ -6,7 +6,7 @@ CGMS Launcher doesn't send your account information to us. The only personal inf
 
 **In-game name.** The launcher asks for the name you want to be shown as in game (on our server we use real names among friends). It's saved in the launcher's settings on your computer and in a small file in the game folder (readable only by you); our companion mod sends it only to our server, when you join it, and other players see it above your head, in the player list and in chat. You can change it in the launcher settings, and the server owner can remove it on request.
 
-**Discord (optional).** If you press "Discord link" in settings, the launcher makes a random code, saves it on your computer and opens our server's page, which sends you to Discord's own approval page (scope: identify). Our server only receives your Discord user ID and display name, shows you which Minecraft account it will be linked to, and links them only after you press "Link" on that page. The launcher never sees your Discord password or token.
+**Discord (optional).** If you press "Discord link" in settings, the launcher makes a random code, saves it on your computer and opens our server's page, which sends you to Discord's own approval page (scopes: identify, guilds.members.read). Our server only receives your Discord user ID and display name, and checks that you are a member of our Discord server (and, if the owner set one, that you have the member role), shows you which Minecraft account it will be linked to, and links them only after you press "Link" on that page. The launcher never sees your Discord password or token.
 
 **Our server.** The launcher downloads the mod list, mod files and launcher updates from our game server. It doesn't send your account or token there. Your Minecraft name reaches our server only when you join it in game, like any server.
 
@@ -15,5 +15,7 @@ CGMS Launcher doesn't send your account information to us. The only personal inf
 **Donations.** The donation page only shows links (Toss, KakaoPay, Ko-fi) and our bank account from the server's settings, and opens them in your browser. The launcher doesn't handle any payment itself.
 
 **Files on your computer:** the launcher's own folder (game files, settings, logs). If you use the official launcher mode, it also adds a "Korea War" installation to the official launcher's settings and keeps a backup of that file.
+
+**Terms.** On install (Windows) and whenever the terms change, the launcher shows our terms of use and a Korean privacy notice (web/terms.html) and asks you to agree. Your answer is saved only in the launcher settings on your computer.
 
 Questions: open an issue on this repository.

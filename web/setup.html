@@ -1,0 +1,106 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>CGMS Launcher 설치</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+@font-face{font-family:"Pretendard";src:url(/PretendardVariable.woff2) format("woff2");font-weight:45 920;font-display:block}
+@font-face{font-family:"KWSerif";src:url(/serif700.woff2) format("woff2");font-weight:400 800;font-display:block}
+@font-face{font-family:"KWSerif";src:url(/serif900.woff2) format("woff2");font-weight:850 950;font-display:block}
+:root{--ji:#E8D9B8;--ji2:#F1E6CC;--meok:#2E2116;--mu:#7a6444;--ju:#982D25;--juH:#B83C2E;--juA:#702019;--off:#B9AA8D;--cheong:#174E45;--sel:#17584C;--geum:#C5A04D;
+ --serif:"KWSerif","Noto Serif KR",serif;--sans:"Pretendard","Malgun Gothic","Apple SD Gothic Neo",sans-serif}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{background:var(--ji);color:var(--meok);font:500 14px/1.55 var(--sans);display:flex;flex-direction:column;overflow:hidden;user-select:none;
+ background-image:radial-gradient(ellipse at 20% 0%,rgba(255,250,235,.7),transparent 60%),repeating-linear-gradient(170deg,transparent 0 9px,rgba(120,90,50,.035) 9px 10px)}
+header{flex:none;display:flex;align-items:center;gap:14px;padding:18px 26px 14px;border-bottom:2px solid var(--ju);box-shadow:0 3px 0 var(--geum),0 5px 0 var(--cheong)}
+header .seal{width:42px;height:42px;border-radius:6px;background:var(--ju);color:#fff3dc;display:grid;place-items:center;font:900 20px var(--serif);box-shadow:inset 0 0 0 2px #fff3dc55,0 2px 4px rgba(0,0,0,.25);transform:rotate(-4deg)}
+header h1{margin:0;font:900 22px var(--serif);letter-spacing:.02em}header small{display:block;font:600 12px var(--sans);color:var(--mu);letter-spacing:.05em}
+main{flex:1;min-height:0;display:flex;flex-direction:column;padding:16px 26px 0}
+.pg{flex:1;min-height:0;display:none;flex-direction:column}.pg.on{display:flex}
+h2{margin:0 0 4px;font:800 19px var(--serif)}.lead{margin:0 0 12px;color:#4a3a24}
+#terms{flex:1;min-height:120px;overflow:auto;background:#fbf5e6;border:1px solid rgba(73,48,31,.35);box-shadow:inset 0 0 0 4px #fbf5e6,inset 0 0 0 5px rgba(152,45,37,.25);padding:12px 18px;user-select:text;font-size:13px}
+#terms h4{font:800 15px var(--serif);margin:10px 0 6px;color:var(--ju)}#terms ol{margin:0;padding-left:20px}#terms li{margin:3px 0}
+#terms table{border-collapse:collapse;width:100%;margin-top:4px}#terms th{width:96px;text-align:left;vertical-align:top;padding:5px 8px 5px 0;font-weight:700;color:var(--cheong);white-space:nowrap}
+#terms td{padding:5px 0;border-bottom:1px dashed rgba(73,48,31,.2)}#terms a{color:var(--sel);text-decoration:underline;cursor:pointer}.t-note{color:var(--ju);font-weight:700;margin:8px 0 2px}
+.chk{display:flex;flex-direction:column;gap:6px;margin:12px 0 4px}
+.chk label{display:flex;align-items:center;gap:9px;cursor:pointer;font-weight:600}.chk label.all{font:800 14.5px var(--serif);padding-bottom:6px;border-bottom:1px solid rgba(73,48,31,.2)}
+.chk input{appearance:none;width:19px;height:19px;margin:0;border:1.5px solid #6a5236;background:#fbf5e6;display:grid;place-items:center;cursor:pointer;flex:none}
+.chk input:checked{background:var(--sel);border-color:var(--sel)}.chk input:checked::after{content:"";width:9px;height:5px;border:2.5px solid #fff;border-top:0;border-right:0;transform:translateY(-1px) rotate(-45deg)}
+.chk em{font-style:normal;color:var(--ju);font-size:12px;font-weight:700}
+.where{font-size:12px;color:var(--mu);margin:2px 0 0;word-break:break-all}
+footer{flex:none;display:flex;align-items:center;gap:10px;padding:14px 26px 18px}
+footer .sp{flex:1}
+button{font:800 15px var(--serif);height:42px;padding:0 22px;border:0;cursor:pointer;letter-spacing:.04em}
+.bp{background:var(--ju);color:#fff3dc;box-shadow:inset 0 0 0 2px var(--ju),inset 0 0 0 3px var(--geum),inset 0 0 0 5px var(--ju),0 3px 0 #5a1712}
+.bp:hover:not(:disabled){background:var(--juH)}.bp:active:not(:disabled){background:var(--juA);transform:translateY(2px);box-shadow:inset 0 0 0 2px var(--juA),inset 0 0 0 3px var(--geum),0 1px 0 #5a1712}
+.bp:disabled{background:var(--off);color:#efe6d2;cursor:default;box-shadow:inset 0 0 0 2px var(--off),0 3px 0 #8f8268}
+.bs{background:linear-gradient(#6a4a2e,#4a3020);color:#f3e6c8;box-shadow:inset 0 0 0 1px var(--geum),0 3px 0 #24150a}.bs:hover{filter:brightness(1.12)}
+.steps{list-style:none;margin:6px 0 16px;padding:0;display:flex;flex-direction:column;gap:8px}
+.steps li{display:flex;align-items:center;gap:12px;font-weight:600;color:var(--mu)}
+.steps i{width:22px;height:22px;border-radius:50%;border:2px solid var(--off);flex:none;display:grid;place-items:center;font:900 12px var(--sans);font-style:normal}
+.steps li.now{color:var(--meok)}.steps li.now i{border-color:var(--ju);border-top-color:transparent;animation:spin .8s linear infinite}
+.steps li.ok{color:var(--cheong)}.steps li.ok i{background:var(--sel);border-color:var(--sel);color:#fff}.steps li.ok i::after{content:"✓"}
+.steps li.bad i{background:var(--ju);border-color:var(--ju);color:#fff}.steps li.bad i::after{content:"!"}
+@keyframes spin{to{transform:rotate(360deg)}}
+.bar{height:16px;background:#d9c9a4;box-shadow:inset 0 0 0 1px rgba(73,48,31,.45);position:relative;overflow:hidden}
+.bar b{position:absolute;inset:2px auto 2px 2px;background:linear-gradient(90deg,var(--cheong),#2a7a68);transition:width .25s}
+.bar b::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,transparent 0 10px,rgba(255,255,255,.14) 10px 20px);animation:mv 1s linear infinite}
+@keyframes mv{to{background-position:22px 0}}
+.pctl{display:flex;justify-content:space-between;font:700 13px var(--sans);color:var(--mu);margin-top:6px}
+.err{display:none;margin-top:12px;padding:10px 12px;background:#f6e0d6;border-left:4px solid var(--ju);color:#5a1712;font-weight:600;user-select:text}
+.done{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px}
+.stamp{width:96px;height:96px;border:4px solid var(--ju);color:var(--ju);border-radius:10px;display:grid;place-items:center;font:900 30px var(--serif);transform:rotate(-8deg);margin-bottom:10px;animation:st .5s ease-out}
+@keyframes st{0%{opacity:0;transform:rotate(-8deg) scale(1.8)}70%{opacity:1;transform:rotate(-8deg) scale(.95)}}
+.done h2{font-size:22px}.note{max-width:470px;background:#fbf5e6;border:1px solid rgba(73,48,31,.25);padding:10px 14px;font-size:13px;color:#4a3a24;margin-top:8px}
+</style></head><body>
+<header><div class="seal">戰</div><div><h1>CGMS Launcher 설치</h1><small>KOREA WAR · 서버 전용 런처 <span id="ver"></span></small></div></header>
+<main>
+ <section class="pg on" id="p1">
+  <h2>설치하기 전에 읽어 주세요</h2><p class="lead">아래 이용약관과 개인정보 안내에 동의하면 설치를 시작해요.</p>
+  <div id="terms">불러오는 중…</div>
+  <div class="chk">
+   <label class="all"><input type="checkbox" id="cAll">모두 동의해요</label>
+   <label><input type="checkbox" id="c1" class="req">이용약관에 동의해요 <em>(필수)</em></label>
+   <label><input type="checkbox" id="c2" class="req">개인정보 수집·이용에 동의해요 <em>(필수)</em></label>
+  </div>
+  <p class="where">설치 위치: <span id="where"></span></p>
+ </section>
+ <section class="pg" id="p2">
+  <h2 id="p2t">설치하는 중</h2><p class="lead">잠시만 기다려 주세요. 보통 몇 초면 끝나요.</p>
+  <ul class="steps" id="steps"></ul>
+  <div class="bar"><b id="barv" style="width:0"></b></div><div class="pctl"><span id="stepTxt"></span><span id="pct">0%</span></div>
+  <div class="err" id="err"></div>
+ </section>
+ <section class="pg" id="p3"><div class="done">
+  <div class="stamp">完</div><h2>설치를 마쳤어요</h2>
+  <p class="lead" style="margin:0">바탕화면과 시작 메뉴에 <b>CGMS Launcher</b> 가 생겼어요.</p>
+  <div class="note">처음 켜면 마인크래프트·자바·모드(약 700MB)를 한 번 받아요. 런처 화면 아래 막대에서 진행률을 볼 수 있어요.</div>
+ </div></section>
+</main>
+<footer><button class="bs" id="cancel">취소</button><span class="sp"></span><button class="bp" id="go" disabled>동의하고 설치</button></footer>
+<script nonce="__NONCE__">
+const TOKEN="__TOKEN__", $=id=>document.getElementById(id);
+const post=(p,b)=>fetch(p,{method:"POST",headers:{"X-KW-Token":TOKEN,"Content-Type":"application/json"},body:JSON.stringify(b||{})});
+fetch("/terms.html").then(r=>r.text()).then(t=>{$("terms").innerHTML=t;
+  document.querySelectorAll("#terms a[data-href]").forEach(a=>a.onclick=e=>{e.preventDefault();post("/api/setup/open",{url:a.dataset.href})})});
+const reqs=[...document.querySelectorAll(".req")];
+function sync(){const ok=reqs.every(c=>c.checked);$("cAll").checked=ok;if(page===1)$("go").disabled=!ok}
+reqs.forEach(c=>c.onchange=sync);$("cAll").onchange=()=>{reqs.forEach(c=>c.checked=$("cAll").checked);sync()};
+let page=1, timer=null, cd=0;
+function show(n){page=n;for(const i of [1,2,3])$("p"+i).classList.toggle("on",i===n)}
+$("go").onclick=async()=>{
+  if(page===1){$("go").disabled=true;show(2);$("cancel").disabled=true;$("go").textContent="설치하는 중";await post("/api/setup/install");poll();return}
+  if(page===2){$("err").style.display="none";$("go").disabled=true;$("go").textContent="설치하는 중";await post("/api/setup/install");poll();return}
+  if(page===3){clearInterval(timer);post("/api/setup/launch")}
+};
+$("cancel").onclick=()=>post("/api/setup/cancel");
+async function poll(){
+  let s; try{s=await (await fetch("/api/setup/state",{cache:"no-store"})).json()}catch(e){setTimeout(poll,400);return}
+  $("steps").innerHTML=s.steps.map((n,i)=>`<li class="${s.phase==="error"&&i===s.step?"bad":i<s.step||s.phase==="done"?"ok":i===s.step&&s.phase==="installing"?"now":""}"><i></i>${n.replace(/&/g,"&amp;").replace(/</g,"&lt;")}</li>`).join("");
+  $("barv").style.width=`calc(${Math.round(s.pct)}% - 4px)`;$("pct").textContent=Math.round(s.pct)+"%";
+  $("stepTxt").textContent=s.phase==="done"?"끝":s.steps[Math.min(s.step,s.steps.length-1)]||"";
+  if(s.phase==="error"){$("p2t").textContent="설치하지 못했어요";$("err").style.display="block";$("err").textContent=s.error;$("go").disabled=false;$("go").textContent="다시 시도";$("cancel").disabled=false;$("cancel").textContent="닫기";return}
+  if(s.phase==="done"){setTimeout(()=>{show(3);$("go").disabled=false;cd=5;$("go").textContent=`런처 열기 (${cd})`;$("cancel").hidden=true;
+    timer=setInterval(()=>{cd--;if(cd<=0){clearInterval(timer);$("go").textContent="런처 여는 중";post("/api/setup/launch")}else $("go").textContent=`런처 열기 (${cd})`},1000)},500);return}
+  setTimeout(poll,150);
+}
+fetch("/api/setup/state").then(r=>r.json()).then(s=>{$("where").textContent=s.where;$("ver").textContent=s.version?"· "+s.version:"";
+  $("steps").innerHTML=s.steps.map(n=>`<li><i></i>${n}</li>`).join("")});
+</script></body></html>

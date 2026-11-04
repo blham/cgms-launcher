@@ -336,6 +336,20 @@ canvas#fib{position:absolute;inset:0}
 #gateName{margin-top:16px;width:100%;font:800 22px var(--serif);padding:5px 2px;border:0;border-bottom:2px solid var(--godong);background:transparent;outline:none;color:var(--meok)}
 #gateName:focus{border-bottom-color:var(--sel)}
 #gateErr{color:var(--juH);font-size:12.5px;min-height:18px;margin-top:5px}
+/* 1.7.4 이용약관 동의 */
+#termsGate{z-index:70}#termsGate .in{width:720px;padding:22px 28px 20px;display:flex;flex-direction:column;max-height:640px}
+#termsGate .ttl{font:700 13px var(--serif);letter-spacing:.32em;color:var(--ju)}#termsGate h3{font:800 22px/1.35 var(--serif);margin:4px 0 4px}
+#termsGate .lead{font:500 13px/1.6 var(--sans);color:#4a3a24;margin:0 0 10px}
+#tBody{flex:1;min-height:150px;max-height:340px;overflow:auto;background:#fbf5e6;border:1px solid rgba(73,48,31,.35);padding:10px 16px;font:500 12.5px/1.6 var(--sans);user-select:text}
+#tBody h4{font:800 14.5px var(--serif);margin:8px 0 5px;color:var(--ju)}#tBody ol{margin:0;padding-left:20px}#tBody li{margin:2px 0}
+#tBody table{border-collapse:collapse;width:100%}#tBody th{width:92px;text-align:left;vertical-align:top;padding:4px 8px 4px 0;color:var(--cheong);white-space:nowrap}
+#tBody td{padding:4px 0;border-bottom:1px dashed rgba(73,48,31,.2)}#tBody a{color:var(--sel);text-decoration:underline;cursor:pointer}#tBody .t-note{color:var(--ju);font-weight:700;margin:6px 0 0}
+.tchk{display:flex;flex-direction:column;gap:5px;margin:10px 0 2px;font:600 13px var(--sans)}.tchk label{display:flex;align-items:center;gap:9px;cursor:pointer}
+.tchk label.all{font:800 14px var(--serif);padding-bottom:5px;border-bottom:1px solid rgba(73,48,31,.2)}.tchk em{font-style:normal;color:var(--ju);font-size:11.5px;font-weight:700}
+.tchk input{appearance:none;width:18px;height:18px;margin:0;border:1.5px solid #6a5236;background:#fbf5e6;display:grid;place-items:center;cursor:pointer;flex:none}
+.tchk input:checked{background:var(--sel);border-color:var(--sel)}.tchk input:checked::after{content:"";width:8px;height:4px;border:2.5px solid #fff;border-top:0;border-right:0;transform:translateY(-1px) rotate(-45deg)}
+#termsGate .acts2{display:flex;align-items:center;gap:12px;margin-top:10px}#termsGate .acts2 span{font:500 12px var(--sans);color:var(--mu2)}
+#termsGate.view .tchk,#termsGate.view #tOk,#termsGate.view .acts2 span{display:none}#termsGate:not(.view) #tClose{display:none}
 #pdet .in{width:420px;padding:22px 24px;display:flex;gap:18px}
 #pdet .body3d{width:96px;height:180px;flex:none;display:grid;place-items:center;background:rgba(73,48,31,.08);border:1px solid var(--line)}
 #pdet .body3d img{max-width:90px;max-height:170px;image-rendering:pixelated}
@@ -471,6 +485,7 @@ canvas#fib{position:absolute;inset:0}
       <div class="fr"><label for="rname">게임 속 이름</label><div><input type="text" id="rname" maxlength="10" autocomplete="off"><small>머리 위 이름표·탭 목록·채팅에 보이는 본인의 실명 (본명이 아니면 불이익이 있어요)</small></div></div>
       <div class="fr"><label>디스코드</label><div><div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><button class="bs navy" id="dcLink">디스코드 연결</button><span id="dcState" style="color:var(--mu);font-size:12.5px"></span></div><small>세력 역할·음성 채널이 자동으로 맞춰지고, 처음 들어올 때 입장 확인도 이걸로 해요</small></div></div>
       <div class="fr"><label>켜면 바로 접속</label><div><div class="seg" id="autoSeg"><button class="bg" data-v="1">예</button><button class="bg" data-v="0">아니요</button></div><select id="auto" hidden><option value="1">예</option><option value="0">아니요</option></select></div></div>
+      <div class="fr"><label>약관</label><div><button class="bg" id="termsView">이용약관·개인정보 안내 보기</button></div></div>
       <div class="acts"><button class="bp" id="save">저장</button><span id="saved">저장했어요</span><span style="flex:1"></span><button class="bs" id="quit">런처 끄기</button></div>
     </div>
     <div class="doc cl pad"><div class="cap">나의 호패<span>게임 속 신분</span></div><div class="hopae"><div id="hpName">이름</div><small>코리아 워 백성</small></div><div class="cap4">게임 속 이름을 바꾸면 호패도 같이 바뀌어요</div></div>
@@ -485,6 +500,15 @@ canvas#fib{position:absolute;inset:0}
     <p>머리 위 이름표·탭 목록·채팅에 이 이름으로 보여요.<br><b style="color:var(--ju)">본명이 아니면 불이익이 있어요.</b></p>
     <input type="text" id="gateName" maxlength="10" autocomplete="off" placeholder="예: 홍길동 (한글)"><div id="gateErr"></div>
     <div style="display:flex;align-items:center;gap:12px;margin-top:8px"><button class="bp" id="gateOk">새기기</button><span style="font:500 12px var(--sans);color:var(--mu2)">나중에 설정에서 바꿀 수 있어요</span></div></div>
+</div></div></div>
+
+<div id="termsGate" class="modal" hidden><div class="lat"><div class="in">
+  <div class="ttl">◆ 이용약관</div><h3 id="tTitle">이용약관과 개인정보 안내에 동의해 주세요</h3>
+  <p class="lead" id="tLead">처음이거나 약관이 바뀌어서 한 번 더 여쭤봐요. 동의해야 서버에 들어갈 수 있어요.</p>
+  <div id="tBody">불러오는 중…</div>
+  <div class="tchk"><label class="all"><input type="checkbox" id="tAll">모두 동의해요</label>
+   <label><input type="checkbox" class="treq">이용약관에 동의해요 <em>(필수)</em></label><label><input type="checkbox" class="treq">개인정보 수집·이용에 동의해요 <em>(필수)</em></label></div>
+  <div class="acts2"><button class="bp" id="tOk" disabled>동의하기</button><button class="bs" id="tClose">닫기</button><span>동의하지 않으면 게임을 시작할 수 없어요</span></div>
 </div></div></div>
 
 <div id="pdet" class="modal" hidden><div class="lat"><div class="in" style="position:relative"></div></div></div>
@@ -612,7 +636,9 @@ async function tick(){
   $("stat").textContent=(st.text||"")+(st.total>0&&busy?`  ${st.done} / ${st.total}`:"")||" ";
   $("err").hidden=!st.error; if(st.error)$("err").innerHTML=esc(st.error)+(st.logTail?`<pre>${esc(st.logTail)}</pre>`:"");
   if(!filled){filled=true;setSeg("mem",String(s.config.memoryMB));setSeg("auto",s.config.autoJoin?"1":"0");$("rname").value=s.config.realName||"";hopae()}
-  const noName=!s.config.realName; $("nameGate").hidden=!noName; if(noName&&document.activeElement!==$("gateName"))$("gateName").focus();
+  const needTerms=s.termsVersion&&s.config.terms!==s.termsVersion; if(needTerms)openTerms(false); else if(!termsView)$("termsGate").hidden=true;   // 1.7.4
+  if(needTerms) $("play").disabled=true;
+  const noName=!s.config.realName&&!needTerms; $("nameGate").hidden=!noName; if(noName&&document.activeElement!==$("gateName"))$("gateName").focus();
   if(noName) $("play").disabled=true;
   $("ver").textContent=`런처 ${s.version}`+(s.newerLauncher?` · 새 런처 ${s.newerLauncher} 이 나왔어요`:"");
 }
@@ -1043,6 +1069,19 @@ $("disc").onclick=()=>post("/api/open",{url:discordUrl});
 $("save").onclick=async()=>{const r=await post("/api/config",{memoryMB:+$("mem").value,autoJoin:$("auto").value==="1",realName:$("rname").value.trim()});filled=false;tick();
   const s=$("saved");s.className="";void s.offsetWidth;s.textContent=r.error?r.error:"저장했어요";s.className=r.error?"bad show":"show";clearTimeout(s._t);s._t=setTimeout(()=>{s.className=""},r.error?4000:2600)};
 async function gateSave(){const r=await post("/api/config",{realName:$("gateName").value.trim()});if(r.error){$("gateErr").textContent=r.error;return}$("gateErr").textContent="";filled=false;tick()}
+// 1.7.4 이용약관 동의 (런처가 web/terms.html 을 보여 줌, 동의는 런처 설정에 저장)
+let termsLoaded=false, termsView=false;
+function openTerms(view){termsView=view;const g=$("termsGate");g.classList.toggle("view",view);
+  $("tTitle").textContent=view?"이용약관과 개인정보 안내":"이용약관과 개인정보 안내에 동의해 주세요";$("tLead").hidden=view;
+  if(g.hidden){g.hidden=false;}
+  if(!termsLoaded){termsLoaded=true;fetch("/terms.html").then(r=>r.text()).then(t=>{$("tBody").innerHTML=t;
+    document.querySelectorAll("#tBody a[data-href]").forEach(a=>a.onclick=e=>{e.preventDefault();post("/api/open",{url:a.dataset.href})})})}}
+const treqs=[...document.querySelectorAll(".treq")];
+function tSync(){const ok=treqs.every(c=>c.checked);$("tAll").checked=ok;$("tOk").disabled=!ok}
+treqs.forEach(c=>c.onchange=tSync);$("tAll").onchange=()=>{treqs.forEach(c=>c.checked=$("tAll").checked);tSync()};
+$("tOk").onclick=async()=>{$("tOk").disabled=true;await post("/api/terms");$("termsGate").hidden=true;tick()};
+$("tClose").onclick=()=>{termsView=false;$("termsGate").hidden=true;$("termsGate").classList.remove("view")};
+$("termsView").onclick=()=>openTerms(true);
 $("gateOk").onclick=gateSave; $("gateName").addEventListener("keydown",e=>{if(e.key==="Enter")gateSave()});
 $("folder").onclick=()=>post("/api/openfolder");
 async function dcStatus(){let d;try{d=await(await fetch("/api/discord/status",{cache:"no-store"})).json()}catch(e){return}

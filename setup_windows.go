@@ -15,11 +15,14 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"syscall"
 	"time"
 	"unicode/utf16"
 	"unsafe"
+
+	webview2 "github.com/jchv/go-webview2"
 )
 
 const appName = "CGMS Launcher"
@@ -69,7 +72,9 @@ func powershell(script string) error {
 func psq(s string) string { return "'" + strings.ReplaceAll(s, "'", "''") + "'" }
 
 // 바로가기 + 제거 항목
-func writeShortcuts(target string) {
+func writeShortcuts(target string) { makeShortcuts(target); registerUninstall(target) }
+
+func makeShortcuts(target string) {
 	dir := filepath.Dir(target)
 	_ = powershell(fmt.Sprintf(`
 $ws = New-Object -ComObject WScript.Shell
@@ -79,7 +84,6 @@ foreach ($d in @([Environment]::GetFolderPath('Desktop'), [Environment]::GetFold
   $l.TargetPath = %s; $l.WorkingDirectory = %s; $l.IconLocation = %s; $l.Description = %s
   $l.Save()
 }`, psq(appName+".lnk"), psq(target), psq(dir), psq(target+",0"), psq("Korea War 서버 전용 런처")))
-	registerUninstall(target)
 }
 
 func registerUninstall(target string) {
@@ -102,20 +106,45 @@ New-ItemProperty $k NoRepair -Value 1 -PropertyType DWord -Force | Out-Null`,
 		psq(appName), psq(target+",0"), psq(LauncherVersion), psq(filepath.Dir(target)), psq(`"`+target+`" --uninstall`), size))
 }
 
-func copyFile(src, dst string) error {
+func copyFile(src, dst string) error { return copyFileProgress(src, dst, nil) }
+
+// 1.7.4 진행률을 알리며 복사 (설치 화면 막대)
+func copyFileProgress(src, dst string, prog func(float64)) error {
 	in, err := os.Open(src)
 	if err != nil {
 		return err
 	}
 	defer in.Close()
+	var total int64 = 1
+	if st, err := in.Stat(); err == nil && st.Size() > 0 {
+		total = st.Size()
+	}
 	tmp := dst + ".tmp"
 	out, err := os.Create(tmp)
 	if err != nil {
 		return err
 	}
-	if _, err := io.Copy(out, in); err != nil {
-		out.Close()
-		return err
+	buf := make([]byte, 256<<10)
+	var done int64
+	for {
+		n, rerr := in.Read(buf)
+		if n > 0 {
+			if _, werr := out.Write(buf[:n]); werr != nil {
+				out.Close()
+				return werr
+			}
+			done += int64(n)
+			if prog != nil {
+				prog(float64(done) / float64(total))
+			}
+		}
+		if rerr == io.EOF {
+			break
+		}
+		if rerr != nil {
+			out.Close()
+			return rerr
+		}
 	}
 	out.Close()
 	_ = os.Remove(dst + ".old")
@@ -140,6 +169,18 @@ func maybeInstall(args []string) bool {
 	exe, target := selfExe(), installedExe()
 	if strings.EqualFold(filepath.Clean(exe), filepath.Clean(target)) {
 		return false
+	}
+	// 1.7.4 설치 화면 (약관 동의 → 진행률). WebView2 가 없으면 예전처럼 알림 창으로
+	if webview2Installed() {
+		if ok := runSetupWindow(exe, target); ok {
+			return true
+		}
+	}
+	if cfg.Terms != TermsVersion {
+		if msgBox(appName+" 를 설치해요.\n\n"+termsSummary+"\n\n이용약관과 개인정보 수집·이용에 동의하고 설치할까요?\n(전문은 설치 뒤 런처 설정에서 볼 수 있어요)", 0x4|0x40) != 6 {
+			return true
+		}
+		acceptTerms()
 	}
 	_ = os.MkdirAll(installDir(), 0o755)
 	if err := copyFile(exe, target); err != nil {
@@ -209,4 +250,75 @@ func quitRunning() {
 	if r, err := httpc.Do(req); err == nil {
 		r.Body.Close()
 	}
+}
+
+// 알림 창용 짧은 약관 (WebView2 가 없을 때)
+const termsSummary = "· Mojang·Microsoft 와 관계없는 CGMS 서버 전용 런처예요. 정품 계정이 필요하고 마인크래프트 EULA 를 지켜야 해요.\n" +
+	"· 마인크래프트·자바·모드(약 700MB)를 받고 스스로 새 버전으로 바뀌어요.\n" +
+	"· 서버 규칙을 어기면 제재받을 수 있어요. 실명을 써 주세요.\n" +
+	"· 모으는 것: 마인크래프트 닉네임·UUID, 실명, (연결하면) 디스코드 아이디, 접속 시간·IP. 입장 확인·이름 표시·제재에만 쓰고, 요청하면 지워요.\n" +
+	"· 만 14세 미만은 보호자 동의가 필요해요."
+
+// 1.7.4 설치 화면 창. false = 창을 못 띄움 (알림 창 방식으로)
+func runSetupWindow(exe, target string) bool {
+	steps := []setupStep{
+		{"켜져 있는 예전 런처 정리", func(p func(float64)) error { stopRunningLauncher(); return nil }},
+		{"런처 파일 복사", func(p func(float64)) error {
+			if err := os.MkdirAll(installDir(), 0o755); err != nil {
+				return err
+			}
+			if err := copyFileProgress(exe, target, p); err != nil {
+				return fmt.Errorf("%v (런처가 켜져 있다면 작업 관리자에서 KoreaWarLauncher 를 끝내고 다시 해 주세요)", err)
+			}
+			return nil
+		}},
+		{"바탕화면·시작 메뉴 바로가기", func(p func(float64)) error { makeShortcuts(target); return nil }},
+		{"\"앱 및 기능\"에 등록 (나중에 지울 수 있게)", func(p func(float64)) error { registerUninstall(target); return nil }},
+		{"이용약관 동의 저장", func(p func(float64)) error { acceptTerms(); return nil }},
+	}
+	u, err := startSetupUI(steps, installDir())
+	if err != nil {
+		logger.Printf("설치 화면을 못 띄움: %v", err)
+		return false
+	}
+	defer u.close()
+	runtime.LockOSThread()
+	w := webview2.NewWithOptions(webview2.WebViewOptions{
+		DataPath:  filepath.Join(dataDir, "webview2-setup"),
+		AutoFocus: true,
+		WindowOptions: webview2.WindowOptions{
+			Title: appName + " 설치", Width: dpiScale(780), Height: dpiScale(640), IconId: 1, Center: true,
+		},
+	})
+	if w == nil {
+		return false
+	}
+	go func() {
+		select {
+		case <-u.launch:
+		case <-u.closed:
+		}
+		w.Dispatch(func() { w.Terminate() })
+	}()
+	w.SetSize(int(dpiScale(640)), int(dpiScale(560)), webview2.HintMin)
+	w.Navigate(u.URL)
+	bringToFront(uintptr(w.Window()))
+	w.Run()
+	w.Destroy()
+	// 설치하는 중에 창을 닫았으면 끝날 때까지 기다림 (반쯤 복사된 채로 끝나지 않게)
+	for i := 0; i < 300 && u.phase() == "installing"; i++ {
+		time.Sleep(100 * time.Millisecond)
+	}
+	if u.phase() != "done" {
+		logger.Printf("설치 화면: 설치하지 않고 닫음")
+		return true
+	}
+	logger.Printf("설치함: %s", target)
+	c := exec.Command(target, "--installed")
+	c.Dir = installDir()
+	detach(c)
+	if err := c.Start(); err != nil {
+		msgBox("설치는 됐지만 켜지 못했어요. 바탕화면의 \""+appName+"\" 를 눌러 주세요.", 0x30)
+	}
+	return true
 }
