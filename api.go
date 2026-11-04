@@ -12,6 +12,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -107,6 +108,8 @@ func registerAPI(mux *http.ServeMux) {
 			"direct": directMode(), "account": acc, "authError": hideHost(authError),
 			"config": c, "address": "", "version": LauncherVersion, "newerLauncher": newer,
 			"running": gameRunning(), "primary": primary, "termsVersion": TermsVersion,
+			// 1.7.5 약관 동의는 설치할 때 한 번: 윈도우는 설치 창에서, 설치 창이 없는 맥·리눅스만 처음 켤 때 한 번 물음
+			"askTerms": runtime.GOOS != "windows" && c.Terms == "",
 		})
 	})
 	mux.HandleFunc("/api/login", guard(func(w http.ResponseWriter, r *http.Request) {

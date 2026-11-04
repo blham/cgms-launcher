@@ -636,7 +636,7 @@ async function tick(){
   $("stat").textContent=(st.text||"")+(st.total>0&&busy?`  ${st.done} / ${st.total}`:"")||" ";
   $("err").hidden=!st.error; if(st.error)$("err").innerHTML=esc(st.error)+(st.logTail?`<pre>${esc(st.logTail)}</pre>`:"");
   if(!filled){filled=true;setSeg("mem",String(s.config.memoryMB));setSeg("auto",s.config.autoJoin?"1":"0");$("rname").value=s.config.realName||"";hopae()}
-  const needTerms=s.termsVersion&&s.config.terms!==s.termsVersion; if(needTerms)openTerms(false); else if(!termsView)$("termsGate").hidden=true;   // 1.7.4
+  const needTerms=!!s.askTerms; if(needTerms)openTerms(false); else if(!termsView)$("termsGate").hidden=true;   // 1.7.4
   if(needTerms) $("play").disabled=true;
   const noName=!s.config.realName&&!needTerms; $("nameGate").hidden=!noName; if(noName&&document.activeElement!==$("gateName"))$("gateName").focus();
   if(noName) $("play").disabled=true;
