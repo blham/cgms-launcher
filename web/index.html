@@ -275,6 +275,10 @@ canvas#fib{position:absolute;inset:0}
 .gi{display:flex;align-items:center;gap:11px;width:100%;text-align:left;padding:8px 10px 8px 8px;border-bottom:1px dashed var(--line);cursor:pointer}
 .gi:hover{background:rgba(23,88,76,.06)}
 .gi .no{flex:none;width:30px;height:30px;display:grid;place-items:center;font:800 13px var(--serif);color:#FFF0D0;background:var(--gc,var(--ju));box-shadow:inset 0 0 0 1.5px rgba(255,240,208,.6)}
+.gi .ic{flex:none;width:40px;height:40px;display:grid;place-items:center;background:var(--ji3);border:1px solid rgba(73,48,31,.4);box-shadow:inset 0 0 0 2px var(--ji3),inset 0 0 0 3px var(--gc,rgba(152,45,37,.55))}
+.gi .ic img,#gHead h3 img{width:32px;height:32px;image-rendering:pixelated;image-rendering:crisp-edges}
+.gi.on .ic{background:#f5ecd8;border-color:#0d3a32}
+#gHead h3 img{width:40px;height:40px}
 .gi b{display:block;font:700 15px var(--serif);color:var(--meok)}
 .gi small{display:block;font:500 11.5px var(--sans);color:var(--mu2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .gi.on{background:var(--sel)}.gi.on b{color:#FFF0D0}.gi.on small{color:#cfe2da}
@@ -651,7 +655,7 @@ function gEl(tag,runs,cls){const e=document.createElement(tag);if(cls)e.classNam
     e.appendChild(n)}
   return e}
 function gChapters(){if(!GD)return[];const cs=(GD.chapters||[]).slice();
-  if((GD.regions||[]).length){const at=Math.min(2,cs.length);cs.splice(at,0,{id:"_regions",title:"성과 특산품",summary:"성마다 신상과 차지하면 얻는 효과",color:"#c5a04d",regions:GD.regions})}
+  if((GD.regions||[]).length){const at=Math.min(2,cs.length);cs.splice(at,0,{id:"_regions",title:"성과 특산품",summary:"성마다 신상과 차지하면 얻는 효과",color:"#c5a04d",iconData:GD.regionsIcon,regions:GD.regions})}
   return cs}
 function gToc(){const cs=gChapters(), q=gQ.toLowerCase(), box=$("gToc");box.innerHTML="";let shown=0;
   cs.forEach((ch,i)=>{let hits=0;
@@ -659,7 +663,9 @@ function gToc(){const cs=gChapters(), q=gQ.toLowerCase(), box=$("gToc");box.inne
       hits=all.toLowerCase().split(q).length-1;if(!hits)return}
     shown++;const b=document.createElement("button");b.className="gi"+(i===gSel?" on":"");
     if(ch.color&&/^#[0-9a-f]{6}$/i.test(ch.color))b.style.setProperty("--gc",inkTone(ch.color));
-    const no=document.createElement("span");no.className="no";no.textContent=String(i+1);b.appendChild(no);
+    const okIc=typeof ch.iconData==="string"&&/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/.test(ch.iconData);
+    if(okIc){const ic=document.createElement("span");ic.className="ic";const im=document.createElement("img");im.src=ch.iconData;im.alt="";ic.appendChild(im);b.appendChild(ic)}
+    else{const no=document.createElement("span");no.className="no";no.textContent=String(i+1);b.appendChild(no)}
     const tx=document.createElement("span");tx.style.minWidth="0";const bb=document.createElement("b");bb.textContent=ch.title;const sm=document.createElement("small");sm.textContent=ch.summary||"";tx.append(bb,sm);b.appendChild(tx);
     if(q){const h=document.createElement("span");h.className="hit";h.textContent=hits+"곳";b.appendChild(h)}
     b.onclick=()=>{gSel=i;gToc();gShow()};box.appendChild(b)});
@@ -667,7 +673,8 @@ function gToc(){const cs=gChapters(), q=gQ.toLowerCase(), box=$("gToc");box.inne
   if(!shown){const d=document.createElement("div");d.style.cssText="padding:14px 4px;color:var(--mu);font-size:13px";d.textContent="찾는 낱말이 없어요.";box.appendChild(d)}}
 function gShow(){const ch=gChapters()[gSel], head=$("gHead"), body=$("gBody");head.innerHTML="";body.innerHTML="";if(!ch)return;
   const h=document.createElement("h3"), dot=document.createElement("i");if(ch.color&&/^#[0-9a-f]{6}$/i.test(ch.color))head.style.setProperty("--gc",inkTone(ch.color));
-  h.append(dot,document.createTextNode(ch.title));const p=document.createElement("p");p.textContent=ch.summary||"";head.append(h,p);
+  if(typeof ch.iconData==="string"&&/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/.test(ch.iconData)){const im=document.createElement("img");im.src=ch.iconData;im.alt="";h.append(im,document.createTextNode(ch.title))}
+  else h.append(dot,document.createTextNode(ch.title));const p=document.createElement("p");p.textContent=ch.summary||"";head.append(h,p);
   if(ch.regions){const g=document.createElement("div");g.className="rg";
     const intro=document.createElement("p");intro.textContent="성(코어)을 차지하면 그 성의 특산품 효과를 우리 세력 모두가 받아요. 성마다 지역을 닮은 신상이 서 있어요.";body.appendChild(intro);
     ch.regions.forEach(r=>{const c=document.createElement("div");c.className="rgc";const b=document.createElement("b");b.textContent=r.name;const e=document.createElement("em");e.textContent=r.statue?"신상 · "+r.statue:"";
