@@ -360,6 +360,17 @@ func registerAPI(mux *http.ServeMux) {
 		w.Header().Set("Cache-Control", "no-store")
 		_, _ = w.Write(b)
 	})
+	// 1.7.6 게임 안내 (플러그인 /launcher/guide.json — 게임 속 /가이드 책 + 성마다 특산품)
+	mux.HandleFunc("/api/guide", func(w http.ResponseWriter, r *http.Request) {
+		b, err := serverGuide()
+		if err != nil {
+			writeJSON(w, map[string]string{"error": err.Error()})
+			return
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.Header().Set("Cache-Control", "no-store")
+		_, _ = w.Write(b)
+	})
 	mux.HandleFunc("/api/map.png", func(w http.ResponseWriter, r *http.Request) {
 		p, err := mapImage(r.URL.Query().Get("v"))
 		if err != nil {
@@ -583,6 +594,43 @@ func serverInfo() ([]byte, error) {
 		curMapV = mv.Map
 	}
 	return b, nil
+}
+
+var (
+	guideMu    sync.Mutex
+	guideCache []byte
+	guideAt    time.Time
+)
+
+// 1.7.6 게임 안내: 1분 동안은 받아 둔 것, 서버가 꺼져 있으면 마지막으로 받은 것
+func serverGuide() ([]byte, error) {
+	guideMu.Lock()
+	defer guideMu.Unlock()
+	if guideCache != nil && time.Since(guideAt) < time.Minute {
+		return guideCache, nil
+	}
+	p := dirs("cache", "guide-last.json")
+	c := &http.Client{Timeout: 8 * time.Second, Transport: fallbackRT{http.DefaultTransport}}
+	resp, err := c.Get(filesBase() + "/launcher/guide.json")
+	var b []byte
+	if err == nil {
+		defer resp.Body.Close()
+		if resp.StatusCode != 200 {
+			err = fmt.Errorf("서버 안내 없음 (HTTP %d)", resp.StatusCode)
+		} else {
+			b, err = io.ReadAll(io.LimitReader(resp.Body, 8<<20))
+		}
+	}
+	if err == nil && json.Valid(b) {
+		guideCache, guideAt = b, time.Now()
+		_ = os.MkdirAll(dirs("cache"), 0o755)
+		_ = os.WriteFile(p, b, 0o644)
+		return b, nil
+	}
+	if old, e := os.ReadFile(p); e == nil && json.Valid(old) {
+		return old, nil
+	}
+	return nil, errors.New("서버에 연결하지 못해서 안내를 불러오지 못했어요")
 }
 
 // 1.6.2 서버가 꺼져 있을 때: 마지막으로 받은 정보에 "꺼짐"·받은 시각을 붙여 줌 (접속자는 비움)

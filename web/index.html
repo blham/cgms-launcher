@@ -268,6 +268,35 @@ canvas#fib{position:absolute;inset:0}
 .hp-ic{width:11px;height:17px;flex:none}
 
 /* 모드 */
+/* 1.7.6 안내 */
+.gcols{flex:1;min-height:0;display:grid;grid-template-columns:300px 1fr;gap:16px}
+#gSearch{height:36px;width:100%;padding:0 12px 0 34px;font:500 13.5px var(--sans);background:var(--ji3) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M10 2a8 8 0 0 1 6.3 12.9l5.4 5.4-1.4 1.4-5.4-5.4A8 8 0 1 1 10 2m0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12' fill='%236a5236'/></svg>") 10px 50%/16px no-repeat;border:1px solid rgba(73,48,31,.5);outline:none;margin-bottom:8px}
+#gSearch:focus{border-color:var(--sel);box-shadow:0 0 0 2px rgba(23,88,76,.2)}
+.gi{display:flex;align-items:center;gap:11px;width:100%;text-align:left;padding:8px 10px 8px 8px;border-bottom:1px dashed var(--line);cursor:pointer}
+.gi:hover{background:rgba(23,88,76,.06)}
+.gi .no{flex:none;width:30px;height:30px;display:grid;place-items:center;font:800 13px var(--serif);color:#FFF0D0;background:var(--gc,var(--ju));box-shadow:inset 0 0 0 1.5px rgba(255,240,208,.6)}
+.gi b{display:block;font:700 15px var(--serif);color:var(--meok)}
+.gi small{display:block;font:500 11.5px var(--sans);color:var(--mu2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gi.on{background:var(--sel)}.gi.on b{color:#FFF0D0}.gi.on small{color:#cfe2da}
+.gi .hit{margin-left:auto;font:700 11px var(--sans);color:var(--ju)}.gi.on .hit{color:#f3d58a}
+#gHead{flex:none;padding:0 22px 12px 0;border-bottom:1.5px solid rgba(152,45,37,.35);margin-bottom:6px}
+#gHead h3{font:900 28px/1.15 var(--serif);letter-spacing:.04em;display:flex;align-items:center;gap:12px}
+#gHead h3 i{width:12px;height:12px;transform:rotate(45deg);background:var(--gc,var(--ju));flex:none}
+#gHead p{font:500 13px var(--sans);color:var(--mu);margin-top:6px}
+#gBody{padding-right:22px;user-select:text}
+#gBody h4{font:800 17px var(--serif);color:var(--sel);margin:18px 0 6px;display:flex;align-items:center;gap:8px}
+#gBody h4:before{content:"";width:6px;height:6px;background:var(--geum);transform:rotate(45deg)}
+#gBody p{font:500 15px/1.8 var(--serif);color:var(--meok);margin:0 0 10px}
+#gBody .li{font:500 14.5px/1.7 var(--serif);color:var(--meok);padding-left:16px;position:relative;margin:2px 0}
+#gBody .li:before{content:"";position:absolute;left:3px;top:.8em;width:5px;height:5px;background:var(--ju);transform:rotate(45deg)}
+#gBody .li.cmd:before{background:var(--sel)}
+#gBody strong{font-weight:800}
+#gBody mark{background:rgba(197,160,77,.45);color:inherit;padding:0 1px}
+.rg{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:6px}
+.rgc{border:1px solid rgba(73,48,31,.3);background:rgba(245,236,216,.6);padding:12px 14px}
+.rgc b{font:800 18px var(--serif);display:block}.rgc em{font-style:normal;font:500 12px var(--sans);color:var(--mu2)}
+.rgc ul{list-style:none;margin:8px 0 0;padding:0}.rgc li{font:500 13px/1.6 var(--sans);color:var(--meok)}
+.rgc li .k{margin-right:6px}
 .mcols{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1.45fr;gap:16px}
 .mcols>div{display:flex;flex-direction:column;min-height:0}
 .verbox{display:flex;gap:14px;align-items:center;padding:11px 13px;background:rgba(23,78,69,.08);border:1px solid rgba(23,78,69,.35);margin-bottom:12px}
@@ -372,6 +401,7 @@ canvas#fib{position:absolute;inset:0}
 
 <aside class="side"><nav id="rail">
   <button class="ri on" id="homeRi" data-home><span class="md"><svg viewBox="0 0 24 24"><path d="M12 3 2 12h3v8h6v-6h2v6h6v-8h3z"/></svg></span><span>홈</span></button>
+  <button class="ri" data-ov="guide"><span class="md"><svg viewBox="0 0 24 24"><path d="M6 2h11a3 3 0 0 1 3 3v17H7a3 3 0 0 1-3-3V4a2 2 0 0 1 2-2m0 2v13.2c.3-.1.6-.2 1-.2h11V5a1 1 0 0 0-1-1zm1 15a1 1 0 0 0 0 2h11v-2zM8 7h8v2H8zm0 4h6v2H8z"/></svg></span><span>안내</span></button>
   <button class="ri" data-ov="map"><span class="md"><svg viewBox="0 0 24 24"><path d="M15 5.1 9 3 3 5.2v15.7l6-2.1 6 2.1 6-2.2V3zM10 5.4l4 1.4v11.8l-4-1.4zM5 6.6l3-1v11.8l-3 1zm11 11.8V6.6l3-1v11.8z"/></svg></span><span>지도</span></button>
   <button class="ri" data-ov="players"><span class="md"><svg viewBox="0 0 24 24"><path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8m7.5.5a3.5 3.5 0 1 0-1.2-6.8 6 6 0 0 1 0 6.6c.4.1.8.2 1.2.2M9 13c-3.3 0-7 1.6-7 4.5V20h14v-2.5C16 14.6 12.3 13 9 13m8.1.1c1.6.8 2.9 2.2 2.9 4.4V20h2v-2.5c0-2.1-2.4-3.8-4.9-4.4"/></svg></span><span>접속자</span></button>
   <button class="ri" data-ov="news" id="newsRi"><span class="md"><svg viewBox="0 0 24 24"><path d="M4 4h13v3h3v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2 2v12h10V6zM8 8h6v2H8zm0 4h6v2H8z"/></svg></span><span>소식</span></button>
@@ -418,6 +448,15 @@ canvas#fib{position:absolute;inset:0}
     <div><div class="cap">관아 방<span>공지</span></div><div class="scroll vfill" id="notice"></div></div>
     <div class="doc cl pad"><div class="cap">세력 실록<span>연대기</span></div><div class="scroll vfill"><div class="tl" id="chron"></div></div></div>
     <div class="doc cl pad"><div class="cap">승정원 전갈<span>전쟁 소식</span></div><div class="scroll vfill rule" id="feed2"></div></div>
+  </div>
+</section>
+<!-- ================= 안내 (1.7.6) ================= -->
+<section class="ov" id="ov-guide">
+  <div class="ph"><h2 data-ttl>안내</h2><div class="sub">게임 규칙과 시스템 · 게임 속 <b style="color:var(--ju)">/가이드</b> 와 같은 내용이에요</div><button class="bs back" data-close>← 홈으로</button></div>
+  <div class="gcols">
+    <div class="doc cl pad" style="display:flex;flex-direction:column;min-height:0"><div class="cap">목차<span id="gCnt"></span></div>
+      <input id="gSearch" type="search" placeholder="찾을 낱말 (예: 약탈, 창고, 탈취)" autocomplete="off"><div id="gToc" class="scroll vfill"></div></div>
+    <div class="doc cl" style="display:flex;flex-direction:column;min-height:0;padding:20px 8px 16px 30px"><div id="gHead"></div><div id="gBody" class="scroll vfill"></div></div>
   </div>
 </section>
 <!-- ================= 지도 ================= -->
@@ -578,6 +617,78 @@ function tone(c){const [r,g,b]=hex(c),k=.32,m=[74,58,40];const t=[r,g,b].map((v,
 let NCOL={};   // 세력 이름 → 차분한 색
 const ncol=n=>n?(NCOL[n]||"#8a7a62"):"#8a7a62";
 
+
+// ---------------- 1.7.6 안내: 게임 속 /가이드 책을 런처에서 (줄 나눔은 책 폭에 맞춘 거라 문단으로 다시 이음)
+let GD=null, gSel=0, gQ="";
+const LISTM=/^\s*([•▶◆◇★☆※→]|[·\-–]\s|\d+[.)]\s|[①-⑳]|\/)/, ENDS=/([.!?…:)」』]|[요다죠])\s*$/;
+function gRuns2Lines(pages){const L=[[]];
+  pages.forEach((runs,pi)=>{ if(pi>0){L.push([]);L.push([])}
+    for(const r of runs){const parts=String(r.t).split("\n");parts.forEach((t,i)=>{if(i>0)L.push([]);if(t)L[L.length-1].push({t,b:!!r.b,c:r.c||""})})}});
+  return L}
+function gBlocks(ch){const lines=gRuns2Lines(ch.pages||[]), out=[]; let cur=null, prevT="";
+  const txt=l=>l.map(r=>r.t).join("").trim();
+  const add=(blk,l,t)=>{const runs=blk.p||blk.li;const glue=/[·\/]$/.test(prevT)||/^·/.test(t)?"":" ";if(glue)runs.push({t:glue});runs.push(...l)};
+  for(let i=0;i<lines.length;i++){const l=lines[i], t=txt(l);
+    if(!t){cur=null;prevT="";continue}
+    if(t===ch.title&&!cur){continue}                                       // 장 첫 쪽의 제목 줄
+    const allB=l.every(r=>r.b||!r.t.trim()), nextBlank=i+1>=lines.length||!txt(lines[i+1]);
+    if(allB&&t.length<=24&&(!cur||nextBlank)&&!/^[\/·•]/.test(t)){out.push({h:l});cur=null;prevT="";continue}
+    const bullet=/^\s*([•▶◆◇★☆※→]|[·\-–]\s|\d+[.)]\s|[①-⑳])/.test(t);
+    if(cur&&!bullet&&!ENDS.test(prevT)){add(cur,l,t)}                       // 문장이 아직 안 끝났으면 이어 붙임
+    else if(bullet||LISTM.test(t)){const rs=l.map(r=>({...r}));if(bullet){const k=rs.findIndex(r=>r.t.trim());if(k>=0)rs[k].t=rs[k].t.replace(/^\s*([•▶◆◇★☆※→]|[·\-–])\s*/,"")}
+      cur={li:rs,cmd:t.startsWith("/")};out.push(cur)}
+    else if(cur&&cur.p){add(cur,l,t)}
+    else{cur={p:[...l]};out.push(cur)}
+    prevT=t}
+  return out}
+function gText(ch){return (ch.title+" "+(ch.summary||"")+" "+(ch.pages||[]).map(p=>p.map(r=>r.t).join("")).join(" ")).replace(/\n/g," ")}
+function gEl(tag,runs,cls){const e=document.createElement(tag);if(cls)e.className=cls;
+  for(const r of runs){let n;const t=r.t;
+    if(gQ){const parts=t.split(new RegExp("("+gQ.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")","gi"));n=document.createElement("span");
+      parts.forEach((x,i)=>{if(!x)return;if(i%2){const m=document.createElement("mark");m.textContent=x;n.appendChild(m)}else n.appendChild(document.createTextNode(x))})}
+    else n=document.createTextNode(t);
+    if(r.b||r.c){const w=document.createElement(r.b?"strong":"span");if(r.c&&/^#[0-9a-f]{6}$/i.test(r.c))w.style.color=inkTone(r.c);w.appendChild(n);n=w}
+    e.appendChild(n)}
+  return e}
+function gChapters(){if(!GD)return[];const cs=(GD.chapters||[]).slice();
+  if((GD.regions||[]).length){const at=Math.min(2,cs.length);cs.splice(at,0,{id:"_regions",title:"성과 특산품",summary:"성마다 신상과 차지하면 얻는 효과",color:"#c5a04d",regions:GD.regions})}
+  return cs}
+function gToc(){const cs=gChapters(), q=gQ.toLowerCase(), box=$("gToc");box.innerHTML="";let shown=0;
+  cs.forEach((ch,i)=>{let hits=0;
+    if(q){const all=ch.regions?ch.regions.map(r=>r.name+" "+r.statue+" "+r.perks.map(p=>p.name+" "+p.desc).join(" ")).join(" "):gText(ch);
+      hits=all.toLowerCase().split(q).length-1;if(!hits)return}
+    shown++;const b=document.createElement("button");b.className="gi"+(i===gSel?" on":"");
+    if(ch.color&&/^#[0-9a-f]{6}$/i.test(ch.color))b.style.setProperty("--gc",inkTone(ch.color));
+    const no=document.createElement("span");no.className="no";no.textContent=String(i+1);b.appendChild(no);
+    const tx=document.createElement("span");tx.style.minWidth="0";const bb=document.createElement("b");bb.textContent=ch.title;const sm=document.createElement("small");sm.textContent=ch.summary||"";tx.append(bb,sm);b.appendChild(tx);
+    if(q){const h=document.createElement("span");h.className="hit";h.textContent=hits+"곳";b.appendChild(h)}
+    b.onclick=()=>{gSel=i;gToc();gShow()};box.appendChild(b)});
+  $("gCnt").textContent=q?shown+"장에서 찾음":cs.length+"장";
+  if(!shown){const d=document.createElement("div");d.style.cssText="padding:14px 4px;color:var(--mu);font-size:13px";d.textContent="찾는 낱말이 없어요.";box.appendChild(d)}}
+function gShow(){const ch=gChapters()[gSel], head=$("gHead"), body=$("gBody");head.innerHTML="";body.innerHTML="";if(!ch)return;
+  const h=document.createElement("h3"), dot=document.createElement("i");if(ch.color&&/^#[0-9a-f]{6}$/i.test(ch.color))head.style.setProperty("--gc",inkTone(ch.color));
+  h.append(dot,document.createTextNode(ch.title));const p=document.createElement("p");p.textContent=ch.summary||"";head.append(h,p);
+  if(ch.regions){const g=document.createElement("div");g.className="rg";
+    const intro=document.createElement("p");intro.textContent="성(코어)을 차지하면 그 성의 특산품 효과를 우리 세력 모두가 받아요. 성마다 지역을 닮은 신상이 서 있어요.";body.appendChild(intro);
+    ch.regions.forEach(r=>{const c=document.createElement("div");c.className="rgc";const b=document.createElement("b");b.textContent=r.name;const e=document.createElement("em");e.textContent=r.statue?"신상 · "+r.statue:"";
+      const ul=document.createElement("ul");(r.perks||[]).forEach(pk=>{const li=document.createElement("li");const k=document.createElement("span");k.className="k";k.textContent=pk.name;li.append(k,document.createTextNode(pk.desc));ul.appendChild(li)});
+      if(!(r.perks||[]).length){const li=document.createElement("li");li.textContent="특산품 없음";li.style.color="var(--mu2)";ul.appendChild(li)}
+      c.append(b,e,ul);g.appendChild(c)});body.appendChild(g);body.scrollTop=0;return}
+  for(const bl of gBlocks(ch)){
+    if(bl.h)body.appendChild(gEl("h4",bl.h));
+    else if(bl.li)body.appendChild(gEl("div",bl.li,"li"+(bl.cmd?" cmd":"")));
+    else body.appendChild(gEl("p",bl.p))}
+  body.scrollTop=0;
+  if(gQ){const m=body.querySelector("mark");if(m)m.scrollIntoView({block:"center"})}}
+async function loadGuide(){
+  if(!GD){$("gBody").innerHTML='<p style="color:var(--mu)">안내를 불러오는 중…</p>'}
+  let d;try{d=await(await fetch("/api/guide",{cache:"no-store"})).json()}catch(e){d={error:"안내를 불러오지 못했어요"}}
+  if(d.error&&!GD){$("gHead").innerHTML="";const p=document.createElement("p");p.style.color="var(--ju)";p.textContent=d.error+" — 서버가 켜져 있을 때 다시 열어 주세요.";$("gBody").innerHTML="";$("gBody").appendChild(p);return}
+  if(!d.error){GD=d}
+  gToc();gShow()}
+$("gSearch").addEventListener("input",e=>{gQ=e.target.value.trim();const cs=gChapters();
+  if(gQ){const q=gQ.toLowerCase();const i=cs.findIndex(ch=>(ch.regions?JSON.stringify(ch.regions):gText(ch)).toLowerCase().includes(q));if(i>=0)gSel=i}
+  gToc();gShow()});
 // ---------------- 해시계 (앙부일구)
 function sundial(){let s=`<defs><radialGradient id="bowl" cx="50%" cy="20%" r="80%"><stop offset="0" stop-color="#e9c97a"/><stop offset="1" stop-color="#8a6a2c"/></radialGradient></defs><path d="M8 20 A40 40 0 0 0 88 20 Z" fill="url(#bowl)" stroke="#49301F" stroke-width="2"/><ellipse cx="48" cy="20" rx="40" ry="7" fill="#f3e2b6" stroke="#49301F" stroke-width="2"/>`;
  for(let i=0;i<=12;i++){const a=Math.PI*(i/12);s+=`<line x1="48" y1="20" x2="${48-Math.cos(a)*38}" y2="${20+Math.sin(a)*36}" stroke="#49301F" stroke-width="${i%3?.6:1.2}" opacity=".55"/>`}
@@ -587,7 +698,7 @@ function sundial(){let s=`<defs><radialGradient id="bowl" cx="50%" cy="20%" r="8
 sundial(); setInterval(sundial,60000);
 
 // ---------------- 덮개 화면 (인장이 찍히며 넘어감)
-const TTL={map:"지도",players:"접속자",news:"소식",donate:"후원",mods:"모드",settings:"설정"};
+const TTL={guide:"안내",map:"지도",players:"접속자",news:"소식",donate:"후원",mods:"모드",settings:"설정"};
 const LOTUS=`<svg viewBox="0 0 30 30"><g fill="#982D25">${[0,45,90,135,180,225,270,315].map(a=>`<ellipse cx="15" cy="7.5" rx="3.6" ry="7" transform="rotate(${a} 15 15)" opacity="${a%90?.55:.9}"/>`).join("")}<circle cx="15" cy="15" r="4.5" fill="#C5A04D"/></g></svg>`;
 document.querySelectorAll("[data-ttl]").forEach(h=>h.insertAdjacentHTML("afterbegin",LOTUS));
 function openOv(n){
@@ -599,6 +710,7 @@ function openOv(n){
   $("home").style.opacity=n?0:1; $("home").style.pointerEvents=n?"none":""; cur=n; decor(n);
   if(n==="map") setTimeout(()=>{fitMap(false)},30);
   if(n==="mods") loadMods();
+  if(n==="guide") loadGuide();
   if(n==="settings") dcStatus();
   if(n==="news"){ try{localStorage.setItem("kwSeen",String(noticeKey()))}catch(e){} $("ncnt").hidden=true; badge(); }
 }
@@ -1091,7 +1203,7 @@ let dcLinked="";
 $("dcLink").onclick=async()=>{await post("/api/discord");$("dcState").textContent="브라우저에서 디스코드 승인을 마쳐 주세요";setTimeout(dcStatus,8000)};
 setInterval(()=>{if(cur==="settings")dcStatus()},5000);
 $("quit").onclick=async()=>{await post("/api/quit");document.body.innerHTML='<div style="padding:44px;color:#49301F;font:16px sans-serif">런처를 껐어요. 이 창은 닫아도 돼요.</div>'};
-{const h=location.hash.slice(1); if(["map","players","news","settings","mods","donate"].includes(h)) setTimeout(()=>openOv(h),50);}
+{const h=location.hash.slice(1); if(["guide","map","players","news","settings","mods","donate"].includes(h)) setTimeout(()=>openOv(h),50);}
 // 1.2.7 인라인 이벤트 대신 (CSP): 그림 못 불러오면 숨기기
 document.addEventListener("error",e=>{const t=e.target;if(!t||t.tagName!=="IMG"||!t.dataset.fb)return;if(t.dataset.fb==="q"){const d=document.createElement("div");d.className="q";d.textContent="?";t.replaceWith(d)}else t.style.visibility="hidden"},true);
 {let bye=false;const sayBye=()=>{if(bye||window.__noBye)return;bye=true;try{navigator.sendBeacon("/api/bye",new Blob([TOKEN],{type:"text/plain"}))}catch(e){}};addEventListener("pagehide",sayBye);addEventListener("beforeunload",sayBye);} // 1.5.1 창을 닫으면 런처도 끝
