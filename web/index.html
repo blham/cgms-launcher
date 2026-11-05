@@ -209,6 +209,10 @@ canvas#fib{position:absolute;inset:0}
 #cdet p{font:500 12.5px/1.65 var(--sans);color:#4a3a24;margin-top:5px}
 #cdet .hpb{height:8px;background:rgba(73,48,31,.15);margin-top:6px}#cdet .hpb i{display:block;height:100%}
 #cdet .att{margin-top:7px;font:700 12px var(--serif);color:var(--juH)}
+#cdet .stimg{margin:8px 0 2px;text-align:center;background:radial-gradient(ellipse at 50% 70%,rgba(197,160,77,.25),transparent 70%)}
+#cdet .stimg img{width:150px;height:auto;display:block;margin:0 auto}
+#cdet .stimg small{display:block;font:500 11px var(--sans);color:var(--mu2);margin-top:2px}
+.rgc{display:grid;grid-template-columns:1fr auto;column-gap:10px}.rgc .rimg{grid-row:1/4;grid-column:2;width:92px;align-self:center}
 .ci{display:grid;grid-template-columns:auto 1fr 96px;gap:9px;align-items:center;padding:7px 2px;border-bottom:1px solid var(--line);cursor:pointer;font:700 13.5px var(--serif)}
 .ci:hover{background:rgba(255,250,236,.6)}
 .ci i{width:9px;height:9px;transform:rotate(45deg)}.ci small{font:500 11px var(--sans);color:var(--mu2);margin-left:6px}
@@ -680,13 +684,17 @@ function gShow(){const ch=gChapters()[gSel], head=$("gHead"), body=$("gBody");he
     ch.regions.forEach(r=>{const c=document.createElement("div");c.className="rgc";const b=document.createElement("b");b.textContent=r.name;const e=document.createElement("em");e.textContent=r.statue?"신상 · "+r.statue:"";
       const ul=document.createElement("ul");(r.perks||[]).forEach(pk=>{const li=document.createElement("li");const k=document.createElement("span");k.className="k";k.textContent=pk.name;li.append(k,document.createTextNode(pk.desc));ul.appendChild(li)});
       if(!(r.perks||[]).length){const li=document.createElement("li");li.textContent="특산품 없음";li.style.color="var(--mu2)";ul.appendChild(li)}
-      c.append(b,e,ul);g.appendChild(c)});body.appendChild(g);body.scrollTop=0;return}
+      c.append(b,e,ul);
+      if(typeof r.img==="string"&&/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/.test(r.img)){const im=document.createElement("img");im.className="rimg";im.src=r.img;im.alt="";c.appendChild(im)}
+      g.appendChild(c)});body.appendChild(g);body.scrollTop=0;return}
   for(const bl of gBlocks(ch)){
     if(bl.h)body.appendChild(gEl("h4",bl.h));
     else if(bl.li)body.appendChild(gEl("div",bl.li,"li"+(bl.cmd?" cmd":"")));
     else body.appendChild(gEl("p",bl.p))}
   body.scrollTop=0;
   if(gQ){const m=body.querySelector("mark");if(m)m.scrollIntoView({block:"center"})}}
+async function preloadGuide(){if(GD)return;try{const d=await(await fetch("/api/guide",{cache:"no-store"})).json();if(!d.error)GD=d}catch(e){}}
+setTimeout(preloadGuide,2500);
 async function loadGuide(){
   if(!GD){$("gBody").innerHTML='<p style="color:var(--mu)">안내를 불러오는 중…</p>'}
   let d;try{d=await(await fetch("/api/guide",{cache:"no-store"})).json()}catch(e){d={error:"안내를 불러오지 못했어요"}}
@@ -1055,7 +1063,8 @@ function drawMarks(){
 function showCore(i){const c=info.cores[i];if(!c)return;selCore=i;focusCore(i);
   const pct=c.maxHp?Math.round(c.hp*100/c.maxHp):0, col=c.owner?ncol(c.owner):"#8a7a62";
   $("cdet").hidden=false;
-  $("cdet").innerHTML=`<button class="x" id="cdx">✕</button><h4>${c.owner?emb(c.owner,col):`<span class="em" style="background:#8a7a62"></span>`}${esc(c.name)}</h4>
+  const rg=GD&&(GD.regions||[]).find(r=>r.name===c.name), okImg=rg&&typeof rg.img==="string"&&/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/.test(rg.img);
+  $("cdet").innerHTML=`<button class="x" id="cdx">✕</button><h4>${c.owner?emb(c.owner,col):`<span class="em" style="background:#8a7a62"></span>`}${esc(c.name)}</h4>${okImg?`<div class="stimg"><img src="${rg.img}" alt=""><small>${esc(rg.statue||"")}</small></div>`:""}
    <p>주인: <b style="color:${col}">${esc(c.owner||"없음")}</b><br>성벽 기운: ${num(c.hp).toLocaleString("ko-KR")} / ${num(c.maxHp).toLocaleString("ko-KR")} (${pct}%)<br>자리: ${num(c.x)}, ${num(c.z)}</p>
    <div class="hpb"><i style="width:${pct}%;background:${pct<35?"#b83c2e":pct<70?"#c5a04d":"#24695d"}"></i></div>${c.attacked?`<div class="att">⚑ 지금 공격받고 있어요</div>`:""}`;
   $("cdx").onclick=()=>{$("cdet").hidden=true;selCore=-1;drawMarks()}; drawMarks()}
