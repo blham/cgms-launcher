@@ -262,6 +262,11 @@ type OptMod struct {
 	Lib         bool     `json:"lib"`              // 라이브러리: 목록에 안 보이고 필요할 때만 같이 받음
 	Detail      string   `json:"detail,omitempty"` // 누르면 보이는 자세한 설명
 	Link        string   `json:"link,omitempty"`   // 모드 페이지 (https)
+	// 1.7.9 셰이더팩: 서버 manifest 의 shaders 를 이 목록에 같이 보여 줌 (Kind "shader"). 파일은 Modrinth 에서 바로 받음
+	Kind   string `json:"kind,omitempty"`
+	URL    string `json:"url,omitempty"`
+	Sha256 string `json:"sha256,omitempty"`
+	Credit string `json:"credit,omitempty"`
 }
 
 // 실제로 받을 편의성 모드 (id): 켠 것 + 그것들이 필요로 하는 것(줄줄이). neededBy[id] = 그걸 필요로 하는 켠 모드 이름들
@@ -310,6 +315,7 @@ type Manifest struct {
 	Server        string            `json:"server"`
 	Mods          []ModFile         `json:"mods"`
 	Optional      []OptMod          `json:"optional"`
+	Shaders       []OptMod          `json:"shaders,omitempty"` // 1.7.9 셰이더팩 (Modrinth 주소 + sha256)
 	BlockedMods   []string          `json:"blockedMods"` // 서버가 막는 모드 id (미니맵 등)
 	Launcher      string            `json:"launcher"`
 	LauncherFiles map[string]string `json:"launcherFiles"`
@@ -443,6 +449,7 @@ func fetchManifest() (*Manifest, error) {
 		return nil, fmt.Errorf("서버가 알려 준 Fabric 버전이 이상해요")
 	}
 	applySigned(&m)
+	mergeShaders(&m)
 	b, _ := json.MarshalIndent(m, "", "  ")
 	_ = os.WriteFile(filepath.Join(dataDir, "manifest.json"), b, 0o644)
 	manifestMu.Lock()
@@ -537,6 +544,9 @@ func syncMods(man *Manifest) error {
 	}
 	active, _ := optActive(man)
 	for _, m := range man.Optional {
+		if m.Kind == "shader" {
+			continue
+		}
 		if m.File == "" || strings.ContainsAny(m.File, `/\`) || want[m.File] || !active[m.ID] {
 			continue
 		}
@@ -571,6 +581,7 @@ func syncMods(man *Manifest) error {
 	}
 	b, _ := json.Marshal(now)
 	_ = os.WriteFile(managedPath, b, 0o644)
+	syncShaders(man, active)
 	return nil
 }
 

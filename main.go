@@ -66,6 +66,7 @@ type Config struct {
 	RealName  string          `json:"realName,omitempty"`       // 1.4.6 게임 속 이름(실명): 다른 사람에게 이 이름으로 보임
 	DiscordS  string          `json:"discordSession,omitempty"` // 1.4.8 디스코드 연결용 무작위 표 (서버가 디스코드 계정을 이 표에 붙임)
 	Terms     string          `json:"terms,omitempty"`          // 1.7.4 동의한 이용약관 판 (1.7.5 설치할 때 한 번만 받음, 판이 바뀌어도 다시 묻지 않음)
+	ShaderSet map[string]bool `json:"shaderSet,omitempty"`      // 1.7.9 셰이더팩을 처음 받았을 때 한 번만 Iris 에 골라 둠 (그 뒤엔 본인이 고른 대로)
 }
 
 // 1.7.4 이용약관·개인정보 안내 판 (web/terms.html 을 바꾸면 올릴 것)
