@@ -597,6 +597,35 @@ func writeGameDefaults() {
 	if _, err := os.Stat(sd); err != nil {
 		_ = os.WriteFile(sd, serversDat("AsiaWar", serverAddr()), 0o644)
 	}
+	quietFootsteps(gd)
+}
+
+// 1.8.5 발소리 모드(Presence Footsteps)가 너무 커서 처음 한 번만 전체 소리를 35% 로 (그 뒤 본인이 바꾼 건 그대로 둠)
+func quietFootsteps(gd string) {
+	mark := filepath.Join(gd, ".asiawar-footsteps-185")
+	if _, err := os.Stat(mark); err == nil {
+		return
+	}
+	p := filepath.Join(gd, "config", "presencefootsteps", "userconfig.json")
+	m := map[string]any{}
+	if b, err := os.ReadFile(p); err == nil {
+		if json.Unmarshal(b, &m) != nil {
+			m = map[string]any{}
+		}
+	}
+	switch v := m["volume"].(type) {
+	case map[string]any:
+		v["volume"] = 35
+	case float64:
+		m["volume"] = 35
+	default:
+		m["volume"] = map[string]any{"volume": 35}
+	}
+	b, _ := json.MarshalIndent(m, "", "  ")
+	_ = os.MkdirAll(filepath.Dir(p), 0o755)
+	if os.WriteFile(p, b, 0o644) == nil {
+		_ = os.WriteFile(mark, []byte("1"), 0o644)
+	}
 }
 
 func serverAddr() string {
