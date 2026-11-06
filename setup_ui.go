@@ -198,7 +198,7 @@ func setupPreview() {
 	}
 	u, err := startSetupUI([]setupStep{{"켜져 있는 런처 정리", fake(600 * time.Millisecond)}, {"런처 파일 복사", fake(2 * time.Second)},
 		{"바탕화면·시작 메뉴 바로가기", fake(time.Second)}, {"\"앱 및 기능\"에 등록", fake(time.Second)}, {"동의 저장", fake(300 * time.Millisecond)}},
-		`C:\Users\이름\AppData\Local\Programs\KoreaWarLauncher`)
+		`C:\Users\이름\AppData\Local\Programs\AsiaWarLauncher`)
 	if err != nil {
 		fmt.Println(err)
 		return

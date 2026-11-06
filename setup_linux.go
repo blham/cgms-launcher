@@ -2,7 +2,7 @@
 
 package main
 
-// 리눅스 설치: 처음 켜면 ~/.local/share/koreawar-launcher/app 으로 복사하고
+// 리눅스 설치: 처음 켜면 ~/.local/share/asiawar-launcher/app 으로 (예전에 깐 사람은 koreawar-launcher 그대로) 복사하고
 // 앱 메뉴(~/.local/share/applications)와 바탕화면에 아이콘을 만든 뒤 설치된 런처를 켬.
 
 import (
@@ -37,13 +37,15 @@ func writeDesktopFiles(target string) {
 	if b, err := webFS.ReadFile("web/icon.png"); err == nil {
 		_ = os.WriteFile(icon, b, 0o644)
 	}
-	entry := fmt.Sprintf("[Desktop Entry]\nType=Application\nName=CGMS Launcher\nComment=Korea War 서버 전용 런처\nExec=\"%s\"\nIcon=%s\nTerminal=false\nCategories=Game;\nStartupWMClass=KoreaWarLauncher\n", target, icon)
+	entry := fmt.Sprintf("[Desktop Entry]\nType=Application\nName=CGMS Launcher\nComment=Asia War 서버 전용 런처\nExec=\"%s\"\nIcon=%s\nTerminal=false\nCategories=Game;\nStartupWMClass=AsiaWarLauncher\n", target, icon)
 	home, _ := os.UserHomeDir()
 	apps := filepath.Join(home, ".local", "share", "applications")
 	_ = os.MkdirAll(apps, 0o755)
-	_ = os.WriteFile(filepath.Join(apps, "koreawar-launcher.desktop"), []byte(entry), 0o755)
+	_ = os.Remove(filepath.Join(apps, "koreawar-launcher.desktop")) // 1.8.1 예전 이름
+	_ = os.WriteFile(filepath.Join(apps, "asiawar-launcher.desktop"), []byte(entry), 0o755)
 	if d := desktopDir(); d != "" {
-		p := filepath.Join(d, "koreawar-launcher.desktop")
+		_ = os.Remove(filepath.Join(d, "koreawar-launcher.desktop"))
+		p := filepath.Join(d, "asiawar-launcher.desktop")
 		_ = os.WriteFile(p, []byte(entry), 0o755)
 		_ = exec.Command("gio", "set", p, "metadata::trusted", "true").Run() // 그놈: "실행 허용"
 	}
@@ -53,7 +55,7 @@ func maybeInstall(args []string) bool {
 	if skipInstall(args) {
 		return false
 	}
-	exe, target := selfExe(), filepath.Join(linuxInstallDir(), "KoreaWarLauncher")
+	exe, target := selfExe(), filepath.Join(linuxInstallDir(), "AsiaWarLauncher")
 	if filepath.Clean(exe) == filepath.Clean(target) {
 		return false
 	}
@@ -70,3 +72,5 @@ func maybeInstall(args []string) bool {
 	}
 	return true
 }
+
+func renameLegacyBundle() {}

@@ -1,7 +1,7 @@
 package main
 
 // 자동 업데이트: 켤 때마다 서버(manifest 의 launcher 버전)와 비교해 새 버전이면 받아서(sha1 확인) 실행 파일을 바꾸고 다시 켬.
-// 서버장은 plugins/KoreaWar/launcher/ 에 플랫폼별 런처 파일을 넣어 두면 됨 (이름은 updateAssetName).
+// 서버장은 plugins/AsiaWar/launcher/ 에 플랫폼별 런처 파일을 넣어 두면 됨 (이름은 updateAssetName).
 
 import (
 	"os"
@@ -18,11 +18,11 @@ func updateAssetName() string {
 	}
 	switch runtime.GOOS {
 	case "windows":
-		return "KoreaWarLauncher-windows-" + arch + ".exe"
+		return "AsiaWarLauncher-windows-" + arch + ".exe"
 	case "darwin":
-		return "KoreaWarLauncher-mac-" + arch
+		return "AsiaWarLauncher-mac-" + arch
 	default:
-		return "KoreaWarLauncher-linux-" + arch
+		return "AsiaWarLauncher-linux-" + arch
 	}
 }
 

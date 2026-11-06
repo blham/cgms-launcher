@@ -469,7 +469,7 @@ func ensureJava(component string) (string, error) {
 	return j, nil
 }
 
-// ---------------------------------------------------------------- 보조 모드 (서버의 plugins/KoreaWar/mod)
+// ---------------------------------------------------------------- 보조 모드 (서버의 plugins/AsiaWar/mod)
 func unzipNatives(jar, dest string) error {
 	r, err := zip.OpenReader(jar)
 	if err != nil {

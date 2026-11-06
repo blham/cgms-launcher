@@ -4,8 +4,8 @@ package main
 // 모장이 로그인 앱을 허가해 주지 않아서, 로그인·게임 실행은 공식 런처가 하고 이 런처는 준비만 함:
 //   - Fabric 버전 정보를 공식 런처 폴더(.minecraft/versions)에 넣음 (게임 파일·자바는 공식 런처가 받음)
 //   - 보조·편의성 모드는 이 런처의 게임 폴더(game/mods)에 받음 (원래 마인크래프트 모드 폴더와 섞이지 않음)
-//   - 공식 런처에 "Korea War" 설치 프로필을 만들고(게임 폴더·메모리 지정) 공식 런처를 열어 줌
-//   - "서버로 바로 접속"은 게임 폴더의 koreawar-join.txt 를 보조 모드(1.2.5)가 읽어서 함
+//   - 공식 런처에 "Asia War" 설치 프로필을 만들고(게임 폴더·메모리 지정) 공식 런처를 열어 줌
+//   - "서버로 바로 접속"은 게임 폴더의 asiawar-join.txt (1.8.0 까지 koreawar-join.txt) 를 보조 모드(1.2.5)가 읽어서 함
 
 import (
 	"encoding/base64"
@@ -140,7 +140,7 @@ func writeProfile(versionID string) error {
 		if pr == nil {
 			pr = map[string]any{"created": now}
 		}
-		pr["name"] = "Korea War"
+		pr["name"] = "Asia War"
 		pr["type"] = "custom"
 		pr["lastUsed"] = now // 맨 위(처음 고른 것)로
 		pr["lastVersionId"] = versionID
@@ -165,7 +165,7 @@ func writeProfile(versionID string) error {
 		wrote++
 	}
 	if wrote == 0 && lastErr != nil {
-		return fmt.Errorf("공식 런처에 Korea War 프로필을 만들지 못했어요: %v", lastErr)
+		return fmt.Errorf("공식 런처에 Asia War 프로필을 만들지 못했어요: %v", lastErr)
 	}
 	return nil
 }
@@ -176,7 +176,8 @@ var realNameRe = regexp.MustCompile(`^[가-힣]{2,10}$`) // 1.4.9 한글만 (마
 // 1.4.6 보조 모드(1.2.6~)가 접속할 때 읽어서 서버로 보냄
 func writeRealName() {
 	n := getCfg().RealName
-	p := filepath.Join(gameDir(), "koreawar-profile.txt")
+	_ = os.Remove(filepath.Join(gameDir(), "koreawar-profile.txt")) // 1.8.1 예전 이름 (보조 모드 1.4.2 는 새 이름을 먼저 읽음)
+	p := filepath.Join(gameDir(), "asiawar-profile.txt")
 	if n == "" {
 		_ = os.Remove(p)
 		return
@@ -199,7 +200,8 @@ func needRealName() error {
 
 // 서버로 바로 접속: 보조 모드가 첫 화면에서 읽고 지움 (10분 안에 켠 게임만)
 func writeAutoJoin() {
-	p := filepath.Join(gameDir(), "koreawar-join.txt")
+	_ = os.Remove(filepath.Join(gameDir(), "koreawar-join.txt"))
+	p := filepath.Join(gameDir(), "asiawar-join.txt")
 	if !getCfg().AutoJoin {
 		_ = os.Remove(p)
 		return
@@ -300,7 +302,7 @@ func playOfficial() {
 	}
 	writeGameDefaults()
 	writeAutoJoin()
-	setStatus("prepare", "공식 런처에 Korea War 프로필 만드는 중", 0)
+	setStatus("prepare", "공식 런처에 Asia War 프로필 만드는 중", 0)
 	if err := writeProfile(id); err != nil {
 		fail(err)
 		return
@@ -311,11 +313,11 @@ func playOfficial() {
 	handoffMu.Unlock()
 	if !ok {
 		statusMu.Lock()
-		status = Status{Phase: "error", Text: "준비는 끝났어요", Error: "공식 마인크래프트 런처를 찾지 못했어요. minecraft.net 에서 설치하고 로그인한 뒤, 설치 프로필에서 'Korea War' 를 골라 플레이하세요."}
+		status = Status{Phase: "error", Text: "준비는 끝났어요", Error: "공식 마인크래프트 런처를 찾지 못했어요. minecraft.net 에서 설치하고 로그인한 뒤, 설치 프로필에서 'Asia War' 를 골라 플레이하세요."}
 		statusMu.Unlock()
 		return
 	}
-	msg := "공식 런처를 열었어요. 'Korea War' 를 골라 플레이를 누르세요."
+	msg := "공식 런처를 열었어요. 'Asia War' 를 골라 플레이를 누르세요."
 	if len(lastBlocked) > 0 {
 		msg += " (미니맵·지도 모드는 이 서버에서 못 써서 mods-blocked 폴더로 뺐어요: " + strings.Join(lastBlocked, ", ") + ")"
 	} else if len(lastUnsigned) > 0 {

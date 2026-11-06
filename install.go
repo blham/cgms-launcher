@@ -247,7 +247,7 @@ type ModFile struct {
 	Size int64  `json:"size"`
 }
 
-// 편의성 모드 (서버 plugins/KoreaWar/mod/optional): 사람마다 런처 "모드" 화면에서 켜고 끔
+// 편의성 모드 (서버 plugins/AsiaWar/mod/optional): 사람마다 런처 "모드" 화면에서 켜고 끔
 type OptMod struct {
 	File        string   `json:"file"`
 	Sha1        string   `json:"sha1"`
@@ -460,7 +460,7 @@ func fetchManifest() (*Manifest, error) {
 
 func dirs(sub ...string) string { return filepath.Join(append([]string{dataDir}, sub...)...) }
 
-// ---------------------------------------------------------------- 보조 모드 (서버의 plugins/KoreaWar/mod)
+// ---------------------------------------------------------------- 보조 모드 (서버의 plugins/AsiaWar/mod)
 func gameDir() string { return dirs("game") }
 
 // jar 안 fabric.mod.json 의 id
@@ -595,7 +595,7 @@ func writeGameDefaults() {
 	}
 	sd := filepath.Join(gd, "servers.dat")
 	if _, err := os.Stat(sd); err != nil {
-		_ = os.WriteFile(sd, serversDat("KoreaWar", serverAddr()), 0o644)
+		_ = os.WriteFile(sd, serversDat("AsiaWar", serverAddr()), 0o644)
 	}
 }
 

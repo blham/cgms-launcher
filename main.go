@@ -1,5 +1,5 @@
-// CGMS Launcher (Korea War 서버 전용): Fabric + 보조 모드를 받아(업데이트) 게임을 켬.
-// 서명된 서버 정보에 승인된 앱 ID(client id)가 있으면 마이크로소프트 로그인 후 직접 켜고, 없으면 공식 런처에 "Korea War" 프로필을 만들어 엶.
+// CGMS Launcher (Asia War 서버 전용): Fabric + 보조 모드를 받아(업데이트) 게임을 켬.
+// 서명된 서버 정보에 승인된 앱 ID(client id)가 있으면 마이크로소프트 로그인 후 직접 켜고, 없으면 공식 런처에 "Asia War" 프로필을 만들어 엶.
 // 화면은 기본 웹 브라우저에 띄움 (http://localhost:25585). 표준 라이브러리만 씀 (윈도우·맥·리눅스 한 소스).
 package main
 
@@ -86,18 +86,40 @@ func defaultDataDir() string {
 	home, _ := os.UserHomeDir()
 	switch runtime.GOOS {
 	case "windows":
-		if a := os.Getenv("APPDATA"); a != "" {
-			return filepath.Join(a, "KoreaWarLauncher")
+		a := os.Getenv("APPDATA")
+		if a == "" {
+			a = filepath.Join(home, "AppData", "Roaming")
 		}
-		return filepath.Join(home, "AppData", "Roaming", "KoreaWarLauncher")
+		return pickDataDir(filepath.Join(a, "AsiaWarLauncher"), filepath.Join(a, "KoreaWarLauncher"), true)
 	case "darwin":
-		return filepath.Join(home, "Library", "Application Support", "KoreaWarLauncher")
+		s := filepath.Join(home, "Library", "Application Support")
+		return pickDataDir(filepath.Join(s, "AsiaWarLauncher"), filepath.Join(s, "KoreaWarLauncher"), true)
 	default:
-		if x := os.Getenv("XDG_DATA_HOME"); x != "" {
-			return filepath.Join(x, "koreawar-launcher")
+		x := os.Getenv("XDG_DATA_HOME")
+		if x == "" {
+			x = filepath.Join(home, ".local", "share")
 		}
-		return filepath.Join(home, ".local", "share", "koreawar-launcher")
+		// 리눅스는 설치된 런처가 자료 폴더 안(app)에 있어 바로가기가 깨지지 않게 예전 폴더를 그대로 씀
+		return pickDataDir(filepath.Join(x, "asiawar-launcher"), filepath.Join(x, "koreawar-launcher"), false)
 	}
+}
+
+var movedDataDir string // 1.8.1 이번에 옮긴 예전 자료 폴더 (로그에 남김)
+
+// 1.8.1 이름 변경 (Asia War → Asia War): 예전 자료 폴더가 있으면 새 이름으로 옮김.
+// 옮기지 못하면 (게임이나 예전 런처가 켜져 있는 등) 예전 폴더를 그대로 쓰고 다음에 켤 때 다시 해 봄.
+func pickDataDir(now, old string, move bool) string {
+	if _, err := os.Stat(now); err == nil {
+		return now
+	}
+	if st, err := os.Stat(old); err == nil && st.IsDir() {
+		if move && os.Rename(old, now) == nil {
+			movedDataDir = old
+			return now
+		}
+		return old
+	}
+	return now
 }
 
 func atoi(s string, d int) int {
@@ -172,6 +194,9 @@ func main() {
 		logger = log.New(os.Stderr, "", log.LstdFlags)
 	}
 	logger.Printf("CGMS Launcher %s (%s/%s) 자료 폴더 %s", LauncherVersion, runtime.GOOS, runtime.GOARCH, dataDir)
+	if movedDataDir != "" {
+		logger.Printf("예전 자료 폴더 %s 를 새 이름으로 옮김", movedDataDir)
+	}
 	loadConfig()
 	for _, a := range os.Args[1:] {
 		if a == "--setup-preview" && devBuild { // 1.7.4 개발용: 설치 화면만 (가짜 진행)
@@ -193,6 +218,7 @@ func main() {
 		go afterUpdate()
 	}
 	go cleanupOldInstall()
+	go cleanupLegacyInstall() // 1.8.1 예전 이름 설치 폴더 정리
 	loadAccount()
 
 	ui := fmt.Sprintf("http://localhost:%d/", uiPort)

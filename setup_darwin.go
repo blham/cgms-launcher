@@ -2,7 +2,7 @@
 
 package main
 
-// 맥 설치: 다운로드 폴더 등에서 KoreaWar.app 을 켜면 응용 프로그램 폴더(/Applications, 안 되면 ~/Applications)로
+// 맥 설치: 다운로드 폴더 등에서 AsiaWar.app 을 켜면 응용 프로그램 폴더(/Applications, 안 되면 ~/Applications)로
 // 복사하고 거기서 다시 켬. 자동 업데이트는 그 앱 안의 실행 파일을 바꿈.
 
 import (
@@ -13,7 +13,7 @@ import (
 )
 
 func appBundle() string {
-	d := filepath.Dir(selfExe()) // .../KoreaWar.app/Contents/MacOS
+	d := filepath.Dir(selfExe()) // .../AsiaWar.app/Contents/MacOS
 	if filepath.Base(d) != "MacOS" || filepath.Base(filepath.Dir(d)) != "Contents" {
 		return ""
 	}
@@ -52,7 +52,7 @@ func maybeInstall(args []string) bool {
 		_ = os.MkdirAll(userApps, 0o755)
 		dest = userApps
 	}
-	target := filepath.Join(dest, "KoreaWar.app")
+	target := filepath.Join(dest, "AsiaWar.app")
 	_ = os.RemoveAll(target + ".old")
 	_ = os.Rename(target, target+".old")
 	if out, err := exec.Command("ditto", b, target).CombinedOutput(); err != nil {
@@ -68,4 +68,26 @@ func maybeInstall(args []string) bool {
 		return false
 	}
 	return true
+}
+
+// 1.8.1 이름 변경: 응용 프로그램 폴더의 KoreaWar.app 을 AsiaWar.app 으로 (켜져 있어도 이름은 바꿀 수 있음) + 보이는 이름
+func renameLegacyBundle() {
+	b := appBundle()
+	if filepath.Base(b) != "KoreaWar.app" {
+		return
+	}
+	nb := filepath.Join(filepath.Dir(b), "AsiaWar.app")
+	if _, err := os.Stat(nb); err == nil {
+		return
+	}
+	pl := filepath.Join(b, "Contents", "Info.plist")
+	if raw, err := os.ReadFile(pl); err == nil {
+		s := strings.ReplaceAll(string(raw), "Korea War 런처", "Asia War 런처")
+		_ = os.WriteFile(pl, []byte(s), 0o644)
+	}
+	if err := os.Rename(b, nb); err != nil {
+		logger.Printf("앱 이름을 바꾸지 못함: %v", err)
+		return
+	}
+	logger.Printf("앱 이름을 바꿈: %s", nb)
 }

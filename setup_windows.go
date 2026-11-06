@@ -2,7 +2,7 @@
 
 package main
 
-// 설치형 (윈도우): 받은 exe(KoreaWarSetup.exe 등)를 켜면 %LOCALAPPDATA%\Programs\KoreaWarLauncher 에 복사하고
+// 설치형 (윈도우): 받은 exe(AsiaWarSetup.exe 등)를 켜면 %LOCALAPPDATA%\Programs\AsiaWarLauncher 에 복사하고
 // 바탕화면·시작 메뉴 바로가기 + "앱 및 기능" 제거 항목을 만든 뒤, 설치된 런처를 켬.
 // 설치된 런처는 켤 때마다 서버에서 새 버전을 확인해 스스로 바꿈 (update.go).
 
@@ -33,10 +33,65 @@ func installDir() string {
 		home, _ := os.UserHomeDir()
 		la = filepath.Join(home, "AppData", "Local")
 	}
-	return filepath.Join(la, "Programs", "KoreaWarLauncher")
+	return filepath.Join(la, "Programs", "AsiaWarLauncher")
 }
 
-func installedExe() string { return filepath.Join(installDir(), "KoreaWarLauncher.exe") }
+func installedExe() string { return filepath.Join(installDir(), "AsiaWarLauncher.exe") }
+
+// 1.8.1 이름 변경 전 설치 자리 (Programs\KoreaWarLauncher)
+func legacyInstallDir() string { return filepath.Join(filepath.Dir(installDir()), "KoreaWarLauncher") }
+
+const uninstallKey = `HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\AsiaWarLauncher`
+const legacyUninstallKey = `HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\KoreaWarLauncher`
+
+// 1.8.1 예전 자리(KoreaWarLauncher)에서 켜졌으면 (예전 런처가 이 판으로 업데이트된 경우): 설치 화면 없이 새 자리로 옮겨 켬.
+// true = 이 프로세스는 끝내야 함. 옮기지 못하면 false (예전 자리에서 그대로 켬)
+func moveLegacyInstall(exe, target string, args []string) bool {
+	if !strings.EqualFold(filepath.Clean(filepath.Dir(exe)), filepath.Clean(legacyInstallDir())) {
+		return false
+	}
+	if err := os.MkdirAll(installDir(), 0o755); err != nil {
+		logger.Printf("새 설치 자리를 못 만듦: %v (예전 자리에서 켬)", err)
+		return false
+	}
+	if err := copyFile(exe, target); err != nil {
+		logger.Printf("새 설치 자리로 복사 실패: %v (예전 자리에서 켬)", err)
+		return false
+	}
+	writeShortcuts(target)
+	_ = powershell(fmt.Sprintf(`Remove-Item -Path %s -Recurse -Force -ErrorAction SilentlyContinue`, psq(legacyUninstallKey)))
+	var pass []string
+	for _, a := range args {
+		if a != "--installed" {
+			pass = append(pass, a)
+		}
+	}
+	c := exec.Command(target, append(pass, "--installed")...)
+	c.Dir = installDir()
+	detach(c)
+	if err := c.Start(); err != nil {
+		logger.Printf("새 자리 런처를 켜지 못함: %v (예전 자리에서 켬)", err)
+		return false
+	}
+	logger.Printf("설치 자리를 %s 로 옮김 (이름 변경)", installDir())
+	return true
+}
+
+// 1.8.1 새 자리에서 켜졌는데 예전 설치 폴더가 남아 있으면 지움 (예전 프로세스가 끝날 때까지 잠깐 기다림)
+func cleanupLegacyInstall() {
+	old := legacyInstallDir()
+	if _, err := os.Stat(old); err != nil || devBuild {
+		return
+	}
+	if strings.EqualFold(filepath.Clean(filepath.Dir(selfExe())), filepath.Clean(old)) {
+		return
+	}
+	c := exec.Command("cmd", "/c", `ping 127.0.0.1 -n 4 > nul & rmdir /s /q "`+old+`"`)
+	hideWindow(c)
+	detach(c)
+	_ = c.Start()
+	logger.Printf("예전 설치 폴더 정리: %s", old)
+}
 
 func selfExe() string {
 	exe, _ := os.Executable()
@@ -83,7 +138,7 @@ foreach ($d in @([Environment]::GetFolderPath('Desktop'), [Environment]::GetFold
   $l = $ws.CreateShortcut((Join-Path $d %s))
   $l.TargetPath = %s; $l.WorkingDirectory = %s; $l.IconLocation = %s; $l.Description = %s
   $l.Save()
-}`, psq(appName+".lnk"), psq(target), psq(dir), psq(target+",0"), psq("Korea War 서버 전용 런처")))
+}`, psq(appName+".lnk"), psq(target), psq(dir), psq(target+",0"), psq("Asia War 서버 전용 런처")))
 }
 
 func registerUninstall(target string) {
@@ -92,7 +147,7 @@ func registerUninstall(target string) {
 		size = st.Size() / 1024
 	}
 	_ = powershell(fmt.Sprintf(`
-$k = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\KoreaWarLauncher'
+$k = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\AsiaWarLauncher'
 New-Item -Path $k -Force | Out-Null
 Set-ItemProperty $k DisplayName %s
 Set-ItemProperty $k DisplayIcon %s
@@ -170,6 +225,9 @@ func maybeInstall(args []string) bool {
 	if strings.EqualFold(filepath.Clean(exe), filepath.Clean(target)) {
 		return false
 	}
+	if moveLegacyInstall(exe, target, args) {
+		return true
+	}
 	// 1.7.4 설치 화면 (약관 동의 → 진행률). WebView2 가 없으면 예전처럼 알림 창으로
 	if webview2Installed() {
 		if ok := runSetupWindow(exe, target); ok {
@@ -184,7 +242,7 @@ func maybeInstall(args []string) bool {
 	}
 	_ = os.MkdirAll(installDir(), 0o755)
 	if err := copyFile(exe, target); err != nil {
-		msgBox("설치하지 못했어요: "+err.Error()+"\n\n런처가 켜져 있다면 끄고 다시 해 주세요. (작업 관리자에서 KoreaWarLauncher 끝내기)", 0x10)
+		msgBox("설치하지 못했어요: "+err.Error()+"\n\n런처가 켜져 있다면 끄고 다시 해 주세요. (작업 관리자에서 AsiaWarLauncher 끝내기)", 0x10)
 		return true
 	}
 	writeShortcuts(target)
@@ -208,6 +266,7 @@ func uninstall() {
 	quitRunning()
 	_ = powershell(fmt.Sprintf(`
 foreach ($d in @([Environment]::GetFolderPath('Desktop'), [Environment]::GetFolderPath('Programs'))) { Remove-Item -LiteralPath (Join-Path $d %s) -Force -ErrorAction SilentlyContinue }
+Remove-Item -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\AsiaWarLauncher' -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\KoreaWarLauncher' -Recurse -Force -ErrorAction SilentlyContinue`, psq(appName+".lnk")))
 	del := `ping 127.0.0.1 -n 3 > nul & rmdir /s /q "` + installDir() + `"`
 	if data {
@@ -268,7 +327,7 @@ func runSetupWindow(exe, target string) bool {
 				return err
 			}
 			if err := copyFileProgress(exe, target, p); err != nil {
-				return fmt.Errorf("%v (런처가 켜져 있다면 작업 관리자에서 KoreaWarLauncher 를 끝내고 다시 해 주세요)", err)
+				return fmt.Errorf("%v (런처가 켜져 있다면 작업 관리자에서 AsiaWarLauncher 를 끝내고 다시 해 주세요)", err)
 			}
 			return nil
 		}},

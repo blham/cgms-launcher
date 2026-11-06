@@ -48,8 +48,8 @@ func exportMods() (string, error) {
 	}
 	ver := "mods"
 	for _, m := range man.Mods {
-		if strings.HasPrefix(m.File, "koreawar-mod-") {
-			ver = strings.TrimSuffix(strings.TrimPrefix(m.File, "koreawar-mod-"), ".jar")
+		if v, ok := modVer(m.File); ok {
+			ver = v
 		}
 	}
 	if !verRe.MatchString(ver) { // 1.2.7 파일 이름에 들어가는 글자는 엄격히 (다운로드 폴더 밖으로 못 나가게)
@@ -59,7 +59,7 @@ func exportMods() (string, error) {
 	if !verRe.MatchString(mc) {
 		mc = "unknown"
 	}
-	out := filepath.Join(outDir, fmt.Sprintf("KoreaWar-mods-%s-mc%s.zip", ver, mc))
+	out := filepath.Join(outDir, fmt.Sprintf("AsiaWar-mods-%s-mc%s.zip", ver, mc))
 	if filepath.Dir(out) != filepath.Clean(outDir) {
 		return "", fmt.Errorf("파일 이름이 이상해요")
 	}
@@ -93,7 +93,7 @@ func exportMods() (string, error) {
 		nl = "\r\n"
 	}
 	readme := strings.Join([]string{
-		"Korea War 서버 필수 모드 (다른 런처용)",
+		"Asia War 서버 필수 모드 (다른 런처용)",
 		"",
 		"1. 마인크래프트 " + man.Minecraft + " 에 Fabric Loader " + fl + " 를 설치하세요.",
 		"   - 공식 런처: https://fabricmc.net/use/installer/ 에서 설치기를 받아 버전 " + man.Minecraft + " 로 설치",
@@ -101,8 +101,8 @@ func exportMods() (string, error) {
 		"2. 이 zip 안 mods 폴더의 .jar 를 그 게임의 mods 폴더에 넣으세요.",
 		"3. 서버 주소: " + serverAddr(),
 		"",
-		"★ 중요: 보조 모드가 바뀔 때마다 이 파일을 새로 받아서 mods 폴더의 예전 koreawar-mod 를 지우고 바꿔 넣어야 해요.",
-		"   (버전이 안 맞으면 모션이 이상하게 보여요. Korea War 런처로 켜면 자동으로 바뀌어요)",
+		"★ 중요: 보조 모드가 바뀔 때마다 이 파일을 새로 받아서 mods 폴더의 예전 asiawar-mod (또는 koreawar-mod) 를 지우고 바꿔 넣어야 해요.",
+		"   (버전이 안 맞으면 모션이 이상하게 보여요. Asia War 런처로 켜면 자동으로 바뀌어요)",
 		"미니맵·지도 모드는 서버에서 막혀 있어요 (넣고 들어오면 튕겨요).",
 	}, nl)
 	if w, err := z.Create("읽어 주세요.txt"); err == nil {
@@ -120,15 +120,25 @@ func exportMods() (string, error) {
 	return out, nil
 }
 
-// 지금 서버의 보조 모드 버전 (koreawar-mod-<버전>.jar)
+// 지금 서버의 보조 모드 버전 (asiawar-mod-<버전>.jar)
 func currentModVer(man *Manifest) string {
 	if man == nil {
 		return ""
 	}
 	for _, m := range man.Mods {
-		if strings.HasPrefix(m.File, "koreawar-mod-") {
-			return strings.TrimSuffix(strings.TrimPrefix(m.File, "koreawar-mod-"), ".jar")
+		if v, ok := modVer(m.File); ok {
+			return v
 		}
 	}
 	return ""
+}
+
+// 1.8.1 보조 모드 파일 이름: asiawar-mod-<버전>.jar (예전 koreawar-mod-)
+func modVer(file string) (string, bool) {
+	for _, p := range []string{"asiawar-mod-", "koreawar-mod-"} {
+		if strings.HasPrefix(file, p) {
+			return strings.TrimSuffix(strings.TrimPrefix(file, p), ".jar"), true
+		}
+	}
+	return "", false
 }

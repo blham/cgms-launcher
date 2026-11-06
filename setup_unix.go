@@ -18,6 +18,9 @@ func selfExe() string {
 
 func afterUpdate() {}
 
+// 1.8.1 이름 변경: 맥은 setup_darwin.go, 리눅스는 할 것 없음
+func cleanupLegacyInstall() { renameLegacyBundle() }
+
 // 개발용 실행(-tags dev)은 KW_TEST_INSTALL 이 있을 때만 설치 흉내
 func skipInstall(args []string) bool {
 	for _, a := range args {

@@ -711,7 +711,7 @@ func verLess(a, b string) bool {
 	return false
 }
 
-// 서버장이 plugins/KoreaWar/launcher/background.jpg 를 두면 그 그림을 배경으로 (켤 때마다 한 번 받아 봄)
+// 서버장이 plugins/AsiaWar/launcher/background.jpg 를 두면 그 그림을 배경으로 (켤 때마다 한 번 받아 봄)
 var (
 	bgOnce sync.Once
 	bgPath string

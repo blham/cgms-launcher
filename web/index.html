@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Korea War</title>
+<title>Asia War</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23982D25'/%3E%3Cpath d='M4 12V4h2v3l3-3h2.5l-3.4 3.4L12 12H9.6L7 9.2 6 10.2V12z' fill='%23FFF0D0'/%3E%3C/svg%3E">
 <style>
 /* 1.7.0 한지·단청 디자인 (시안 B2). 화면은 1280×760 기준으로 그리고 창 크기에 맞춰 통째로 늘이고 줄임 */
@@ -422,7 +422,7 @@ canvas#fib{position:absolute;inset:0}
 
 <!-- ================= 홈 ================= -->
 <div id="home">
-  <div id="logo"><div id="sname">코리아 <em>워</em></div><div class="s">해 가 진 땅 · 한반도 국가전쟁</div></div>
+  <div id="logo"><div id="sname">아시아 <em>워</em></div><div class="s">해 가 진 땅 · 한반도 국가전쟁</div></div>
   <div id="season" hidden></div>
   <div id="acct"></div>
   <div class="screen"><div class="pan"><div class="in" style="background-position:0 0"></div></div><div class="pan"><div class="in" style="background-position:-142px 0"></div></div><div class="pan"><div class="in" style="background-position:-284px 0"></div></div><div class="pan"><div class="in" style="background-position:-426px 0"></div></div></div>
@@ -535,7 +535,7 @@ canvas#fib{position:absolute;inset:0}
       <div class="fr"><label>약관</label><div><button class="bg" id="termsView">이용약관·개인정보 안내 보기</button></div></div>
       <div class="acts"><button class="bp" id="save">저장</button><span id="saved">저장했어요</span><span style="flex:1"></span><button class="bs" id="quit">런처 끄기</button></div>
     </div>
-    <div class="doc cl pad"><div class="cap">나의 호패<span>게임 속 신분</span></div><div class="hopae"><div id="hpName">이름</div><small>코리아 워 백성</small></div><div class="cap4">게임 속 이름을 바꾸면 호패도 같이 바뀌어요</div></div>
+    <div class="doc cl pad"><div class="cap">나의 호패<span>게임 속 신분</span></div><div class="hopae"><div id="hpName">이름</div><small>아시아 워 백성</small></div><div class="cap4">게임 속 이름을 바꾸면 호패도 같이 바뀌어요</div></div>
   </div>
 </section>
 
@@ -659,7 +659,7 @@ function gEl(tag,runs,cls){const e=document.createElement(tag);if(cls)e.classNam
     e.appendChild(n)}
   return e}
 function gChapters(){if(!GD)return[];const cs=(GD.chapters||[]).slice();
-  if((GD.regions||[]).length){const at=Math.min(2,cs.length);cs.splice(at,0,{id:"_regions",title:"성과 특산품",summary:"성마다 신상과 차지하면 얻는 효과",color:"#c5a04d",iconData:GD.regionsIcon,regions:GD.regions})}
+  if((GD.regions||[]).length){const at=Math.min(2,cs.length);cs.splice(at,0,{id:"_regions",title:"성과 특산품",summary:"성마다 수호상과 차지하면 얻는 효과",color:"#c5a04d",iconData:GD.regionsIcon,regions:GD.regions})}
   return cs}
 function gToc(){const cs=gChapters(), q=gQ.toLowerCase(), box=$("gToc");box.innerHTML="";let shown=0;
   cs.forEach((ch,i)=>{let hits=0;
@@ -680,8 +680,8 @@ function gShow(){const ch=gChapters()[gSel], head=$("gHead"), body=$("gBody");he
   if(typeof ch.iconData==="string"&&/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/.test(ch.iconData)){const im=document.createElement("img");im.src=ch.iconData;im.alt="";h.append(im,document.createTextNode(ch.title))}
   else h.append(dot,document.createTextNode(ch.title));const p=document.createElement("p");p.textContent=ch.summary||"";head.append(h,p);
   if(ch.regions){const g=document.createElement("div");g.className="rg";
-    const intro=document.createElement("p");intro.textContent="성(코어)을 차지하면 그 성의 특산품 효과를 우리 세력 모두가 받아요. 성마다 지역을 닮은 신상이 서 있어요.";body.appendChild(intro);
-    ch.regions.forEach(r=>{const c=document.createElement("div");c.className="rgc";const b=document.createElement("b");b.textContent=r.name;const e=document.createElement("em");e.textContent=r.statue?"신상 · "+r.statue:"";
+    const intro=document.createElement("p");intro.textContent="성(코어)을 차지하면 그 성의 특산품 효과를 우리 세력 모두가 받아요. 성마다 지역을 닮은 수호상이 서 있어요.";body.appendChild(intro);
+    ch.regions.forEach(r=>{const c=document.createElement("div");c.className="rgc";const b=document.createElement("b");b.textContent=r.name;const e=document.createElement("em");e.textContent=r.statue?"수호상 · "+r.statue:"";
       const ul=document.createElement("ul");(r.perks||[]).forEach(pk=>{const li=document.createElement("li");const k=document.createElement("span");k.className="k";k.textContent=pk.name;li.append(k,document.createTextNode(pk.desc));ul.appendChild(li)});
       if(!(r.perks||[]).length){const li=document.createElement("li");li.textContent="특산품 없음";li.style.color="var(--mu2)";ul.appendChild(li)}
       c.append(b,e,ul);
@@ -805,8 +805,8 @@ async function infoTick(){
   let d; try{d=await(await fetch("/api/info",{cache:"no-store"})).json()}catch(e){return}
   if(d.error){ if(!info) $("notice").innerHTML=`<div class="empty">${esc(d.error)}</div>`; return }
   const first=!info; info=d; infoAt=Date.now(); NCOL={}; (d.nations||[]).forEach(n=>NCOL[n.name]=tone(n.color)); showHours();
-  const nm=(d.name||"Korea War").trim(); document.title=nm;
-  if(nm!=="Korea War"){const parts=nm.split(/\s+/);$("sname").innerHTML=parts.length>1?esc(parts.slice(0,-1).join(" "))+" <em>"+esc(parts[parts.length-1])+"</em>":esc(nm)}
+  const nm=(d.name||"Asia War").trim(); document.title=nm;
+  if(nm!=="Asia War"){const parts=nm.split(/\s+/);$("sname").innerHTML=parts.length>1?esc(parts.slice(0,-1).join(" "))+" <em>"+esc(parts[parts.length-1])+"</em>":esc(nm)}
   who(d.online,d.max);
   discordUrl=d.discord||""; $("disc").hidden=!discordUrl;
   if(d.act){$("season").hidden=false;$("season").textContent=`${num(d.act)}막 · ${num(d.seasonDay)}일째`+(d.seasonDays?` / ${num(d.seasonDays)}일`:"")} else $("season").hidden=true;
