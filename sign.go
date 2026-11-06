@@ -126,6 +126,39 @@ func fetchSignedDoc() (*SignedDoc, error) {
 	return &d, nil
 }
 
+// 1.8.0 깃허브에 올린 같은 서명 목록 (서버가 꺼져 있어도 런처 새 판을 받게). 같은 열쇠로 서명했는지·기한·예전 목록 여부를 똑같이 확인
+const githubLauncher = "https://github.com/blham/chegal-minecraft-launcher/raw/main/launcher"
+
+func fetchGithubDoc() (*SignedDoc, error) {
+	b, err := getBytes(githubLauncher+"/kw-signed.json", 4<<20)
+	if err != nil {
+		return nil, err
+	}
+	sb, err := getBytes(githubLauncher+"/kw-signed.sig", 4096)
+	if err != nil {
+		return nil, err
+	}
+	sig, err1 := base64.StdEncoding.DecodeString(strings.TrimSpace(string(sb)))
+	pub, err2 := base64.StdEncoding.DecodeString(signPub)
+	if err1 != nil || err2 != nil || !ed25519.Verify(ed25519.PublicKey(pub), b, sig) {
+		return nil, errors.New("깃허브 서명이 맞지 않음")
+	}
+	var d SignedDoc
+	if err := json.Unmarshal(b, &d); err != nil || d.Files == nil || d.V < 2 || d.Serial <= 0 {
+		return nil, errors.New("깃허브 서명 목록이 이상함")
+	}
+	if d.Expires <= 0 || time.Now().Unix() > d.Expires {
+		return nil, errors.New("깃허브 서명 기한 지남")
+	}
+	if d.Serial < seenSerial() {
+		return nil, errors.New("깃허브 서명 목록이 예전 것")
+	}
+	if d.LauncherVersion != "" && !verRe.MatchString(d.LauncherVersion) {
+		return nil, errors.New("깃허브 런처 버전이 이상함")
+	}
+	return &d, nil
+}
+
 func fetchSigned() (map[string]string, error) {
 	d, err := fetchSignedDoc()
 	if err != nil {

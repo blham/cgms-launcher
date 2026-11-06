@@ -53,6 +53,13 @@ func checkUpdate() {
 	}
 	defer updating.Store(false)
 	doc, err := fetchSignedDoc() // 1.2.7 업데이트 여부·파일 모두 서명된 값으로만
+	base := filesBase()
+	if gd, gerr := fetchGithubDoc(); gerr == nil && (err != nil || verLess(doc.LauncherVersion, gd.LauncherVersion)) {
+		doc, err, base = gd, nil, githubLauncher // 1.8.0 서버가 꺼져 있거나 깃허브 쪽이 더 새 판이면 깃허브에서
+		logger.Printf("깃허브의 런처 %s 를 봄", gd.LauncherVersion)
+	} else if gerr != nil {
+		logger.Printf("깃허브 확인 안 됨: %v", gerr)
+	}
 	if err != nil {
 		logger.Printf("런처 업데이트 확인 안 함: %v", err)
 		return
@@ -73,7 +80,11 @@ func checkUpdate() {
 	exe := selfExe()
 	tmp := exe + ".new"
 	setStatus("prepare", "새 런처 "+target+" 받는 중", 0)
-	if err := download(dlTask{URL: filesBase() + "/launcher/" + name, Path: tmp, Sha256: sha}); err != nil {
+	url := filesBase() + "/launcher/" + name
+	if base == githubLauncher {
+		url = githubLauncher + "/" + name
+	}
+	if err := download(dlTask{URL: url, Path: tmp, Sha256: sha}); err != nil {
 		logger.Printf("런처 업데이트 받기 실패: %v", err)
 		setStatus("idle", "", 0)
 		_ = os.Remove(tmp)
