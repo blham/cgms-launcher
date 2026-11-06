@@ -142,6 +142,9 @@ func loadConfig() {
 	if cfg.MemoryMB < 1024 {
 		cfg.MemoryMB = 4096
 	}
+	if badName(cfg.RealName) { // 1.8.2 예전에 적은 욕 이름은 지워서 호패 만들기 창이 다시 뜨게
+		cfg.RealName = ""
+	}
 }
 
 func saveConfig() {

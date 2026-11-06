@@ -202,6 +202,11 @@ func registerAPI(mux *http.ServeMux) {
 				writeJSON(w, map[string]string{"error": "이름은 한글 2~10글자로 적어 주세요 (띄어쓰기·영문·숫자·기호 없이)."})
 				return
 			}
+			if badName(n) {
+				cfgMu.Unlock()
+				writeJSON(w, map[string]string{"error": "욕설이나 나쁜 말이 들어간 이름은 쓸 수 없어요. 본명을 적어 주세요."})
+				return
+			}
 			cfg.RealName = n
 		}
 		cfgMu.Unlock()

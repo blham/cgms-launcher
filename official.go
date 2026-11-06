@@ -195,6 +195,9 @@ func needRealName() error {
 	if !realNameRe.MatchString(getCfg().RealName) {
 		return errors.New("게임 속 이름(실명)을 먼저 적어 주세요. 한글 2~10글자, 다른 사람에게 그 이름으로 보여요.")
 	}
+	if badName(getCfg().RealName) { // 1.8.2
+		return errors.New("호패 이름에 쓸 수 없는 말이 들어 있어요. 설정에서 본명으로 바꿔 주세요.")
+	}
 	return nil
 }
 
