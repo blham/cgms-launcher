@@ -90,12 +90,20 @@ canvas#fib{position:absolute;inset:0}
 #sname{font:900 58px/1 var(--serif);letter-spacing:.05em}
 #sname em{font-style:normal;color:var(--ju)}
 #logo .s{margin-top:9px;font:700 13px var(--serif);letter-spacing:.42em;color:#6a5236}
-#season{position:absolute;left:474px;top:106px;font:700 13px var(--serif);letter-spacing:.16em;color:var(--ju);border:1.5px solid var(--ju);padding:5px 10px;transform:rotate(-2.5deg);box-shadow:inset 0 0 0 2px var(--ji),inset 0 0 0 3px rgba(152,45,37,.45);background:rgba(232,217,184,.4)}
-#acct{position:absolute;left:150px;top:176px;display:flex;align-items:center;gap:10px;font:500 12.5px var(--sans);color:var(--mu)}
-#acct b{color:var(--meok);font-weight:700}
-#acct img{width:22px;height:22px;image-rendering:pixelated}
-#acct .q{width:22px;height:22px;border:1px dashed var(--mu2);display:grid;place-items:center;font-size:11px}
-#acct button.lk{color:var(--sel);font-weight:700;text-decoration:underline;text-underline-offset:3px}
+#season{position:absolute;left:420px;top:150px;font:700 13px var(--serif);letter-spacing:.16em;color:var(--ju);border:1.5px solid var(--ju);padding:5px 10px;transform:rotate(-2.5deg);box-shadow:inset 0 0 0 2px var(--ji),inset 0 0 0 3px rgba(152,45,37,.45);background:rgba(232,217,184,.4)}
+#acct{position:absolute;left:428px;top:72px;width:262px;height:72px;box-sizing:border-box;display:flex;align-items:center;gap:11px;padding:0 12px;font:500 12.5px var(--sans);color:var(--mu);
+ background:linear-gradient(180deg,rgba(248,240,222,.95),rgba(234,220,190,.95));border:1.5px solid #6b5233;border-radius:6px;box-shadow:0 4px 10px rgba(60,35,15,.22),inset 0 0 0 3px rgba(255,250,236,.6)}
+#acct:empty{display:none}
+#acct img{width:40px;height:40px;flex:none;image-rendering:pixelated;border:1.5px solid #4a3622;border-radius:4px;background:#3a2414}
+#acct .q{width:40px;height:40px;flex:none;border:1px dashed var(--mu2);display:grid;place-items:center;font-size:14px}
+#acct .who{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
+#acct b{color:var(--meok);font:900 18px/1 var(--serif);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#acct small{font:700 11.5px/1 var(--sans);color:#2f6f3a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#acct small.no{color:var(--ju)}
+#acct .msg{font:600 12.5px/1.45 var(--sans);color:var(--meok)}
+#acct button.lk{flex:none;font:700 12px/1 var(--sans);color:var(--ju);border:1.5px solid var(--ju);border-radius:4px;padding:6px 10px;background:rgba(255,248,232,.7);text-decoration:none}
+#acct button.lk:hover{background:var(--ju);color:#fff3dc}
+#acct #loginBtn{flex:none}
 .screen{position:absolute;left:146px;top:208px;width:568px;height:292px;display:flex;filter:drop-shadow(0 14px 16px rgba(60,35,15,.3))}
 .pan{flex:1;position:relative;padding:9px 6px;background:linear-gradient(180deg,#5a3a22,#3a2414);border-right:1px solid #24150a}
 .pan:last-child{border-right:0}
@@ -748,10 +756,10 @@ async function tick(){
   if(sv.online&&!(info&&info.hours&&hoursState()&&!hoursState().open)) $("motd").textContent=sv.motd||"";
   const a=s.account, key=s.direct?(a?"a:"+a.name+a.uuid:"login"):"official";
   if($("acct").dataset.k!==key){ $("acct").dataset.k=key;
-    if(!s.direct) $("acct").innerHTML=`<span>공식 런처로 실행 · 로그인은 마인크래프트 공식 런처에서 해요</span>`;
-    else if(a){ $("acct").innerHTML=`<img alt="" src="https://mc-heads.net/avatar/${encodeURIComponent(a.uuid)}/22" data-fb="q"><span><b>${esc(a.name)}</b> · 마이크로소프트 계정</span><button class="lk" id="logout">로그아웃</button>`;
+    if(!s.direct) $("acct").innerHTML=`<span class="msg">공식 런처로 실행해요<br>로그인은 마인크래프트 공식 런처에서</span>`;
+    else if(a){ $("acct").innerHTML=`<img alt="" src="https://mc-heads.net/avatar/${encodeURIComponent(a.uuid)}/40" data-fb="q"><div class="who"><b>${esc(a.name)}</b><small>● 로그인됨</small></div><button class="lk" id="logout">로그아웃</button>`;
       $("logout").onclick=async()=>{await post("/api/logout");tick()}; }
-    else { $("acct").innerHTML=`<span>로그인이 필요해요 · 마인크래프트 자바 에디션</span><button class="bs" id="loginBtn" style="height:26px;padding:0 12px;font-size:12px">로그인</button>`;
+    else { $("acct").innerHTML=`<div class="who"><b>로그인 해 주세요</b><small class="no">마인크래프트 자바 에디션 계정</small></div><button class="bs" id="loginBtn" style="height:34px;padding:0 16px;font-size:14px">로그인</button>`;
       $("loginBtn").onclick=async()=>{$("loginBtn").disabled=true;const r=await post("/api/login");if(r.url&&/^https:\/\/login\.microsoftonline\.com\//.test(r.url)){location.href=r.url;return}$("loginBtn").disabled=false;$("autherr").hidden=false;$("autherr").textContent=r.error||"로그인 화면을 열지 못했어요"}; }
   }
   if(s.authError){$("autherr").hidden=false;$("autherr").textContent=s.authError} else if(a) $("autherr").hidden=true;
