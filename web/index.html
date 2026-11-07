@@ -143,6 +143,13 @@ canvas#fib{position:absolute;inset:0}
 .err{margin-top:8px;border-left:3px solid var(--ju);background:rgba(152,45,37,.08);padding:7px 10px;font-size:12px;line-height:1.5;user-select:text;max-height:96px;overflow:auto}
 .err pre{white-space:pre-wrap;word-break:break-all;font-size:10.5px;margin:6px 0 0;color:var(--mu)}
 .warn{border-left-color:var(--geum);background:rgba(197,160,77,.12)}
+/* 1.8.8 런처 업데이트 버튼 */
+#updBtn{position:absolute;left:324px;top:692px;display:flex;align-items:center;gap:7px;height:30px;padding:0 14px;border-radius:5px;background:var(--ju);color:#FFF0D0;font:700 13px var(--sans);box-shadow:0 2px 0 #5c1712;animation:updPulse 2.4s ease-in-out infinite}
+#updBtn[hidden]{display:none}
+#updBtn svg{width:14px;height:14px;fill:#FFF0D0}
+#updBtn:hover{filter:brightness(1.1)}
+#updBtn:disabled{animation:none;filter:grayscale(.3);opacity:.8}
+@keyframes updPulse{0%,100%{box-shadow:0 2px 0 #5c1712,0 0 0 0 rgba(152,45,37,.35)}50%{box-shadow:0 2px 0 #5c1712,0 0 0 6px rgba(152,45,37,0)}}
 /* 1.8.7 홈 디스코드 연결 */
 #dcRow{display:flex;align-items:center;gap:10px;margin-top:12px}
 #dcRow[hidden]{display:none}
@@ -461,6 +468,7 @@ canvas#fib{position:absolute;inset:0}
       <div id="dcRow" hidden><button id="dcHome"><svg viewBox="0 0 71 55"><path d="M60 4.6A58 58 0 0 0 45.6.2l-1.8 3.7a54 54 0 0 0-16.2 0L25.8.2A58 58 0 0 0 11.3 4.6 59.6 59.6 0 0 0 .9 44.8 58.3 58.3 0 0 0 18.6 53.8l3.8-5.2a38 38 0 0 1-6-2.9l1.5-1.1a41.6 41.6 0 0 0 35.4 0l1.5 1.1a38 38 0 0 1-6 2.9l3.8 5.2a58 58 0 0 0 17.8-9A59.4 59.4 0 0 0 60 4.6ZM23.7 36.7c-3.5 0-6.4-3.2-6.4-7.2s2.8-7.2 6.4-7.2 6.4 3.3 6.4 7.2-2.8 7.2-6.4 7.2Zm23.6 0c-3.5 0-6.4-3.2-6.4-7.2s2.8-7.2 6.4-7.2 6.4 3.3 6.4 7.2-2.8 7.2-6.4 7.2Z"/></svg><span>디스코드 연결</span></button><span id="dcHint"></span></div>
     </div>
   </div>
+  <button id="updBtn" hidden><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9h-2a7 7 0 1 1-2.05-4.95L14 10h7V3l-2.64 2.64A8.96 8.96 0 0 0 12 3z"/></svg><span id="updTxt">업데이트</span></button>
   <button id="bigDonate" data-ov="donate"><svg viewBox="0 0 24 24"><path d="M12 21.4 10.6 20C5.4 15.4 2 12.3 2 8.5 2 5.4 4.4 3 7.5 3c1.7 0 3.4.8 4.5 2.1C13.1 3.8 14.8 3 16.5 3 19.6 3 22 5.4 22 8.5c0 3.8-3.4 6.9-8.6 11.5z"/></svg><span>서버 후원</span><span id="bigGoal" style="color:var(--mu2);font-weight:500"></span></button>
 
   <div class="doc cl rc" id="tCard"><svg width="92" height="80" viewBox="0 0 96 80" id="sun"></svg>
@@ -790,6 +798,7 @@ async function tick(){
   const noName=!s.config.realName&&!needTerms; $("nameGate").hidden=!noName; if(noName&&document.activeElement!==$("gateName"))$("gateName").focus();
   if(noName) $("play").disabled=true;
   $("ver").textContent=`런처 ${s.version}`+(s.newerLauncher?` · 새 런처 ${s.newerLauncher} 이 나왔어요`:"");
+  {const u=s.update||""; $("updBtn").hidden=!u; if(u&&!$("updBtn").disabled) $("updTxt").textContent=`새 런처 ${u} 업데이트`;}
 }
 function who(n,max){$("who").innerHTML=n==null?"":`지금 <b>${num(n)}</b>명이 접속해 있어요${max?` · 최대 ${num(max)}명`:""}`}
 // ---------------- 2.5.9 여는 시간 (서버가 꺼져 있어도 마지막으로 받은 시간표로 계산)
@@ -1239,6 +1248,8 @@ async function dcStatus(){let d;try{d=await(await fetch("/api/discord/status",{c
   if(d.linkedName&&!dcLinked)dcLinked=d.linkedName;
   $("dcState").textContent=d.ready===false?"서버장이 아직 디스코드 연결을 설정하지 않았어요":t; if(d.state==="linked")dcLinked=d.name||"";if(dcLinked&&d.state!=="linked")$("dcState").textContent="연결됨: "+dcLinked;}
 let dcLinked="";
+$("updBtn").onclick=async()=>{const b=$("updBtn");b.disabled=true;$("updTxt").textContent="받는 중…";
+  let r; try{r=await post("/api/update")}catch(e){return} if(r&&r.error){$("updTxt").textContent=r.error;setTimeout(()=>{b.disabled=false},4000)}};
 // 1.8.7 홈에도 디스코드 연결 (설정 안에 있으면 못 찾음)
 async function dcHomeStatus(){
   const a=lastState&&lastState.account; if(!lastState||!lastState.direct||!a){$("dcRow").hidden=true;return}

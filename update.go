@@ -1,15 +1,35 @@
 package main
 
-// 자동 업데이트: 켤 때마다 서버(manifest 의 launcher 버전)와 비교해 새 버전이면 받아서(sha1 확인) 실행 파일을 바꾸고 다시 켬.
+// 업데이트: 켤 때·10분마다 서버(manifest 의 launcher 버전)와 비교해 새 버전이 있으면 화면에 「업데이트」 버튼을 띄우고,
+// 1.8.8 버튼을 누르면 받아서(sha256 확인) 실행 파일을 바꾸고 다시 켬.
 // 서버장은 plugins/AsiaWar/launcher/ 에 플랫폼별 런처 파일을 넣어 두면 됨 (이름은 updateAssetName).
 
 import (
+	"errors"
 	"os"
 	"os/exec"
 	"runtime"
+	"sync"
 	"sync/atomic"
 	"time"
 )
+
+// 1.8.8 받을 수 있는 새 런처 (버튼을 누를 때까지 기다림)
+type pendingUpd struct{ Target, URL, Sha string }
+
+var (
+	updMu   sync.Mutex
+	updPend *pendingUpd
+)
+
+func pendingVersion() string {
+	updMu.Lock()
+	defer updMu.Unlock()
+	if updPend == nil {
+		return ""
+	}
+	return updPend.Target
+}
 
 func updateAssetName() string {
 	arch := "x64"
@@ -74,34 +94,55 @@ func checkUpdate() {
 		logger.Printf("새 런처 %s 이 있지만 %s 에 서명이 없음", target, name)
 		return
 	}
-	if gameRunning() || busy() {
-		return
-	}
-	exe := selfExe()
-	tmp := exe + ".new"
-	setStatus("prepare", "새 런처 "+target+" 받는 중", 0)
 	url := filesBase() + "/launcher/" + name
 	if base == githubLauncher {
 		url = githubLauncher + "/" + name
 	}
+	updMu.Lock()
+	if updPend == nil || updPend.Target != target {
+		logger.Printf("새 런처 %s 이 있음 (업데이트 버튼을 기다림)", target)
+	}
+	updPend = &pendingUpd{Target: target, URL: url, Sha: sha}
+	updMu.Unlock()
+}
+
+// 1.8.8 「업데이트」 버튼: 받아서 바꿔 넣고 다시 켬
+func applyUpdate() error {
+	updMu.Lock()
+	p := updPend
+	updMu.Unlock()
+	if p == nil {
+		return errors.New("받을 새 런처가 없어요")
+	}
+	if gameRunning() || busy() {
+		return errors.New("게임이 켜져 있거나 준비 중이라 지금은 못 바꿔요. 게임을 끈 뒤 다시 눌러 주세요")
+	}
+	if !updating.CompareAndSwap(false, true) {
+		return errors.New("이미 받는 중이에요")
+	}
+	defer updating.Store(false)
+	target, url, sha := p.Target, p.URL, p.Sha
+	exe := selfExe()
+	tmp := exe + ".new"
+	setStatus("prepare", "새 런처 "+target+" 받는 중", 0)
 	if err := download(dlTask{URL: url, Path: tmp, Sha256: sha}); err != nil {
 		logger.Printf("런처 업데이트 받기 실패: %v", err)
 		setStatus("idle", "", 0)
 		_ = os.Remove(tmp)
-		return
+		return errors.New("새 런처를 받지 못했어요. 잠시 뒤 다시 눌러 주세요")
 	}
 	_ = os.Chmod(tmp, 0o755)
 	_ = os.Remove(exe + ".old")
 	if err := os.Rename(exe, exe+".old"); err != nil {
 		logger.Printf("런처 업데이트 실패 (이름 바꾸기): %v", err)
 		setStatus("idle", "", 0)
-		return
+		return errors.New("런처 파일을 바꾸지 못했어요")
 	}
 	if err := os.Rename(tmp, exe); err != nil {
 		_ = os.Rename(exe+".old", exe)
 		logger.Printf("런처 업데이트 실패 (바꿔 넣기): %v", err)
 		setStatus("idle", "", 0)
-		return
+		return errors.New("런처 파일을 바꾸지 못했어요")
 	}
 	logger.Printf("런처 %s -> %s 로 바꿈, 다시 켬", LauncherVersion, target)
 	setStatus("prepare", "새 런처 "+target+" 로 다시 켜는 중", 0)
@@ -115,4 +156,5 @@ func checkUpdate() {
 		logger.Printf("새 런처를 켜지 못함: %v", err)
 	}
 	os.Exit(0)
+	return nil
 }

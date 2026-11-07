@@ -107,6 +107,7 @@ func registerAPI(mux *http.ServeMux) {
 			"status": st, "server": si, "mcDir": mcDir(),
 			"direct": directMode(), "account": acc, "authError": hideHost(authError),
 			"config": c, "address": "", "version": LauncherVersion, "newerLauncher": newer,
+			"update":  pendingVersion(), // 1.8.8 받을 수 있는 새 런처 (화면에 업데이트 버튼)
 			"running": gameRunning(), "primary": primary, "termsVersion": TermsVersion,
 			// 1.7.5 약관 동의는 설치할 때 한 번: 윈도우는 설치 창에서, 설치 창이 없는 맥·리눅스만 처음 켤 때 한 번 물음
 			"askTerms": runtime.GOOS != "windows" && c.Terms == "",
@@ -170,6 +171,24 @@ func registerAPI(mux *http.ServeMux) {
 	})
 	mux.HandleFunc("/api/terms", guard(func(w http.ResponseWriter, r *http.Request) { // 1.7.4 이용약관·개인정보 동의
 		acceptTerms()
+		writeJSON(w, map[string]bool{"ok": true})
+	}))
+	mux.HandleFunc("/api/update", guard(func(w http.ResponseWriter, r *http.Request) { // 1.8.8 업데이트 버튼
+		if pendingVersion() == "" {
+			go checkUpdate()
+			writeJSON(w, map[string]string{"error": "받을 새 런처가 없어요"})
+			return
+		}
+		errc := make(chan error, 1)
+		go func() { errc <- applyUpdate() }()
+		select {
+		case err := <-errc:
+			if err != nil {
+				writeJSON(w, map[string]string{"error": err.Error()})
+				return
+			}
+		case <-time.After(1500 * time.Millisecond): // 받는 중 (끝나면 런처가 다시 켜짐)
+		}
 		writeJSON(w, map[string]bool{"ok": true})
 	}))
 	mux.HandleFunc("/api/play", guard(func(w http.ResponseWriter, r *http.Request) {
