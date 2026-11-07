@@ -10,6 +10,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
+	"log"
 	"net"
 	"net/http"
 	"os"
@@ -268,11 +269,49 @@ func uninstall() {
 foreach ($d in @([Environment]::GetFolderPath('Desktop'), [Environment]::GetFolderPath('Programs'))) { Remove-Item -LiteralPath (Join-Path $d %s) -Force -ErrorAction SilentlyContinue }
 Remove-Item -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\AsiaWarLauncher' -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\KoreaWarLauncher' -Recurse -Force -ErrorAction SilentlyContinue`, psq(appName+".lnk")))
-	del := `ping 127.0.0.1 -n 3 > nul & rmdir /s /q "` + installDir() + `"`
+	// 1.8.9 게임 자료가 남던 것: 이 런처가 쓰는 기록 파일·런처 창(WebView2)·끝나는 중인 런처가 자료 폴더 파일을 잡고 있어
+	// 한 번 지우기(rmdir)가 반쯤 실패했음 → 기록 파일을 닫고, 런처 창 프로세스를 끄고, 이 프로세스가 끝난 뒤 지워질 때까지 다시 시도
+	killWindowProfile()
+	dirs := []string{installDir(), legacyInstallDir()}
 	if data {
-		del += ` & rmdir /s /q "` + dataDir + `"`
+		dirs = append(dirs, dataDir)
+		if a := os.Getenv("APPDATA"); a != "" {
+			dirs = append(dirs, filepath.Join(a, "KoreaWarLauncher"), filepath.Join(a, "AsiaWarLauncher"))
+		}
 	}
-	c := exec.Command("cmd", "/c", del)
+	var q []string
+	for _, d := range dirs {
+		q = append(q, psq(d))
+	}
+	dataPat := strings.ReplaceAll(dataDir, "'", "''")
+	// 게임 자료를 지울 때만 그 자료로 켜진 게임(java)까지 끔. 「아니요」면 런처 창(WebView2)만
+	procs := "Name='msedgewebview2.exe'"
+	if data {
+		procs += " OR Name='javaw.exe' OR Name='java.exe'"
+	}
+	script := fmt.Sprintf(`
+Wait-Process -Id %d -Timeout 60 -ErrorAction SilentlyContinue
+$dirs = @(%s)
+for ($i = 0; $i -lt 40; $i++) {
+  Get-CimInstance Win32_Process -Filter "%s" -ErrorAction SilentlyContinue |
+    Where-Object { $_.CommandLine -and $_.CommandLine.Contains('%s') } |
+    ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+  $left = $false
+  foreach ($d in $dirs) { if (Test-Path -LiteralPath $d) { Remove-Item -LiteralPath $d -Recurse -Force -ErrorAction SilentlyContinue; if (Test-Path -LiteralPath $d) { $left = $true } } }
+  if (-not $left) { break }
+  Start-Sleep -Milliseconds 750
+}`, os.Getpid(), strings.Join(q, ","), procs, dataPat)
+	u := utf16.Encode([]rune(script))
+	b := make([]byte, len(u)*2)
+	for i, v := range u {
+		b[2*i], b[2*i+1] = byte(v), byte(v>>8)
+	}
+	logger.Printf("지우기: %v (게임 자료 %v)", dirs, data)
+	logger = log.New(os.Stderr, "", log.LstdFlags)
+	if logFile != nil {
+		_ = logFile.Close()
+	}
+	c := exec.Command("powershell", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-EncodedCommand", base64.StdEncoding.EncodeToString(b))
 	hideWindow(c)
 	detach(c)
 	_ = c.Start()

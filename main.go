@@ -105,6 +105,8 @@ func defaultDataDir() string {
 	}
 }
 
+var logFile *os.File // 1.8.9 지우기 전에 닫음 (열려 있으면 자료 폴더가 안 지워졌음)
+
 var movedDataDir string // 1.8.1 이번에 옮긴 예전 자료 폴더 (로그에 남김)
 
 // 1.8.1 이름 변경 (Asia War → Asia War): 예전 자료 폴더가 있으면 새 이름으로 옮김.
@@ -193,6 +195,7 @@ func main() {
 	}
 	lf, err := os.OpenFile(lp, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
 	if err == nil {
+		logFile = lf
 		logger = log.New(lf, "", log.LstdFlags)
 	} else {
 		logger = log.New(os.Stderr, "", log.LstdFlags)
