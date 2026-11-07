@@ -156,9 +156,15 @@ func registerAPI(mux *http.ServeMux) {
 			if cfg.DiscordS == s {
 				cfg.DiscordS = randString(24)
 			}
+			if n, ok := out["name"].(string); ok && n != "" {
+				cfg.DiscordN = n
+			}
 			cfgMu.Unlock()
 			saveConfig()
 			writeRealName()
+		}
+		if n := getCfg().DiscordN; n != "" { // 1.8.7 예전에 연결한 이름
+			out["linkedName"] = n
 		}
 		writeJSON(w, out)
 	})
