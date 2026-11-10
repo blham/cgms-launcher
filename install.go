@@ -562,6 +562,21 @@ func syncMods(man *Manifest) error {
 	if err := downloadAll("보조 모드 업데이트 중", tasks, 4); err != nil {
 		return fmt.Errorf("보조 모드를 받지 못했어요: %v", err)
 	}
+	// 1.9.0 이 서버는 런처가 넣어 주는 모드만: 그 밖의 jar 는 mods-blocked 로 뺌 (지우지 않음)
+	if es, err := os.ReadDir(modsDir); err == nil {
+		for _, e := range es {
+			n := e.Name()
+			if e.IsDir() || !strings.HasSuffix(strings.ToLower(n), ".jar") || want[n] {
+				continue
+			}
+			bd := filepath.Join(gameDir(), "mods-blocked")
+			_ = os.MkdirAll(bd, 0o755)
+			if os.Rename(filepath.Join(modsDir, n), filepath.Join(bd, n)) == nil {
+				logger.Printf("직접 넣은 모드 뺌: %s", n)
+				lastBlocked = append(lastBlocked, n)
+			}
+		}
+	}
 	// 예전에 런처가 넣은 것 중 이제 안 쓰는 것만 지움 (직접 넣은 모드는 그대로)
 	managedPath := dirs("managed-mods.json")
 	var old []string

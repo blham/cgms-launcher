@@ -333,14 +333,17 @@ canvas#fib{position:absolute;inset:0}
 .rgc b{font:800 18px var(--serif);display:block}.rgc em{font-style:normal;font:500 12px var(--sans);color:var(--mu2)}
 .rgc ul{list-style:none;margin:8px 0 0;padding:0}.rgc li{font:500 13px/1.6 var(--sans);color:var(--meok)}
 .rgc li .k{margin-right:6px}
-.mcols{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1.45fr;gap:16px}
-.mcols>div{display:flex;flex-direction:column;min-height:0}
-.verbox{display:flex;gap:14px;align-items:center;padding:11px 13px;background:rgba(23,78,69,.08);border:1px solid rgba(23,78,69,.35);margin-bottom:12px}
-.verbox b{font:800 22px var(--serif);color:var(--cheong)}.verbox span{font:500 12px/1.5 var(--sans);color:#3a4a3f}
-.rq{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);font:700 13.5px var(--serif)}
-.rq small{font:600 11.5px var(--sans);color:var(--cheong);white-space:nowrap}
-.rq.bad small{color:var(--juH)}
-.man{display:flex;flex-direction:column;padding:7px 0;border-bottom:1px solid var(--line);font:600 12.5px var(--sans);user-select:text;word-break:break-all}
+.mwrap{flex:1;min-height:0;display:flex;flex-direction:column}
+.mtop{display:grid;grid-template-columns:auto 1fr auto;gap:22px;align-items:center;padding:12px 16px;background:rgba(23,78,69,.08);border:1px solid rgba(23,78,69,.35);margin-bottom:16px}
+.mver b{display:block;font:800 26px/1 var(--serif);color:var(--cheong)}.mver span{display:block;margin-top:4px;font:600 11.5px var(--sans);color:#3a4a3f;white-space:nowrap}
+.mreqT{font:700 12px var(--sans);color:#3a4a3f;margin-bottom:6px}.mreqT small{font-weight:500;color:var(--mu2);margin-left:6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chip{font:700 12.5px var(--serif);padding:3px 10px;background:rgba(255,250,236,.75);border:1px solid rgba(23,78,69,.35);color:var(--meok)}
+.mrule{font:500 12px/1.6 var(--sans);color:#3a4a3f;text-align:right}
+.mbar{display:flex;align-items:center;gap:16px;margin-bottom:6px}.mbar .cap{margin:0;flex:1}
+.mbar #modSearch{margin:0;width:320px;flex:none}
+.mgrid{display:grid;grid-template-columns:1fr 1fr;column-gap:28px;align-content:start;align-items:start}
+.mgrid .libs,.mgrid .empty{grid-column:1/-1}
+.mgrid .mod .ds{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mgrid .mod.open .ds{display:none}.mgrid .mod>div{min-width:0}
 .man small{font:700 11.5px var(--sans);color:var(--juH);margin-top:2px}
 #modSearch{height:36px;width:100%;padding:0 12px 0 34px;font:500 13.5px var(--sans);background:var(--ji3) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M10 2a8 8 0 0 1 6.3 12.9l5.4 5.4-1.4 1.4-5.4-5.4A8 8 0 1 1 10 2m0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12' fill='%236a5236'/></svg>") 10px 50%/16px no-repeat;border:1px solid rgba(73,48,31,.5);outline:none;margin-bottom:6px}
 #modSearch:focus{border-color:var(--sel);box-shadow:0 0 0 2px rgba(23,88,76,.2)}
@@ -348,7 +351,6 @@ canvas#fib{position:absolute;inset:0}
 .mod .ic{width:40px;height:40px;background:rgba(73,48,31,.1);display:grid;place-items:center;font:800 16px var(--serif);color:var(--mu);overflow:hidden}
 .mod .ic img{width:40px;height:40px;image-rendering:pixelated}
 .mod h5{font:700 15px var(--serif)}.mod h5 small{font:500 11px var(--sans);color:var(--mu2);margin-left:6px}
-.mod h5 .up{font:700 10.5px var(--sans);color:var(--cheong);border:1px solid rgba(23,78,69,.45);padding:0 5px;margin-left:6px}
 .mod p{font:500 12.5px/1.5 var(--sans);color:var(--mu);margin-top:2px}
 .mod .need{color:#8a6a2c}.mod .warnx{color:var(--juH);font-weight:700}
 .mod .more{display:none;margin-top:8px;padding:9px 11px;background:rgba(255,250,236,.6);border-left:3px solid var(--geum)}
@@ -360,8 +362,6 @@ canvas#fib{position:absolute;inset:0}
 .sw.on{background:var(--sel)}.sw.on:before{content:"켬";left:8px;right:auto;color:#e8f1ec}.sw.on:after{left:31px}
 .sw.forced{opacity:.6}
 .libs{font-size:12px;color:var(--mu2);padding:10px 0;line-height:1.6}
-.expnew{font-size:12px;color:#fff;background:var(--sel);padding:5px 9px;margin-top:6px;display:inline-block;font-weight:700}
-.expwarn{font-size:11.5px;color:#8a6a2c;margin-top:5px}
 #modNote{font-size:12px;color:var(--mu2);margin-top:10px}
 
 /* 설정 */
@@ -442,7 +442,6 @@ canvas#fib{position:absolute;inset:0}
   <button class="ri" data-ov="players"><span class="md"><svg viewBox="0 0 24 24"><path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8m7.5.5a3.5 3.5 0 1 0-1.2-6.8 6 6 0 0 1 0 6.6c.4.1.8.2 1.2.2M9 13c-3.3 0-7 1.6-7 4.5V20h14v-2.5C16 14.6 12.3 13 9 13m8.1.1c1.6.8 2.9 2.2 2.9 4.4V20h2v-2.5c0-2.1-2.4-3.8-4.9-4.4"/></svg></span><span>접속자</span></button>
   <button class="ri" data-ov="news" id="newsRi"><span class="md"><svg viewBox="0 0 24 24"><path d="M4 4h13v3h3v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2 2v12h10V6zM8 8h6v2H8zm0 4h6v2H8z"/></svg></span><span>소식</span></button>
   <button class="ri" data-ov="donate"><span class="md"><svg viewBox="0 0 24 24"><path d="M12 21.4 10.6 20C5.4 15.4 2 12.3 2 8.5 2 5.4 4.4 3 7.5 3c1.7 0 3.4.8 4.5 2.1C13.1 3.8 14.8 3 16.5 3 19.6 3 22 5.4 22 8.5c0 3.8-3.4 6.9-8.6 11.5z"/></svg></span><span>후원</span></button>
-  <button class="ri" id="folder"><span class="md"><svg viewBox="0 0 24 24"><path d="M10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8zm10 14H4V8h16z"/></svg></span><span>게임 폴더</span></button>
   <button class="ri" data-ov="mods"><span class="md"><svg viewBox="0 0 24 24"><path d="M20.5 11H19V7a2 2 0 0 0-2-2h-4V3.5a2.5 2.5 0 0 0-5 0V5H4a2 2 0 0 0-2 2v3.8h1.5a2.7 2.7 0 0 1 0 5.4H2V20a2 2 0 0 0 2 2h3.8v-1.5a2.7 2.7 0 0 1 5.4 0V22H17a2 2 0 0 0 2-2v-4h1.5a2.5 2.5 0 0 0 0-5"/></svg></span><span>모드</span></button>
   <button class="ri" data-ov="settings"><span class="md"><svg viewBox="0 0 24 24"><path d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7 7 0 0 0-1.7-1L15 3h-4l-.4 2.9a7 7 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.6 7.6 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7 7 0 0 0 1.7 1L11 21h4l.4-2.9a7 7 0 0 0 1.7-1l2.5 1 2-3.5zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7"/></svg></span><span>설정</span></button>
   <button class="ri dc" id="disc" hidden><span class="md"><svg viewBox="0 0 71 55"><path d="M60 4.6A58 58 0 0 0 45.6.2l-1.8 3.7a54 54 0 0 0-16.2 0L25.8.2A58 58 0 0 0 11.3 4.6 59.6 59.6 0 0 0 .9 44.8 58.3 58.3 0 0 0 18.6 53.8l3.8-5.2a38 38 0 0 1-6-2.9l1.5-1.1a41.6 41.6 0 0 0 35.4 0l1.5 1.1a38 38 0 0 1-6 2.9l3.8 5.2a58 58 0 0 0 17.8-9A59.4 59.4 0 0 0 60 4.6ZM23.7 36.7c-3.5 0-6.4-3.2-6.4-7.2s2.8-7.2 6.4-7.2 6.4 3.3 6.4 7.2-2.8 7.2-6.4 7.2Zm23.6 0c-3.5 0-6.4-3.2-6.4-7.2s2.8-7.2 6.4-7.2 6.4 3.3 6.4 7.2-2.8 7.2-6.4 7.2Z"/></svg></span><span>디스코드</span></button>
@@ -548,9 +547,15 @@ canvas#fib{position:absolute;inset:0}
 <!-- ================= 모드 ================= -->
 <section class="ov" id="ov-mods">
   <div class="ph"><h2 data-ttl>모드</h2><div class="sub">편의성 모드는 원하는 것만 켜서 쓰세요</div><button class="bs back" data-close>← 홈으로</button></div>
-  <div class="mcols">
-    <div class="doc cl pad" style="overflow:auto" id="modLeft"><div id="modVer"></div><div id="modReq"></div><div class="cap" style="margin-top:14px">직접 넣은 모드<span>mods 폴더</span></div><div id="modMan"></div></div>
-    <div class="doc cl pad"><div class="cap">편의성 모드<span>골라서 켜기</span></div><input id="modSearch" type="search" placeholder="모드 이름이나 설명으로 찾기" autocomplete="off"><div id="modList" class="scroll vfill"></div><div id="modNote"></div></div>
+  <div class="doc cl pad mwrap">
+    <div class="mtop">
+      <div class="mver" id="modVer"></div>
+      <div><div class="mreqT">꼭 필요한 모드<small>늘 켜져 있어요</small></div><div class="chips" id="modReq"></div></div>
+      <div class="mrule">이 서버는 런처가 넣어 주는 모드만 쓸 수 있어요.<br>모든 모드는 런처가 알아서 업데이트해요.</div>
+    </div>
+    <div class="mbar"><div class="cap">편의성 모드<span id="modCount"></span></div><input id="modSearch" type="search" placeholder="모드 이름이나 설명으로 찾기" autocomplete="off"></div>
+    <div id="modList" class="scroll vfill mgrid"></div>
+    <div id="modNote"></div>
   </div>
 </section>
 <!-- ================= 설정 ================= -->
@@ -1176,36 +1181,25 @@ function drawDonate(dn){
   const row=x=>`<div class="dn">${HOPAE}${x.prefix?`<span style="color:${inkTone(x.prefixColor)};margin-right:2px">『${esc(x.prefix)}』</span>`:""}${esc(x.name)}<small>${titleSpan(x.title,x.color)}</small></div>`;
   $("dRecent").innerHTML=(dn.recent||[]).map(row).join("")||`<div class="empty">아직 없어요.</div>`;
 }
-// ---------------- 모드 (찾기 · 자동 업데이트 표시 · 직접 넣은 모드와 겹치면 경고)
+// ---------------- 모드 (런처가 넣어 주는 모드만: 꼭 필요한 모드 + 골라 켜는 편의성 모드)
 let mods=null, openMod="", mq="";
 async function loadMods(){
   let d; try{d=await(await fetch("/api/mods",{cache:"no-store",headers:{"X-KW-Token":TOKEN}})).json()}catch(e){return}
   mods=d; drawMods();
 }
-const norm=s=>String(s||"").toLowerCase().replace(/\.jar$/,"").replace(/[-_ +.]?(v?\d+[\d.]*.*)$/,"").replace(/[^a-z0-9가-힣]/g,"");
 function drawMods(){
-  const d=mods, req=d.required||[], op=d.optional||[], man=d.manual||[];
-  $("modVer").innerHTML=`<div class="verbox"><b>${esc(d.minecraft)}</b><span>마인크래프트 ${esc(d.minecraft)} · Fabric${d.fabricLoader?" "+esc(d.fabricLoader):""}<br>모드를 직접 받을 땐 이 버전·Fabric 용으로 받으세요</span></div><button class="bs" id="openMods" style="margin-bottom:10px">모드 폴더 열기</button>`;
-  $("openMods").onclick=()=>post("/api/openmods");
-  // 겹치는 모드: 직접 넣은 파일 이름이 서버 모드 이름과 같으면 (같은 모드가 두 번 켜져 게임이 안 켜질 수 있음)
-  const known=[...req.map(r=>({n:String(r),id:norm(r)})),...op.filter(m=>m.enabled||m.active).map(m=>({n:m.name,id:norm(m.id||m.name),n2:norm(m.name)}))];
-  const clash=f=>{const k=norm(f);if(k.length<3)return null;const h=known.find(x=>x.id&&(k===x.id||k===x.n2||k.startsWith(x.id)&&x.id.length>=5));return h?h.n:null};
-  $("modMan").innerHTML=man.length?man.map(f=>{const c=clash(f);return `<div class="man">${esc(f)}${c?`<small>⚠ 「${esc(c)}」 와 겹쳐요. 하나만 남겨 주세요</small>`:""}</div>`}).join(""):`<div class="empty">없어요. 「모드 폴더 열기」로 연 폴더에 .jar 를 넣으면 다음에 게임을 켤 때 같이 켜져요.</div>`;
-  $("modReq").innerHTML=`<div class="cap">꼭 필요한 모드<span>늘 켜짐 · 자동 업데이트</span></div>`+req.map(r=>`<div class="rq">${esc(r)}<small>자동 업데이트</small></div>`).join("")
-    +(d.exported&&d.modVer&&d.exported!==d.modVer?`<div class="expnew">보조 모드가 새로 나왔어요 (${esc(d.exported)} → ${esc(d.modVer)}). 다른 런처를 쓴다면 다시 받아 주세요.</div>`:"")
-    +`<div class="expwarn">다른 런처용은 자동 업데이트가 안 돼요. (이 런처로 켜면 자동)</div><div style="display:flex;gap:10px;align-items:center;margin-top:8px"><button class="bs" id="expBtn">다른 런처용 받기</button></div><div class="exp" id="expMsg"></div>`;
-  $("expBtn").onclick=async()=>{$("expBtn").disabled=true;$("expMsg").textContent="묶는 중…";
-    const r=await post("/api/exportmods");$("expBtn").disabled=false;if(!r.error){d.exported=d.modVer;const n=document.querySelector(".expnew");if(n)n.remove()}
-    $("expMsg").textContent=r.error?r.error:`저장했어요: ${r.path}  (공식 런처·Prism·CurseForge 에 Fabric ${d.minecraft} 로 설치 후 mods 폴더에 넣기 — zip 안 설명서 참고)`};
-  const q=mq.trim().toLowerCase();
+  const d=mods, req=d.required||[], op=d.optional||[];
+  $("modVer").innerHTML=`<b>${esc(d.minecraft)}</b><span>Fabric${d.fabricLoader?" "+esc(d.fabricLoader):""}</span>`;
+  $("modReq").innerHTML=req.length?req.map(r=>`<span class="chip">${esc(r)}</span>`).join(""):`<span class="chip">Asia War 보조 모드</span><span class="chip">Fabric API</span>`;
+  const q=mq.trim().toLowerCase(), all=op.filter(m=>!m.lib);
   const vis=op.map((m,i)=>({m,i})).filter(x=>!x.m.lib).filter(x=>!q||[x.m.name,x.m.description,x.m.detail,x.m.id].join(" ").toLowerCase().includes(q)), libs=op.filter(m=>m.lib);
-  const manK=man.map(norm);
-  $("modList").innerHTML=vis.length?vis.map(({m,i})=>{const forced=!m.enabled&&m.active, why=(m.neededBy||[]).join(", "), dup=(m.enabled||m.active)&&manK.some(k=>k&&(k===norm(m.id)||k===norm(m.name)));
-    return `<div class="mod${openMod===m.id?" open":""}" data-id="${esc(m.id)}"><div class="ic">${m.icon?`<img alt="" src="${esc(m.icon)}">`:esc((m.name||"?")[0])}</div><div><h5>${esc(m.name)}<small>${esc(m.version)}</small><span class="up">자동 업데이트</span></h5><p>${esc(m.description||"설명이 없어요")}</p>${forced?`<p class="need">${esc(why)} 에 필요해서 같이 켜져요</p>`:""}${dup?`<p class="warnx">⚠ mods 폴더에 직접 넣은 것과 겹쳐요. 직접 넣은 쪽을 빼 주세요</p>`:""}
+  $("modCount").textContent=all.length?`켜짐 ${all.filter(m=>m.enabled||m.active).length} / ${all.length}`:"";
+  $("modList").innerHTML=vis.length?vis.map(({m,i})=>{const forced=!m.enabled&&m.active, why=(m.neededBy||[]).join(", ");
+    return `<div class="mod${openMod===m.id?" open":""}" data-id="${esc(m.id)}"><div class="ic">${m.icon?`<img alt="" src="${esc(m.icon)}">`:esc((m.name||"?")[0])}</div><div><h5>${esc(m.name)}<small>${esc(m.version)}</small></h5><p class="ds">${esc(m.description||"설명이 없어요")}</p>${forced?`<p class="need">${esc(why)} 에 필요해서 같이 켜져요</p>`:""}
       <div class="more"><p class="det">${esc(m.detail||m.description||"")}</p>${(m.depends||[]).length?`<p class="dep">필요한 모드: ${(m.depends||[]).map(x=>esc((op.find(y=>y.id===x)||{}).name||x)).join(", ")} (같이 받아요)</p>`:""}${m.link?`<button class="bs lnk" data-link="${esc(m.link)}">모드 페이지 ↗</button>`:""}</div></div><button class="sw${m.enabled||m.active?" on":""}${forced?" forced":""}" data-i="${i}" aria-label="${esc(m.name)} 켜기"></button></div>`}).join("")
-    +(libs.length&&!q?`<div class="libs">라이브러리 ${libs.length}개 (${libs.map(l=>esc(l.name)).join(", ")}) — 필요한 모드를 켜면 런처가 알아서 같이 받아요</div>`:"")
+    +(libs.length&&!q?`<div class="libs">라이브러리 ${libs.length}개 (${libs.map(l=>esc(l.name)).join(", ")}) — 필요한 모드를 켜면 같이 받아요</div>`:"")
     :`<div class="empty">${q?"찾는 모드가 없어요":"아직 서버에 편의성 모드가 없어요."}</div>`;
-  $("modNote").textContent=d.running?"게임이 켜져 있어요. 바꾼 것은 게임을 끄고 다시 켤 때 적용돼요.":"바꾼 것은 다음에 게임을 켤 때 적용돼요. 직접 mods 폴더에 넣은 모드는 건드리지 않아요.";
+  $("modNote").textContent=d.running?"게임이 켜져 있어요. 바꾼 것은 게임을 끄고 다시 켤 때 적용돼요.":"모드를 누르면 자세한 설명이 보여요. 바꾼 것은 다음에 게임을 켤 때 적용돼요.";
   document.querySelectorAll(".mod[data-id]").forEach(c=>c.onclick=e=>{if(e.target.closest(".sw,.lnk"))return;openMod=openMod===c.dataset.id?"":c.dataset.id;document.querySelectorAll(".mod[data-id]").forEach(x=>x.classList.toggle("open",x.dataset.id===openMod))});
   document.querySelectorAll(".lnk").forEach(b=>b.onclick=e=>{e.stopPropagation();post("/api/open",{url:b.dataset.link})});
   document.querySelectorAll("#modList .sw").forEach(b=>b.onclick=async()=>{const m=op[+b.dataset.i];
@@ -1242,7 +1236,6 @@ $("tOk").onclick=async()=>{$("tOk").disabled=true;await post("/api/terms");$("te
 $("tClose").onclick=()=>{termsView=false;$("termsGate").hidden=true;$("termsGate").classList.remove("view")};
 $("termsView").onclick=()=>openTerms(true);
 $("gateOk").onclick=gateSave; $("gateName").addEventListener("keydown",e=>{if(e.key==="Enter")gateSave()});
-$("folder").onclick=()=>post("/api/openfolder");
 async function dcStatus(){let d;try{d=await(await fetch("/api/discord/status",{cache:"no-store"})).json()}catch(e){return}
   const t={linked:"연결됨: "+(d.name||""),claimed:"준비됨 · 「디스코드 연결」을 눌러 승인하세요",none:"게임에 한 번 접속한 뒤 연결할 수 있어요",error:"서버에 연결하지 못했어요"}[d.state]||"";
   if(d.linkedName&&!dcLinked)dcLinked=d.linkedName;

@@ -319,25 +319,6 @@ func registerAPI(mux *http.ServeMux) {
 		}
 		writeJSON(w, map[string]any{"optional": out, "required": req, "manual": manual, "minecraft": mc, "fabricLoader": fl, "running": gameRunning(), "modVer": currentModVer(m), "exported": getCfg().Exported})
 	})
-	mux.HandleFunc("/api/exportmods", guard(func(w http.ResponseWriter, r *http.Request) {
-		p, err := exportMods()
-		if err != nil {
-			writeJSON(w, map[string]string{"error": err.Error()})
-			return
-		}
-		openBrowser(filepath.Dir(p))
-		writeJSON(w, map[string]string{"path": p})
-	}))
-	mux.HandleFunc("/api/openmods", guard(func(w http.ResponseWriter, r *http.Request) {
-		d := filepath.Join(gameDir(), "mods")
-		_ = os.MkdirAll(d, 0o755)
-		openBrowser(d)
-		writeJSON(w, map[string]bool{"ok": true})
-	}))
-	mux.HandleFunc("/api/openfolder", guard(func(w http.ResponseWriter, r *http.Request) {
-		openBrowser(gameDir())
-		writeJSON(w, map[string]bool{"ok": true})
-	}))
 	// 제거할 때 켜져 있는 런처를 끝냄 (게임 중이면 그대로)
 	mux.HandleFunc("/api/quit-uninstall", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "POST" || r.Header.Get("X-KW-Token") != apiToken || gameRunning() { // 1.2.6 토큰 있어야

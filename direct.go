@@ -625,7 +625,7 @@ func launchGame(p *Prepared) error {
 	gameStart = time.Now()
 	gameMu.Unlock()
 	if len(lastBlocked) > 0 {
-		setStatus("running", "미니맵·지도 모드는 이 서버에서 못 써서 빼 두었어요 (mods-blocked 폴더): "+strings.Join(lastBlocked, ", "), 0)
+		setStatus("running", "이 서버에서 못 쓰는 모드(직접 넣은 모드·미니맵)를 빼 두었어요: "+strings.Join(lastBlocked, ", "), 0)
 	} else if len(lastUnsigned) > 0 {
 		setStatus("running", "서명이 없어 안 받은 편의성 모드가 있어요 (서버장에게 알려 주세요): "+strings.Join(lastUnsigned, ", "), 0)
 	} else {

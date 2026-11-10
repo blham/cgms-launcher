@@ -322,7 +322,7 @@ func playOfficial() {
 	}
 	msg := "공식 런처를 열었어요. 'Asia War' 를 골라 플레이를 누르세요."
 	if len(lastBlocked) > 0 {
-		msg += " (미니맵·지도 모드는 이 서버에서 못 써서 mods-blocked 폴더로 뺐어요: " + strings.Join(lastBlocked, ", ") + ")"
+		msg += " (이 서버에서 못 쓰는 모드(직접 넣은 모드·미니맵)를 빼 두었어요: " + strings.Join(lastBlocked, ", ") + ")"
 	} else if len(lastUnsigned) > 0 {
 		msg += " (서명이 없어 안 받은 편의성 모드: " + strings.Join(lastUnsigned, ", ") + ")"
 	}
