@@ -1,0 +1,68 @@
+# Builds the launcher from this repository's source. Release binaries come only from this workflow.
+# Run it by pushing a tag like v1.9.1, or by hand from the Actions tab with a version number.
+name: build
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version without the leading v (for example 1.9.1)'
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+      - name: Version
+        id: v
+        run: |
+          V="${{ github.event.inputs.version }}"
+          if [ -z "$V" ]; then V="${GITHUB_REF_NAME#v}"; fi
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+      - name: Build
+        env:
+          HOST: ${{ vars.KW_HOST }}
+          CLIENT_ID: ${{ vars.KW_CLIENT_ID }}
+        run: |
+          go vet ./...
+          sh build.sh "${{ steps.v.outputs.version }}"
+          cd dist
+          for f in KoreaWarLauncher-*; do cp "$f" "AsiaWar${f#KoreaWar}"; done
+          cp AsiaWarLauncher-windows-x64.exe AsiaWarSetup.exe
+          cp AsiaWarLauncher-windows-arm64.exe AsiaWarSetup-arm64.exe
+          sha256sum * > SHA256SUMS.txt
+      - name: Upload Windows binaries (to be signed)
+        id: unsigned
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-unsigned
+          path: |
+            dist/AsiaWarLauncher-windows-x64.exe
+            dist/AsiaWarLauncher-windows-arm64.exe
+            dist/AsiaWarSetup.exe
+            dist/AsiaWarSetup-arm64.exe
+          if-no-files-found: error
+      - name: Upload all binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: all-platforms
+          path: dist/
+      # Code signing (SignPath Foundation). Enabled once the project is accepted:
+      # - uses: signpath/github-action-submit-signing-request@v1
+      #   with:
+      #     api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+      #     organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+      #     project-slug: cgms-launcher
+      #     signing-policy-slug: release-signing
+      #     github-artifact-id: ${{ steps.unsigned.outputs.artifact-id }}
+      #     wait-for-completion: true
+      #     output-artifact-directory: dist/signed
