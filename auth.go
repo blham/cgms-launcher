@@ -115,8 +115,22 @@ func randString(n int) string {
 
 // 로그인 주소 (브라우저로 엶)
 func beginLogin() (string, error) {
-	if _, err := fetchManifest(); err != nil {
-		logger.Printf("서버 정보 못 받음: %v", err)
+	// 1.9.8 서버가 꺼져 있으면 서버 정보를 기다리느라 로그인 창이 1분 가까이 늦게 떴음 (1.9.7 부터 서버 없이도 로그인이 되면서 드러남).
+	// 로그인 앱 ID 를 이미 알고 있으면 2초만 기다리고 바로 로그인 창을 엶 (서버 정보는 뒤에서 마저 받음)
+	got := make(chan struct{})
+	go func() {
+		if _, err := fetchManifest(); err != nil {
+			logger.Printf("서버 정보 못 받음: %v", err)
+		}
+		close(got)
+	}()
+	if clientID() == "" {
+		<-got
+	} else {
+		select {
+		case <-got:
+		case <-time.After(2 * time.Second):
+		}
 	}
 	cid := clientID()
 	if cid == "" {
