@@ -413,6 +413,23 @@ func registerAPI(mux *http.ServeMux) {
 		}
 		writeJSON(w, map[string]bool{"ok": true})
 	}))
+	mux.HandleFunc("/api/log", guard(func(w http.ResponseWriter, r *http.Request) { // 1.9.5 문제 신고용 기록 (복사 · 저장)
+		var q struct {
+			Save bool `json:"save"`
+		}
+		_ = json.NewDecoder(io.LimitReader(r.Body, 1<<10)).Decode(&q)
+		if !q.Save {
+			writeJSON(w, map[string]string{"text": collectLog()})
+			return
+		}
+		out, err := saveLog()
+		if err != nil {
+			writeJSON(w, map[string]string{"error": err.Error()})
+			return
+		}
+		logger.Printf("기록을 저장함: %s", out)
+		writeJSON(w, map[string]string{"path": out})
+	}))
 	mux.HandleFunc("/api/quit", guard(func(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, map[string]bool{"ok": true})
 		// 1.6.0 새로 켠 런처가 이어받을 때도 이 길로 옴: 창은 새 런처가 정리하고 다시 띄우니 여기선 창을 건드리지 않음

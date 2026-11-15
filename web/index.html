@@ -51,6 +51,7 @@ canvas#fib{position:absolute;inset:0}
 .side:before,.side:after{content:"";position:absolute;top:0;bottom:0;width:7px;background:linear-gradient(90deg,#5d3f27,#2c1b0f)}
 .side:before{left:0}.side:after{right:0;box-shadow:inset -1px 0 0 var(--geum)}
 #rail{padding-top:14px;display:flex;flex-direction:column}
+#brand{position:absolute;left:0;right:0;bottom:9px;z-index:1;display:flex;flex-direction:column;align-items:center;gap:3px;pointer-events:none}#brand img{width:26px;height:26px;display:block}#brand span{font:700 9px var(--sans);letter-spacing:.24em;padding-left:.24em;color:#b9a47c}
 .ri{position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;width:100%;padding:7px 0 8px;color:#d8c49b;font:600 12px var(--sans);letter-spacing:.03em}
 .ri .md{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;border:1px solid rgba(197,160,77,.45);background:radial-gradient(circle at 50% 35%,rgba(255,255,255,.06),rgba(0,0,0,.18));transition:background .15s,border-color .15s}
 .ri svg{width:18px;height:18px;fill:currentColor}
@@ -445,7 +446,7 @@ canvas#fib{position:absolute;inset:0}
   <button class="ri" data-ov="mods"><span class="md"><svg viewBox="0 0 24 24"><path d="M20.5 11H19V7a2 2 0 0 0-2-2h-4V3.5a2.5 2.5 0 0 0-5 0V5H4a2 2 0 0 0-2 2v3.8h1.5a2.7 2.7 0 0 1 0 5.4H2V20a2 2 0 0 0 2 2h3.8v-1.5a2.7 2.7 0 0 1 5.4 0V22H17a2 2 0 0 0 2-2v-4h1.5a2.5 2.5 0 0 0 0-5"/></svg></span><span>모드</span></button>
   <button class="ri" data-ov="settings"><span class="md"><svg viewBox="0 0 24 24"><path d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7 7 0 0 0-1.7-1L15 3h-4l-.4 2.9a7 7 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.6 7.6 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7 7 0 0 0 1.7 1L11 21h4l.4-2.9a7 7 0 0 0 1.7-1l2.5 1 2-3.5zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7"/></svg></span><span>설정</span></button>
   <button class="ri dc" id="disc" hidden><span class="md"><svg viewBox="0 0 71 55"><path d="M60 4.6A58 58 0 0 0 45.6.2l-1.8 3.7a54 54 0 0 0-16.2 0L25.8.2A58 58 0 0 0 11.3 4.6 59.6 59.6 0 0 0 .9 44.8 58.3 58.3 0 0 0 18.6 53.8l3.8-5.2a38 38 0 0 1-6-2.9l1.5-1.1a41.6 41.6 0 0 0 35.4 0l1.5 1.1a38 38 0 0 1-6 2.9l3.8 5.2a58 58 0 0 0 17.8-9A59.4 59.4 0 0 0 60 4.6ZM23.7 36.7c-3.5 0-6.4-3.2-6.4-7.2s2.8-7.2 6.4-7.2 6.4 3.3 6.4 7.2-2.8 7.2-6.4 7.2Zm23.6 0c-3.5 0-6.4-3.2-6.4-7.2s2.8-7.2 6.4-7.2 6.4 3.3 6.4 7.2-2.8 7.2-6.4 7.2Z"/></svg></span><span>디스코드</span></button>
-</nav></aside>
+</nav><div id="brand"><img src="/icon.png" alt=""><span>CGMS</span></div></aside>
 
 <!-- ================= 홈 ================= -->
 <div id="home">
@@ -567,6 +568,7 @@ canvas#fib{position:absolute;inset:0}
       <div class="fr"><label for="rname">게임 속 이름</label><div><input type="text" id="rname" maxlength="10" autocomplete="off"><small>머리 위 이름표·탭 목록·채팅에 보이는 본인의 실명 (본명이 아니면 불이익이 있어요)</small></div></div>
       <div class="fr"><label>디스코드</label><div><div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><button class="bs navy" id="dcLink">디스코드 연결</button><span id="dcState" style="color:var(--mu);font-size:12.5px"></span></div><small>세력 역할·음성 채널이 자동으로 맞춰지고, 처음 들어올 때 입장 확인도 이걸로 해요</small></div></div>
       <div class="fr"><label>켜면 바로 접속</label><div><div class="seg" id="autoSeg"><button class="bg" data-v="1">예</button><button class="bg" data-v="0">아니요</button></div><select id="auto" hidden><option value="1">예</option><option value="0">아니요</option></select></div></div>
+      <div class="fr"><label>문제 신고</label><div><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><button class="bg" id="logCopy">기록 복사</button><button class="bg" id="logSave">파일로 저장</button><span id="logMsg" style="color:var(--mu);font-size:12.5px"></span></div><small>런처·게임 기록의 끝부분이에요. 서버 주소와 로그인 정보는 가려져요</small></div></div>
       <div class="fr"><label>약관</label><div><button class="bg" id="termsView">이용약관·개인정보 안내 보기</button></div></div>
       <div class="acts"><button class="bp" id="save">저장</button><span id="saved">저장했어요</span><span style="flex:1"></span><button class="bs" id="quit">런처 끄기</button></div>
     </div>
@@ -802,7 +804,7 @@ async function tick(){
   if(needTerms) $("play").disabled=true;
   const noName=!s.config.realName&&!needTerms; $("nameGate").hidden=!noName; if(noName&&document.activeElement!==$("gateName"))$("gateName").focus();
   if(noName) $("play").disabled=true;
-  $("ver").textContent=`런처 ${s.version}`+(s.newerLauncher?` · 새 런처 ${s.newerLauncher} 이 나왔어요`+(s.store?" (Microsoft Store 에서 업데이트)":""):"");
+  $("ver").textContent=`CGMS Launcher ${s.version}`+(s.newerLauncher?` · 새 런처 ${s.newerLauncher} 이 나왔어요`+(s.store?" (Microsoft Store 에서 업데이트)":""):"");
   {const u=s.update||""; $("updBtn").hidden=!u; if(u&&!$("updBtn").disabled) $("updTxt").textContent=`새 런처 ${u} 업데이트`;}
 }
 function who(n,max){$("who").innerHTML=n==null?"":`지금 <b>${num(n)}</b>명이 접속해 있어요${max?` · 최대 ${num(max)}명`:""}`}
@@ -1234,6 +1236,15 @@ function tSync(){const ok=treqs.every(c=>c.checked);$("tAll").checked=ok;$("tOk"
 treqs.forEach(c=>c.onchange=tSync);$("tAll").onchange=()=>{treqs.forEach(c=>c.checked=$("tAll").checked);tSync()};
 $("tOk").onclick=async()=>{$("tOk").disabled=true;await post("/api/terms");$("termsGate").hidden=true;tick()};
 $("tClose").onclick=()=>{termsView=false;$("termsGate").hidden=true;$("termsGate").classList.remove("view")};
+// 1.9.5 문제 신고용 기록
+function logMsg(t){const m=$("logMsg");m.textContent=t;clearTimeout(m._t);m._t=setTimeout(()=>{m.textContent=""},6000)}
+$("logCopy").onclick=async()=>{let r;try{r=await post("/api/log",{})}catch(e){return logMsg("기록을 읽지 못했어요")}
+  if(!r||!r.text)return logMsg("기록을 읽지 못했어요");
+  let ok=false;try{await navigator.clipboard.writeText(r.text);ok=true}catch(e){}
+  if(!ok){const t=document.createElement("textarea");t.value=r.text;t.style.cssText="position:fixed;left:-9999px;top:0";document.body.appendChild(t);t.select();try{ok=document.execCommand("copy")}catch(e){}t.remove()}
+  logMsg(ok?"복사했어요. 디스코드에 붙여 넣으세요":"복사하지 못했어요. 「파일로 저장」을 써 주세요")};
+$("logSave").onclick=async()=>{let r;try{r=await post("/api/log",{save:true})}catch(e){return logMsg("저장하지 못했어요")}
+  logMsg(r&&r.path?"다운로드 폴더에 저장했어요: "+r.path.split(/[\\/]/).pop():(r&&r.error)||"저장하지 못했어요")};
 $("termsView").onclick=()=>openTerms(true);
 $("gateOk").onclick=gateSave; $("gateName").addEventListener("keydown",e=>{if(e.key==="Enter")gateSave()});
 async function dcStatus(){let d;try{d=await(await fetch("/api/discord/status",{cache:"no-store"})).json()}catch(e){return}
