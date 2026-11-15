@@ -25,8 +25,10 @@ import (
 
 // 빌드할 때 -ldflags "-X main.defaultHost=... -X main.defaultClientID=..." 로 바꿀 수 있음
 var (
-	LauncherVersion  = "1.6.6"
-	defaultClientID  = "" // 모장 승인된 앱 ID (보통은 서버 config.yml launcher.client-id 로 받음)
+	LauncherVersion = "1.6.6"
+	// 모장 승인된 로그인 앱 ID (공개 값: 서명된 kw-signed.json 에도 들어 있음). 서버에서 새 값을 받으면 그 값을 씀.
+	// 1.9.7 기본값을 넣어 둠: 서버가 꺼져 있을 때 「공식 런처로 실행」 으로 바뀌던 것 (깃허브에서 만든 런처에는 이 값이 비어 있었음)
+	defaultClientID  = "81e9aea6-4da4-48c4-afbf-308ed404b275"
 	defaultHost      = "" // 빌드할 때 -ldflags "-X main.defaultHost=서버주소" 로 넣음 (소스에 IP 를 안 남기려고)
 	defaultGamePort  = "25565"
 	defaultFilesPort = "8163"
