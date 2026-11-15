@@ -717,7 +717,7 @@ function gShow(){const ch=gChapters()[gSel], head=$("gHead"), body=$("gBody");he
   if(typeof ch.iconData==="string"&&/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/.test(ch.iconData)){const im=document.createElement("img");im.src=ch.iconData;im.alt="";h.append(im,document.createTextNode(ch.title))}
   else h.append(dot,document.createTextNode(ch.title));const p=document.createElement("p");p.textContent=ch.summary||"";head.append(h,p);
   if(ch.regions){const g=document.createElement("div");g.className="rg";
-    const intro=document.createElement("p");intro.textContent="성(코어)을 차지하면 그 성의 특산품 효과를 우리 세력 모두가 받아요. 성마다 지역을 닮은 수호상이 서 있어요.";body.appendChild(intro);
+    const intro=document.createElement("p");intro.textContent="성을 차지하면 그 성의 특산품 효과를 우리 세력 모두가 받아요. 성마다 지역을 닮은 수호상이 서 있어요.";body.appendChild(intro);
     ch.regions.forEach(r=>{const c=document.createElement("div");c.className="rgc";const b=document.createElement("b");b.textContent=r.name;const e=document.createElement("em");e.textContent=r.statue?"수호상 · "+r.statue:"";
       const ul=document.createElement("ul");(r.perks||[]).forEach(pk=>{const li=document.createElement("li");const k=document.createElement("span");k.className="k";k.textContent=pk.name;li.append(k,document.createTextNode(pk.desc));ul.appendChild(li)});
       if(!(r.perks||[]).length){const li=document.createElement("li");li.textContent="특산품 없음";li.style.color="var(--mu2)";ul.appendChild(li)}
