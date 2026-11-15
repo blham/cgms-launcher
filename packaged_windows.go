@@ -31,23 +31,14 @@ func packagedDataDir() string {
 	if r, err := filepath.EvalSymlinks(exe); err == nil {
 		exe = r
 	}
-	parts := strings.Split(filepath.ToSlash(exe), "/")
-	for i, p := range parts {
-		if strings.EqualFold(p, "windowsapps") && i+1 < len(parts) {
-			f := strings.Split(parts[i+1], "_") // 이름_판_구조_언어_게시자
-			if len(f) < 5 {
-				return ""
-			}
-			la := os.Getenv("LOCALAPPDATA")
-			if la == "" {
-				return ""
-			}
-			root := filepath.Join(la, "Packages", f[0]+"_"+f[len(f)-1])
-			if st, err := os.Stat(root); err != nil || !st.IsDir() {
-				return ""
-			}
-			return filepath.Join(root, "LocalCache", "Roaming", "AsiaWarLauncher")
-		}
+	fam := packageFamily(exe)
+	la := os.Getenv("LOCALAPPDATA")
+	if fam == "" || la == "" {
+		return ""
 	}
-	return ""
+	root := filepath.Join(la, "Packages", fam)
+	if st, err := os.Stat(root); err != nil || !st.IsDir() {
+		return ""
+	}
+	return filepath.Join(root, "LocalCache", "Roaming", "AsiaWarLauncher")
 }

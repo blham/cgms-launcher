@@ -265,7 +265,7 @@ func play() {
 		statusMu.Unlock()
 		return
 	}
-	if directMode() {
+	if directMode() || packaged() { // 1.9.9 스토어판은 공식 런처 폴더에 쓴 파일이 공식 런처에 안 보여서 늘 직접 실행
 		playDirect()
 	} else {
 		playOfficial()

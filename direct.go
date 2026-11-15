@@ -586,7 +586,7 @@ func launchGame(p *Prepared) error {
 	if ms > 2048 {
 		ms = 2048
 	}
-	jvm = append([]string{fmt.Sprintf("-Xmx%dM", c.MemoryMB), fmt.Sprintf("-Xms%dM", ms), "-XX:-OmitStackTraceInFastThrow"}, jvm...) // 1.5.6 튕길 때 오류 위치가 크래시 리포트에 남게
+	jvm = append([]string{fmt.Sprintf("-Xmx%dM", c.MemoryMB), fmt.Sprintf("-Xms%dM", ms), "-XX:-OmitStackTraceInFastThrow", "-Dstdout.encoding=UTF-8", "-Dstderr.encoding=UTF-8"}, jvm...) // 1.5.6 튕길 때 오류 위치가 크래시 리포트에 남게
 	if p.LogConfig != "" && p.Version.Logging.Client.Argument != "" {
 		jvm = append(jvm, subst(p.Version.Logging.Client.Argument, vars))
 	}

@@ -182,14 +182,13 @@ func openBrowser(url string) {
 }
 
 func main() {
-	dataDir = defaultDataDir()
+	if d := packagedDataDir(); packaged() && d != "" { // 1.9.9 스토어판은 예전 폴더 옮기기도 하지 않음
+		dataDir = d
+	} else {
+		dataDir = defaultDataDir()
+	}
 	if devBuild { // 시험용 빌드는 진짜 런처와 다른 폴더를 씀
 		dataDir += "-test"
-	}
-	if packaged() { // 1.9.9
-		if d := packagedDataDir(); d != "" {
-			dataDir = d
-		}
 	}
 	if d := os.Getenv("KW_LAUNCHER_DIR"); d != "" {
 		dataDir = d
