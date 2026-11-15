@@ -137,7 +137,7 @@ canvas#fib{position:absolute;inset:0}
 #dot.on{background:var(--ok);box-shadow:0 0 0 3px rgba(47,122,79,.18)}
 #who{font:500 14px var(--sans);color:#4a3a24;margin-top:4px}
 #stat{margin-top:7px;font-size:12.5px;color:var(--mu);min-height:17px}
-#motd,#hours{font-size:12px;color:var(--mu2);margin-top:2px;line-height:1.5}
+#motd,#hours{font-size:12px;color:var(--mu2);margin-top:2px;line-height:1.5}#motd{white-space:pre-line}
 .bar{height:5px;background:rgba(73,48,31,.15);margin-top:9px;overflow:hidden;opacity:0;transition:opacity .3s}
 .bar.on{opacity:1}.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--geum),var(--geum2));transition:width .25s}
 .err{margin-top:8px;border-left:3px solid var(--ju);background:rgba(152,45,37,.08);padding:7px 10px;font-size:12px;line-height:1.5;user-select:text;max-height:96px;overflow:auto}
@@ -341,9 +341,9 @@ canvas#fib{position:absolute;inset:0}
 .mrule{font:500 12px/1.6 var(--sans);color:#3a4a3f;text-align:right}
 .mbar{display:flex;align-items:center;gap:16px;margin-bottom:6px}.mbar .cap{margin:0;flex:1}
 .mbar #modSearch{margin:0;width:320px;flex:none}
-.mgrid{display:grid;grid-template-columns:1fr 1fr;column-gap:28px;align-content:start;align-items:start}
-.mgrid .libs,.mgrid .empty{grid-column:1/-1}
-.mgrid .mod .ds{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mgrid .mod.open .ds{display:none}.mgrid .mod>div{min-width:0}
+.modgrid{display:grid;grid-template-columns:1fr 1fr;column-gap:28px;align-content:start;align-items:start}
+.modgrid .libs,.modgrid .empty{grid-column:1/-1}
+.modgrid .mod .ds{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.modgrid .mod.open .ds{display:none}.modgrid .mod>div{min-width:0}
 .man small{font:700 11.5px var(--sans);color:var(--juH);margin-top:2px}
 #modSearch{height:36px;width:100%;padding:0 12px 0 34px;font:500 13.5px var(--sans);background:var(--ji3) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M10 2a8 8 0 0 1 6.3 12.9l5.4 5.4-1.4 1.4-5.4-5.4A8 8 0 1 1 10 2m0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12' fill='%236a5236'/></svg>") 10px 50%/16px no-repeat;border:1px solid rgba(73,48,31,.5);outline:none;margin-bottom:6px}
 #modSearch:focus{border-color:var(--sel);box-shadow:0 0 0 2px rgba(23,88,76,.2)}
@@ -554,7 +554,7 @@ canvas#fib{position:absolute;inset:0}
       <div class="mrule">이 서버는 런처가 넣어 주는 모드만 쓸 수 있어요.<br>모든 모드는 런처가 알아서 업데이트해요.</div>
     </div>
     <div class="mbar"><div class="cap">편의성 모드<span id="modCount"></span></div><input id="modSearch" type="search" placeholder="모드 이름이나 설명으로 찾기" autocomplete="off"></div>
-    <div id="modList" class="scroll vfill mgrid"></div>
+    <div id="modList" class="scroll vfill modgrid"></div>
     <div id="modNote"></div>
   </div>
 </section>
@@ -1000,7 +1000,7 @@ function buildTerr(){
   OM.T=T;OM.tp=tp;OM.tkey=terrKey()}
 function paintOld(){
   if(!OM.land||!info||!info.bounds) return; const {W,H,land,dist,tex}=OM, b=info.bounds, bpp=b.width/W, n=W*H, kor=koreaOK(), cores=info.cores||[];
-  if(kor){ if(!OM.prov) buildProv(); if(OM.tkey!==terrKey()) buildTerr() } else OM.terr=null;
+  if(kor){ if(!OM.prov) buildProv(); if(cores.length&&(OM.tkey!==terrKey()||!OM.terr)) buildTerr(); if(!cores.length||!OM.terr||!OM.tp){OM.terr=[];OM.tp=null;OM.tkey=""} } else OM.terr=null;   // 1.9.4 성이 하나도 없을 때도 땅은 그림
   const paper=[236,224,196], sea=[226,212,178], ink=[58,40,28], brown=[78,50,30];
   const NAT=[...new Set(cores.map(c=>c.owner).filter(Boolean))], ni={}; NAT.forEach((o,k)=>ni[o]=k);
   const cols=NAT.map(o=>hex(ncol(o))), band=NAT.map(o=>hex(ncol(o)).map((v,i)=>v*.82+ink[i]*.18));
@@ -1008,7 +1008,7 @@ function paintOld(){
   let tOwn=null; if(kor){OM.terr.forEach(t=>t.owner=(cores[t.core]&&cores[t.core].owner)||"");tOwn=OM.terr.map(t=>t.owner?ni[t.owner]:-1)}
   const own=new Int16Array(n).fill(-1), R2=(2300/bpp)**2, cx0=cores.map(c=>[(c.x-b.minX)/bpp,(c.z-b.minZ)/bpp,c.owner?ni[c.owner]:-1]);
   for(let i=0;i<n;i++){if(!land[i])continue;
-    if(kor){const t=OM.tp[i];own[i]=t>=0?tOwn[t]:-1}
+    if(kor){const t=OM.tp?OM.tp[i]:-1;own[i]=t>=0?tOwn[t]:-1}
     else{const x=i%W,y=(i/W)|0;let bd=R2,w=-1;for(const c of cx0){const q=(x-c[0])**2+(y-c[1])**2;if(q<bd){bd=q;w=c[2]}}own[i]=w}}
   // 국경: 주인이 다른 두 땅 사이 한 줄(갈색 1px), 그 안쪽 2px 은 나라 색 띠
   const bd=new Uint8Array(n).fill(255); let q=[];
@@ -1138,7 +1138,7 @@ function drawPlayers(){
   document.querySelectorAll("#pTabs [data-s]").forEach(b=>b.onclick=()=>{pSort=b.dataset.s;drawPlayers()});
   $("pRole").onclick=()=>{pRole=!pRole;drawPlayers()};
   let list=ps.filter(p=>pFilter===""||(pFilter==="~"?!p.nation:p.nation===pFilter)).filter(p=>!pRole||p.role);
-  list.sort(pSort==="time"?(a,b)=>since(b)-since(a):pSort==="name"?(a,b)=>a.name.localeCompare(b.name):(a,b)=>(a.nation||"~").localeCompare(b.nation||"~")||(b.role?1:0)-(a.role?1:0)||a.name.localeCompare(b.name));
+  list.sort(pSort==="time"?(a,b)=>since(b)-since(a):pSort==="name"?(a,b)=>a.name.localeCompare(b.name):(a,b)=>(a.nation?0:1)-(b.nation?0:1)||(a.nation||"").localeCompare(b.nation||"")||(b.role?1:0)-(a.role?1:0)||a.name.localeCompare(b.name));
   $("players").innerHTML=list.length?list.map(p=>{const c=p.nation?ncol(p.nation):"#8a7a62";return `<div class="pl" data-p="${esc(p.name)}"><i class="st" style="background:${c}"></i><div class="av" style="background:${c};position:relative"><span>${esc([...p.name][0]||"?").toUpperCase()}</span><img alt="" style="position:absolute;inset:0" src="https://mc-heads.net/avatar/${encodeURIComponent(p.name)}/42" data-fb="hide"></div><div class="nmx"><b>${esc(p.name)}</b><small>${esc(p.nation||"방랑자")}${p.since?" · "+dur(since(p)):""}</small></div>${p.role?`<span class="tag" style="color:${c};border-color:${c}">${esc(p.role)}</span>`:""}<span class="on">접속 중</span></div>`}).join(""):`<div class="empty">${ps.length?"조건에 맞는 사람이 없어요":"지금은 아무도 없어요"}</div>`;
   document.querySelectorAll(".pl[data-p]").forEach(e=>e.onclick=()=>showPlayer(e.dataset.p));
 }
