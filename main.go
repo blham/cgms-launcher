@@ -147,6 +147,10 @@ func loadConfig() {
 	if cfg.MemoryMB < 1024 {
 		cfg.MemoryMB = 4096
 	}
+	if cfg.DiscordS == "" { // 1.9.9 디스코드 표를 처음부터 만들어 둠: 「디스코드 연결」을 누를 때 만들면 이미 켜진 게임은 표를 모른 채 접속해 있어 "먼저 게임에 접속해 주세요" 가 떴음
+		cfg.DiscordS = randString(24)
+		defer saveConfig()
+	}
 	if badName(cfg.RealName) { // 1.8.2 예전에 적은 욕 이름은 지워서 호패 만들기 창이 다시 뜨게
 		cfg.RealName = ""
 	}
