@@ -110,7 +110,9 @@ func registerAPI(mux *http.ServeMux) {
 			"update":  pendingVersion(), // 1.8.8 받을 수 있는 새 런처 (화면에 업데이트 버튼)
 			"running": gameRunning(), "primary": primary, "termsVersion": TermsVersion,
 			// 1.7.5 약관 동의는 설치할 때 한 번: 윈도우는 설치 창에서, 설치 창이 없는 맥·리눅스만 처음 켤 때 한 번 물음
-			"askTerms": runtime.GOOS != "windows" && c.Terms == "",
+			// 1.9.3 스토어판도 설치 창이 없으므로 처음 켤 때 한 번 물음
+			"askTerms": (runtime.GOOS != "windows" || packaged()) && c.Terms == "",
+			"store":    packaged(), // 1.9.3 스토어판: 새 런처는 스토어에서 받음
 		})
 	})
 	mux.HandleFunc("/api/login", guard(func(w http.ResponseWriter, r *http.Request) {

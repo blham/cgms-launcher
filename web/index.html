@@ -802,7 +802,7 @@ async function tick(){
   if(needTerms) $("play").disabled=true;
   const noName=!s.config.realName&&!needTerms; $("nameGate").hidden=!noName; if(noName&&document.activeElement!==$("gateName"))$("gateName").focus();
   if(noName) $("play").disabled=true;
-  $("ver").textContent=`런처 ${s.version}`+(s.newerLauncher?` · 새 런처 ${s.newerLauncher} 이 나왔어요`:"");
+  $("ver").textContent=`런처 ${s.version}`+(s.newerLauncher?` · 새 런처 ${s.newerLauncher} 이 나왔어요`+(s.store?" (Microsoft Store 에서 업데이트)":""):"");
   {const u=s.update||""; $("updBtn").hidden=!u; if(u&&!$("updBtn").disabled) $("updTxt").textContent=`새 런처 ${u} 업데이트`;}
 }
 function who(n,max){$("who").innerHTML=n==null?"":`지금 <b>${num(n)}</b>명이 접속해 있어요${max?` · 최대 ${num(max)}명`:""}`}
