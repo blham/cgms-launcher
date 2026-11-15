@@ -32,6 +32,13 @@ func collectLog() string {
 	fmt.Fprintf(&b, "CGMS Launcher %s%s (%s/%s)\n모은 시각 %s\n", LauncherVersion, kind, runtime.GOOS, runtime.GOARCH, time.Now().Format("2006-01-02 15:04:05"))
 	b.WriteString("\n===== 런처 기록 (끝 300줄) =====\n")
 	b.WriteString(tail(filepath.Join(dataDir, "logs", "launcher.log"), 300))
+	// 1.9.9 게임이 켜지다 바로 꺼졌을 때 자바가 남긴 글 (logs/game.log): 1.9.5~1.9.8 은 이걸 빠뜨려 원인을 볼 수 없었음
+	b.WriteString("\n\n===== 게임 실행 출력 (끝 80줄) =====\n")
+	if g := tail(dirs("logs", "game.log"), 80); g != "" {
+		b.WriteString(g)
+	} else {
+		b.WriteString("(없음)")
+	}
 	b.WriteString("\n\n===== 게임 기록 (끝 200줄) =====\n")
 	if g := tail(filepath.Join(gameDir(), "logs", "latest.log"), 200); g != "" {
 		b.WriteString(g)

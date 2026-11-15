@@ -186,6 +186,11 @@ func main() {
 	if devBuild { // 시험용 빌드는 진짜 런처와 다른 폴더를 씀
 		dataDir += "-test"
 	}
+	if packaged() { // 1.9.9
+		if d := packagedDataDir(); d != "" {
+			dataDir = d
+		}
+	}
 	if d := os.Getenv("KW_LAUNCHER_DIR"); d != "" {
 		dataDir = d
 	}

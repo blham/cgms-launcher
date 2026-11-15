@@ -930,7 +930,7 @@ const DO=[
  ["제주",[[33.4,126.55]]],["규슈",[[33.0,131.0]]],["만주",[[43,126]]]];
 const R_JEJU=8,R_KYU=9,R_MAN=10;
 // 1.7.1 성 하나가 맡는 땅: 대개 그 성이 있는 도. 백두산·신의주는 만주를 나눠 갖고, 황해도는 평양(평안도) 몫, 성이 없는 도는 붙어 있는 도의 성들이 나눠 가짐
-function regionOfCore(c){const lat=latOf(c.z),lon=lonOf(c.x);if(/백두|신의주/.test(c.name||""))return R_MAN;return regionAt(lat,lon)}
+function regionOfCore(c){const lat=latOf(c.z),lon=lonOf(c.x);if(/백두/.test(c.name||""))return R_MAN;return regionAt(lat,lon)}
 function regionAt(lat,lon){if(lon>129.6&&lat<34.6)return R_KYU;if(lat<33.75&&lon>125.9&&lon<127.2)return R_JEJU;return provAt(lat,lon)}
 function vnoise(x,y){const f=(a,b)=>{let h=Math.sin(a*127.1+b*311.7)*43758.5453;return h-Math.floor(h)};const xi=Math.floor(x),yi=Math.floor(y),xf=x-xi,yf=y-yi,u=xf*xf*(3-2*xf),v=yf*yf*(3-2*yf);
   return (f(xi,yi)*(1-u)+f(xi+1,yi)*u)*(1-v)+(f(xi,yi+1)*(1-u)+f(xi+1,yi+1)*u)*v}
