@@ -19,9 +19,9 @@
     <Resource Language="en-US" />
   </Resources>
   <Applications>
-    <Application Id="AsiaWarLauncher" Executable="AsiaWarLauncher.exe" EntryPoint="Windows.FullTrustApplication">
+    <Application Id="CGMSLauncher" Executable="AsiaWarLauncher.exe" EntryPoint="Windows.FullTrustApplication">
       <uap:VisualElements DisplayName="@DISPLAY_NAME@"
-                          Description="Launcher for the Asia War Minecraft: Java Edition community server"
+                          Description="Launcher for the CGMS (Asia War) community server for Minecraft: Java Edition"
                           BackgroundColor="transparent"
                           Square150x150Logo="Assets\Square150x150Logo.png"
                           Square44x44Logo="Assets\Square44x44Logo.png" />
