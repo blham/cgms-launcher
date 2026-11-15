@@ -68,6 +68,9 @@ func checkUpdate() {
 	if devBuild && os.Getenv("KW_TEST_UPDATE") == "" {
 		return
 	}
+	if packaged() { // 1.9.1 스토어판은 스토어가 업데이트함
+		return
+	}
 	if !updating.CompareAndSwap(false, true) { // 이미 확인 중
 		return
 	}

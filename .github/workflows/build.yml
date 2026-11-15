@@ -5,6 +5,8 @@ name: build
 on:
   push:
     tags: ['v*']
+    branches: [main]
+    paths: ['.github/workflows/**', 'msix/**']
   workflow_dispatch:
     inputs:
       version:
@@ -17,6 +19,8 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -26,7 +30,8 @@ jobs:
         id: v
         run: |
           V="${{ github.event.inputs.version }}"
-          if [ -z "$V" ]; then V="${GITHUB_REF_NAME#v}"; fi
+          if [ -z "$V" ] && [ "$GITHUB_REF_TYPE" = "tag" ]; then V="${GITHUB_REF_NAME#v}"; fi
+          if [ -z "$V" ]; then V="0.0.1"; fi   # packaging check on pushes to main
           echo "version=$V" >> "$GITHUB_OUTPUT"
       - name: Build
         env:
@@ -66,3 +71,27 @@ jobs:
       #     github-artifact-id: ${{ steps.unsigned.outputs.artifact-id }}
       #     wait-for-completion: true
       #     output-artifact-directory: dist/signed
+
+  # Microsoft Store packages (MSIX). The Store signs them after certification, so they are uploaded unsigned.
+  msix:
+    needs: build
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: windows-unsigned
+          path: dist
+      - name: Pack MSIX
+        shell: pwsh
+        env:
+          MSIX_IDENTITY_NAME: ${{ vars.MSIX_IDENTITY_NAME }}
+          MSIX_PUBLISHER: ${{ vars.MSIX_PUBLISHER }}
+          MSIX_PUBLISHER_DISPLAY: ${{ vars.MSIX_PUBLISHER_DISPLAY }}
+          MSIX_DISPLAY_NAME: ${{ vars.MSIX_DISPLAY_NAME }}
+        run: ./msix/pack.ps1 -Version "${{ needs.build.outputs.version }}" -In dist -Out dist/msix
+      - uses: actions/upload-artifact@v4
+        with:
+          name: store-msix
+          path: dist/msix/*.msix
+          if-no-files-found: error

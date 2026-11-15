@@ -222,6 +222,9 @@ func maybeInstall(args []string) bool {
 	if devBuild { // 개발·시험용 빌드는 설치하지 않고 그 자리에서 켬 (진짜 런처를 덮어쓰지 않게)
 		return false
 	}
+	if packaged() { // 1.9.1 스토어판: 설치는 스토어가 함 (약관 동의는 런처 화면에서)
+		return false
+	}
 	exe, target := selfExe(), installedExe()
 	if strings.EqualFold(filepath.Clean(exe), filepath.Clean(target)) {
 		return false
