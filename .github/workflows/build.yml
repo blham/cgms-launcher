@@ -31,7 +31,7 @@ jobs:
         run: |
           V="${{ github.event.inputs.version }}"
           if [ -z "$V" ] && [ "$GITHUB_REF_TYPE" = "tag" ]; then V="${GITHUB_REF_NAME#v}"; fi
-          if [ -z "$V" ]; then V="0.0.1"; fi   # packaging check on pushes to main
+          if [ -z "$V" ]; then V="$(cat msix/VERSION)"; fi   # pushes to main build the version in msix/VERSION
           echo "version=$V" >> "$GITHUB_OUTPUT"
       - name: Build
         env:

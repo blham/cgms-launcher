@@ -1,9 +1,10 @@
 # Packs the built launcher into MSIX packages for the Microsoft Store (one per architecture).
+# The identity values below are the ones Partner Center shows under Product identity (public; they end up inside every package).
 # usage: pack.ps1 -Version 1.9.1 -In dist -Out dist/msix
 param([string]$Version, [string]$In = "dist", [string]$Out = "dist/msix")
 $ErrorActionPreference = "Stop"
-$name = if ($env:MSIX_IDENTITY_NAME) { $env:MSIX_IDENTITY_NAME } else { "AsiaWarLauncher.Dev" }
-$publisher = if ($env:MSIX_PUBLISHER) { $env:MSIX_PUBLISHER } else { "CN=AsiaWarLauncherDev" }
+$name = if ($env:MSIX_IDENTITY_NAME) { $env:MSIX_IDENTITY_NAME } else { "blham.AsiaWarLauncher" }
+$publisher = if ($env:MSIX_PUBLISHER) { $env:MSIX_PUBLISHER } else { "CN=BF43D319-CFFF-4A2B-8B00-2FD7911C65BD" }
 $pubDisplay = if ($env:MSIX_PUBLISHER_DISPLAY) { $env:MSIX_PUBLISHER_DISPLAY } else { "blham" }
 $display = if ($env:MSIX_DISPLAY_NAME) { $env:MSIX_DISPLAY_NAME } else { "Asia War Launcher" }
 $v = ($Version -replace '[^0-9.]', '').Trim('.')
